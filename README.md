@@ -4,8 +4,8 @@
 Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.
 
 ### Python Dependencies
-*numpy
-*scipy
+* numpy
+* scipy
 
 ### Demo and cross-validation dependencies
 * skimage 0.13.0
