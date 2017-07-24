@@ -8,11 +8,11 @@ from scipy.linalg import inv
 from scipy.stats import linregress
 
 
-# NOTE: test_phi_b() and test_phi_w can take  A VERY LONG TIME TO RUN!!
+# NOTE: test_Φ_b() and test_Φ_w can take  A VERY LONG TIME TO RUN!!
 # Set the parameters to smaller values if you want to make sure the code runs.
 class TestPLDA(unittest.TestCase):
     def setUp(self, n=100000, n_classes=5, n_dims=5):
-        """ Paramters that the model should recover: phi_w, phi_b, m, S_b. """
+        """ Paramters that the model should recover: Φ_w, Φ_b, m, S_b. """
         self.n_dims = n_dims = 2                    # Dimension of the data.
         self.n_classes = n_classes
         self.n = n                                  # n for each class.
@@ -154,53 +154,53 @@ class TestPLDA(unittest.TestCase):
 
         return A, Ψ, model
 
-    def test_phi_w_and_phi_b(self):
+    def test_Φ_w_and_Φ_b(self):
         n_experiments = int(np.log10(1000000) / 2)
         n_list = [100 ** x for x in range(1, n_experiments + 1)]
         n_list = np.array(n_list).astype(float)
         n_dims = self.n_dims
         n_classes = 30 #self.n_classes
         
-        phi_w_L1_errors = []
+        Φ_w_L1_errors = []
         for n in n_list:
             A, Ψ, model = self.experiment(int(n), n_dims, n_classes)
 
-            phi_w = np.matmul(A, A.T)
-            phi_w_model = np.matmul(model.A, model.A.T)
+            Φ_w = np.matmul(A, A.T)
+            Φ_w_model = np.matmul(model.A, model.A.T)
 
-            L1_error = np.abs(phi_w - phi_w_model).mean()
-            abs_μ = (np.abs(phi_w).mean() + np.abs(phi_w_model).mean()) * .5
+            L1_error = np.abs(Φ_w - Φ_w_model).mean()
+            abs_μ = (np.abs(Φ_w).mean() + np.abs(Φ_w_model).mean()) * .5
             percent_error = L1_error / abs_μ * 100
-            print('Testing phi_w with {} samples: {} percent error'.format(n,
+            print('Testing Φ_w with {} samples: {} percent error'.format(n,
                   percent_error))
-            phi_w_L1_errors.append(percent_error)
+            Φ_w_L1_errors.append(percent_error)
 
-        Y = phi_w_L1_errors
-        X = [x for x in range(len(phi_w_L1_errors))]
+        Y = Φ_w_L1_errors
+        X = [x for x in range(len(Φ_w_L1_errors))]
         slope_of_error_vs_N = linregress(X, Y)[0]
         self.assertTrue(slope_of_error_vs_N < 0)
 
-    def test_phi_b(self):
+    def test_Φ_b(self):
         n_classes_list = [4 ** x for x in range(1, 6)]
         n_list = [100 * n for n in n_classes_list]
         n_list = np.array(n_list).astype(float)
         n_dims = self.n_dims
 
-        phi_b_L1_errors = []
+        Φ_b_L1_errors = []
         for n, n_classes in zip(n_list, n_classes_list):
             A, Ψ, model = self.experiment(int(n), n_dims, n_classes)
 
-            phi_b = np.matmul(np.matmul(A, Ψ), A.T)
-            phi_b_model = np.matmul(np.matmul(model.A, model.Ψ), model.A.T)
+            Φ_b = np.matmul(np.matmul(A, Ψ), A.T)
+            Φ_b_model = np.matmul(np.matmul(model.A, model.Ψ), model.A.T)
 
-            L1_error = np.abs(phi_b - phi_b_model).mean()
-            abs_μ = (np.abs(phi_b).mean() + np.abs(phi_b_model).mean()) * .5
+            L1_error = np.abs(Φ_b - Φ_b_model).mean()
+            abs_μ = (np.abs(Φ_b).mean() + np.abs(Φ_b_model).mean()) * .5
             percent_error = L1_error / abs_μ * 100
-            phi_b_L1_errors.append(percent_error)
-            print('Testing phi_b with {} classes: {} percent error'.format(
+            Φ_b_L1_errors.append(percent_error)
+            print('Testing Φ_b with {} classes: {} percent error'.format(
                   n_classes, percent_error))
 
-        Y = phi_b_L1_errors
-        X = [x for x in range(len(phi_b_L1_errors))]
+        Y = Φ_b_L1_errors
+        X = [x for x in range(len(Φ_b_L1_errors))]
         slope_of_error_vs_N = linregress(X, Y)[0]
         self.assertTrue(slope_of_error_vs_N < 0)

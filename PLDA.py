@@ -22,7 +22,7 @@ class PLDA:
 
         # Intermediate parameters used to compute model parameters.
         self.K = None         # (int) Number of classes in the dataset.
-        self.m = None         # (vector) Mean of the dataset.
+        self.m = None         # (ndarray) Mean of the dataset.
         self.N = None         # (int) Number of examples/data.
         self.n_avg = None     # (float) See last sentence on p. 536.
         self.S_b = None       # (n x n ndarray) Between class scatter.
@@ -303,7 +303,7 @@ class PLDA:
         """ Calculates the covariance of the whitened cluster centers.
 
         EQUATION: Ψ = max(0, [(n-1) / n * [Λ_b]/[Λ_w]] - 1/n)
-                  Also, note that phi_b = [A][Ψ][A.T]
+                  Also, note that Φ_b = [A][Ψ][A.T]
 
         DESCRIPTION: Remember, that for this algorithm, one way to deal with
                       unequal numbers of examples between the classes is to

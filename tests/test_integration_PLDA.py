@@ -159,8 +159,8 @@ class TestModel(unittest.TestCase):
 
         cls.assert_diagonal(result)
 
-    def test_A_and_Ψ_recover_phi_b(cls):
-        """ phi_b = S_b - S_w / (n-1) = (A)(Ψ)(A.T)
+    def test_A_and_Ψ_recover_Φ_b(cls):
+        """ Φ_b = S_b - S_w / (n-1) = (A)(Ψ)(A.T)
         """
         A = cls.model.A
         Ψ = cls.model.Ψ
@@ -168,46 +168,46 @@ class TestModel(unittest.TestCase):
         S_b = cls.model.S_b
         n = cls.n_avg
 
-        phi_b_1 = np.matmul(np.matmul(A, Ψ), A.T)
-        phi_b_2 = S_b - (S_w * (1 / (n - 1)))
+        Φ_b_1 = np.matmul(np.matmul(A, Ψ), A.T)
+        Φ_b_2 = S_b - (S_w * (1 / (n - 1)))
 
-        # Ideally both phi_b's are equal, but precision error is problematic.
-        # cls.assert_same(phi_b_1, phi_b_2)
+        # Ideally both Φ_b's are equal, but precision error is problematic.
+        # cls.assert_same(Φ_b_1, Φ_b_2)
 
         # Hacky alternative since the assertion above has precision issues:
-        #  compared to phi_b_2, S_b should be less similar to phi_b_1 because 
+        #  compared to Φ_b_2, S_b should be less similar to Φ_b_1 because 
         #  the point of the term on the right of S_b is to bring it closer to
-        #  the "true phi_b".
-        passes = np.abs(phi_b_1 - S_b).sum() > np.abs(phi_b_1 - phi_b_2).sum()
+        #  the "true Φ_b".
+        passes = np.abs(Φ_b_1 - S_b).sum() > np.abs(Φ_b_1 - Φ_b_2).sum()
         cls.assertTrue(passes)
 
-    def test_A_recovers_phi_w(cls):
-        """ phi_w = (A)(A.T) = n / (n-1) * S_w """
+    def test_A_recovers_Φ_w(cls):
+        """ Φ_w = (A)(A.T) = n / (n-1) * S_w """
         A = cls.model.A
         S_w = cls.model.S_w
         n = cls.n_avg
 
-        phi_w_1 = np.matmul(A, A.T)
-        phi_w_2 = n / (n - 1) * S_w
-        cls.assert_same(phi_w_1, phi_w_2)
+        Φ_w_1 = np.matmul(A, A.T)
+        Φ_w_2 = n / (n - 1) * S_w
+        cls.assert_same(Φ_w_1, Φ_w_2)
 
-    def test_A_and_phi_w_make_eye(cls):
-        """ I = (V.T)(phi_w)(V), where A = inv(V.T)
+    def test_A_and_Φ_w_make_eye(cls):
+        """ I = (V.T)(Φ_w)(V), where A = inv(V.T)
             NOTES:
-            (1) There are two ways to compute phi_w:
-                phi_w = (A)(A.T)
-                phi_w = n / (n-1) * S_w 
-            (2) *** COMPUTE PHI WITH S_w: phi_w = n/(n-1) * S_w. ***
-            (3) Do NOT use phi_w = (A)(A.T) because that is trivially true:
-                 (V.T)(phi_w)(V), where V = inv(A.T), which gives
+            (1) There are two ways to compute Φ_w:
+                Φ_w = (A)(A.T)
+                Φ_w = n / (n-1) * S_w 
+            (2) *** COMPUTE PHI WITH S_w: Φ_w = n/(n-1) * S_w. ***
+            (3) Do NOT use Φ_w = (A)(A.T) because that is trivially true:
+                 (V.T)(Φ_w)(V), where V = inv(A.T), which gives
                  (inv(A))(A)(A.T)(inv(A.T)) = (I)(I) = I.
         """
         S_w = cls.model.S_w
         n = cls.n_avg
         V = inv(cls.model.A.T)
 
-        phi_w = n / (n - 1) * S_w
-        result = np.matmul(np.matmul(V.T, phi_w), V)
+        Φ_w = n / (n - 1) * S_w
+        result = np.matmul(np.matmul(V.T, Φ_w), V)
         cls.assert_same(result, np.eye(cls.n_dims))
 
 #    def test_pdfs(cls):
