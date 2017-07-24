@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import unittest
 from numpy.random import multivariate_normal as normal
@@ -13,7 +14,7 @@ class TestModel(unittest.TestCase):
         cls.N = cls.K * 1000  # 1000 data per class k.
         cls.n_avg = cls.N / cls.K  # For testing, n_k = n_avg for all k.
         cls.labels = None
-        cls.means = None
+        cls.μs = None
         cls.covariances = None
         cls.data = None
         cls.class_info = None
@@ -21,10 +22,10 @@ class TestModel(unittest.TestCase):
         cls.S_b = None
         cls.S_w = None
         cls.W = None
-        cls.lambda_b = None
-        cls.lambda_w = None
+        cls.Λ_b = None
+        cls.Λ_w = None
         cls.A = None
-        cls.psi = None
+        cls.Ψ = None
         cls.pdfs = None
 
         # Create data structure to hold class statistics and data.
@@ -32,41 +33,41 @@ class TestModel(unittest.TestCase):
         cls.class_info = cls.get_data_dict_structure(cls, cls.labels)
 
         # Build artifical data set with means (2 ** label).
-        cls.means = [np.ones(cls.n_dims) * (2 ** x) for x in cls.labels]
+        cls.μs = [np.ones(cls.n_dims) * (2 ** x) for x in cls.labels]
         cls.covariances = [np.eye(cls.n_dims) * 10 for x in cls.labels]
 
         cls.data = []
-        for mean, cov, label in zip(cls.means, cls.covariances, cls.labels):
+        for μ, cov, label in zip(cls.μs, cls.covariances, cls.labels):
             n = int(cls.n_avg)
             for x in range(n):
-                datum = (normal(mean, cov), label)
+                datum = (normal(μ, cov), label)
                 cls.data.append(datum)
                 cls.class_info[label]['data'].append(datum[0])
 
         # Compute and store class statistics of generated data.
         for label in cls.class_info.keys():
-            mean = np.array(cls.class_info[label]['data']).mean(axis=0)
+            μ = np.array(cls.class_info[label]['data']).mean(axis=0)
             cov = np.cov(np.array(cls.class_info[label]['data']).T)
 
-            cls.class_info[label]['mean'] = mean
+            cls.class_info[label]['μ'] = μ
             cls.class_info[label]['covariance'] = cov
 
         cls.m = cls.calc_m(cls)
         cls.S_w = cls.calc_S_w(cls)
         cls.S_b = cls.calc_S_b(cls)
         cls.W = cls.calc_W(cls)
-        cls.lambda_b = cls.calc_lambda_b(cls)
-        cls.lambda_w = cls.calc_lambda_w(cls)
+        cls.Λ_b = cls.calc_Λ_b(cls)
+        cls.Λ_w = cls.calc_Λ_w(cls)
         cls.A = cls.calc_A(cls)
-        cls.psi = cls.calc_psi(cls)
+        cls.Ψ = cls.calc_Ψ(cls)
 #        cls.pdfs = cls.get_pdfs()
 
         cls.model = PLDA(cls.data)
 
     def test_stats(cls):
         for label in cls.class_info.keys():
-            result = cls.model.stats[label]['mean']
-            expected = cls.class_info[label]['mean']
+            result = cls.model.stats[label]['μ']
+            expected = cls.class_info[label]['μ']
             cls.assert_same(result, expected)
 
             result = cls.model.stats[label]['covariance']
@@ -89,23 +90,23 @@ class TestModel(unittest.TestCase):
     def test_W(cls):
         cls.assert_same(cls.model.W, cls.W)
 
-    def test_lambda_b(cls):
-        cls.assert_same(cls.model.lambda_b, cls.lambda_b)
+    def test_Λ_b(cls):
+        cls.assert_same(cls.model.Λ_b, cls.Λ_b)
 
-    def test_lambda_w(cls):
-        cls.assert_same(cls.model.lambda_w, cls.lambda_w)
+    def test_Λ_w(cls):
+        cls.assert_same(cls.model.Λ_w, cls.Λ_w)
 
     def test_A(cls):
         cls.assert_same(cls.model.A, cls.A)
 
-    def test_psi(cls):
-        cls.assert_same(cls.model.psi, cls.psi)
+    def test_Ψ(cls):
+        cls.assert_same(cls.model.Ψ, cls.Ψ)
 
-    def test_psi_diagonal(cls):
-        cls.assert_diagonal(cls.model.psi)
+    def test_Ψ_diagonal(cls):
+        cls.assert_diagonal(cls.model.Ψ)
 
-    def test_psi_nonnegative(cls):
-        result = (cls.model.psi < 0).sum() # Adds 1 for every element < 0.
+    def test_Ψ_nonnegative(cls):
+        result = (cls.model.Ψ < 0).sum() # Adds 1 for every element < 0.
         expected = 0
         cls.assertEqual(result, expected)
 
@@ -130,11 +131,11 @@ class TestModel(unittest.TestCase):
         cls.assert_invertible(cls.model.A)
 
     def test_A_recovers_W(cls):
-        """ A = inv(W.T)(n / (n-1) * lambda_w) ** .5, therefore
-           inv( A / [n / (n-1) * diagonal(lambda_w)] ** .5 ).T """
-        lambda_w = cls.lambda_w
+        """ A = inv(W.T)(n / (n-1) * Λ_w) ** .5, therefore
+           inv( A / [n / (n-1) * diagonal(Λ_w)] ** .5 ).T """
+        Λ_w = cls.Λ_w
         n = cls.n_avg
-        result = (n / (n - 1)) * lambda_w.diagonal()
+        result = (n / (n - 1)) * Λ_w.diagonal()
         result = np.sqrt(result)
         result = cls.model.A / result
         result = result.T
@@ -158,16 +159,16 @@ class TestModel(unittest.TestCase):
 
         cls.assert_diagonal(result)
 
-    def test_A_and_psi_recover_phi_b(cls):
-        """ phi_b = S_b - S_w / (n-1) = (A)(psi)(A.T)
+    def test_A_and_Ψ_recover_phi_b(cls):
+        """ phi_b = S_b - S_w / (n-1) = (A)(Ψ)(A.T)
         """
         A = cls.model.A
-        psi = cls.model.psi
+        Ψ = cls.model.Ψ
         S_w = cls.model.S_w
         S_b = cls.model.S_b
         n = cls.n_avg
 
-        phi_b_1 = np.matmul(np.matmul(A, psi), A.T)
+        phi_b_1 = np.matmul(np.matmul(A, Ψ), A.T)
         phi_b_2 = S_b - (S_w * (1 / (n - 1)))
 
         # Ideally both phi_b's are equal, but precision error is problematic.
@@ -231,7 +232,7 @@ class TestModel(unittest.TestCase):
         data_dict = dict()
         for label in labels:
             data_dict[label] = dict({'data': [],
-                                     'mean': None,
+                                     'μ': None,
                                      'covariance': None})
 
         return data_dict
@@ -248,7 +249,7 @@ class TestModel(unittest.TestCase):
     def calc_S_w(cls):
         S_w = []
         for label in cls.class_info.keys():
-            m_k = cls.class_info[label]['mean']
+            m_k = cls.class_info[label]['μ']
             for example in cls.class_info[label]['data']:
                 x_i_minus_m_k = example - m_k
                 S_w.append(np.outer(x_i_minus_m_k, x_i_minus_m_k))
@@ -262,7 +263,7 @@ class TestModel(unittest.TestCase):
         m = cls.m
         S_b = []
         for label in cls.class_info.keys():
-            mk_minus_m = cls.class_info[label]['mean'] - m
+            mk_minus_m = cls.class_info[label]['μ'] - m
             S_b.append(int(cls.n_avg) * np.outer(mk_minus_m, mk_minus_m))
 
         S_b = np.array(S_b).sum(axis=0)
@@ -278,36 +279,36 @@ class TestModel(unittest.TestCase):
 
         return W
 
-    def calc_lambda_b(cls):
-        lambda_b = np.dot(np.dot(cls.W.T, cls.S_b), cls.W)
+    def calc_Λ_b(cls):
+        Λ_b = np.dot(np.dot(cls.W.T, cls.S_b), cls.W)
 
-        return lambda_b
+        return Λ_b
 
-    def calc_lambda_w(cls):
-        lambda_w = np.dot(np.dot(cls.W.T, cls.S_w), cls.W)
+    def calc_Λ_w(cls):
+        Λ_w = np.dot(np.dot(cls.W.T, cls.S_w), cls.W)
 
-        return lambda_w
+        return Λ_w
 
     def calc_A(cls):
-        diag = cls.lambda_w.diagonal()
+        diag = cls.Λ_w.diagonal()
         diag = np.sqrt(cls.n_avg / (cls.n_avg - 1) * diag)
         A = inv(cls.W).T * diag
 
         return A
 
-    def calc_psi(cls):
-        lambda_b = cls.lambda_b.copy()
-        lambda_b[np.isclose(lambda_b, 0)] = 0
-        lambda_w = cls.lambda_w.copy()
-        lambda_w[np.isclose(lambda_w, 0)] = 0
+    def calc_Ψ(cls):
+        Λ_b = cls.Λ_b.copy()
+        Λ_b[np.isclose(Λ_b, 0)] = 0
+        Λ_w = cls.Λ_w.copy()
+        Λ_w[np.isclose(Λ_w, 0)] = 0
 
         with np.errstate(divide='ignore', invalid='ignore'):
-            psi = lambda_b / lambda_w
-        psi[np.isnan(psi)] = 0
-        psi = (cls.n_avg - 1) / cls.n_avg * psi - (1 / cls.n_avg)
-        psi = np.maximum(psi, 0)
+            Ψ = Λ_b / Λ_w
+        Ψ[np.isnan(Ψ)] = 0
+        Ψ = (cls.n_avg - 1) / cls.n_avg * Ψ - (1 / cls.n_avg)
+        Ψ = np.maximum(Ψ, 0)
 
-        return psi
+        return Ψ
 
 #    def gen_pdfs(cls):
 #

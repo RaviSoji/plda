@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import unittest
 from numpy.random import multivariate_normal as m_normal
@@ -16,9 +17,9 @@ class TestPLDA(unittest.TestCase):
         self.n_classes = n_classes
         self.n = n                                  # n for each class.
 
-        self.psi = self.gen_psi(n_dims)              # Diagonal matrix >= 0.
+        self.Ψ = self.gen_Ψ(n_dims)              # Diagonal matrix >= 0.
         self.m = self.gen_m(n_dims)                  # ndarray [1 x n_dims]
-        V = self.gen_V(self.psi, n_classes, n_dims)  # v ~ N(0, psi)
+        V = self.gen_V(self.Ψ, n_classes, n_dims)  # v ~ N(0, Ψ)
         U = self.gen_U(n_dims, n, V)                # u ~ N(v, I)
         self.A, self.S_b = self.gen_A(V, n_classes, n_dims,
                                    return_S_b=True)
@@ -32,36 +33,36 @@ class TestPLDA(unittest.TestCase):
         are_same = np.allclose(result, expected)
         self.assertTrue(are_same)
 
-    def gen_psi(self, n_dims):
-        psi = np.diag(10 / np.random.sample(n_dims))
+    def gen_Ψ(self, n_dims):
+        Ψ = np.diag(10 / np.random.sample(n_dims))
 
-        return psi
+        return Ψ
 
     def gen_m(self, n_dims):
         m = np.random.randint(-1000, 1000, n_dims).astype(float)
 
         return m
 
-    def gen_V(self, psi, n_classes, n_dims):
-        """ v ~ N(0, psi): Consult Equations (2) on p. 533.
+    def gen_V(self, Ψ, n_classes, n_dims):
+        """ v ~ N(0, Ψ): Consult Equations (2) on p. 533.
 
         DESCRIPTION: Samples whitened class centers from a multivariate
-                      Gaussian distribution centered at 0, with covariance psi.
+                      Gaussian distribution centered at 0, with covariance Ψ.
                       For testing purposes, we ensure that V.sum(axis=0) = 0. 
 
         PARAMETERS
          n_classes      (int): Number of classes.
          n_dims         (int): Dimensionality of the data.
-         psi        (ndarray): Covariance between whitened class centers.
+         Ψ        (ndarray): Covariance between whitened class centers.
                                 [n_dims x n_dims] 
         RETURNS
          V          (ndarray): Whitened class centers. [n_classes x n_dims] 
         """
-        assert psi.shape[0] == psi.shape[1]
+        assert Ψ.shape[0] == Ψ.shape[1]
 
-        mean = np.zeros(n_dims)  # [1 x n_dims] 
+        μ = np.zeros(n_dims)  # [1 x n_dims] 
 
-        V = m_normal(mean, psi, n_classes)
+        V = m_normal(μ, Ψ, n_classes)
         V = V - V.mean(axis=0)  # Center means at origin to control result.
 
 
@@ -70,7 +71,7 @@ class TestPLDA(unittest.TestCase):
         return V
 
     def gen_A(self, V, n_classes, n_dims, return_S_b=False):
-        """ A = [B][inv(lambda ** .5)][Q.T] and assumes same number of data
+        """ A = [B][inv(Λ ** .5)][Q.T] and assumes same number of data
              in each class v. """
         B = np.random.randint(-100, 100, (n_dims, n_dims)).astype(float)
         big_V = np.matmul(V.T, V)  # V is now a scatter matrix.
@@ -97,8 +98,8 @@ class TestPLDA(unittest.TestCase):
 
         U = []
         for v in V:
-            mean = np.zeros(n_dims)
-            U_for_class_v = m_normal(mean, cov, n)
+            μ = np.zeros(n_dims)
+            U_for_class_v = m_normal(μ, cov, n)
             U_for_class_v -= U_for_class_v.mean(axis=0)
             U_for_class_v += v  # Center at v to control test results.
             U.append(U_for_class_v)
@@ -139,9 +140,9 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(self.S_b, self.model.S_b)
 
     def experiment(self, n, n_dims, n_classes):
-        psi = self.gen_psi(n_dims)
+        Ψ = self.gen_Ψ(n_dims)
         m = self.gen_m(n_dims)
-        V = self.gen_V(psi, n_classes, n_dims)
+        V = self.gen_V(Ψ, n_classes, n_dims)
         U = self.gen_U(n_dims, n, V)
         A, S_b = self.gen_A(V, n_classes, n_dims,
                                    return_S_b=True)
@@ -151,7 +152,7 @@ class TestPLDA(unittest.TestCase):
  
         model = PLDA(labeled_X)
 
-        return A, psi, model
+        return A, Ψ, model
 
     def test_phi_w_and_phi_b(self):
         n_experiments = int(np.log10(1000000) / 2)
@@ -162,14 +163,14 @@ class TestPLDA(unittest.TestCase):
         
         phi_w_L1_errors = []
         for n in n_list:
-            A, psi, model = self.experiment(int(n), n_dims, n_classes)
+            A, Ψ, model = self.experiment(int(n), n_dims, n_classes)
 
             phi_w = np.matmul(A, A.T)
             phi_w_model = np.matmul(model.A, model.A.T)
 
             L1_error = np.abs(phi_w - phi_w_model).mean()
-            abs_mean = (np.abs(phi_w).mean() + np.abs(phi_w_model).mean()) * .5
-            percent_error = L1_error / abs_mean * 100
+            abs_μ = (np.abs(phi_w).mean() + np.abs(phi_w_model).mean()) * .5
+            percent_error = L1_error / abs_μ * 100
             print('Testing phi_w with {} samples: {} percent error'.format(n,
                   percent_error))
             phi_w_L1_errors.append(percent_error)
@@ -187,14 +188,14 @@ class TestPLDA(unittest.TestCase):
 
         phi_b_L1_errors = []
         for n, n_classes in zip(n_list, n_classes_list):
-            A, psi, model = self.experiment(int(n), n_dims, n_classes)
+            A, Ψ, model = self.experiment(int(n), n_dims, n_classes)
 
-            phi_b = np.matmul(np.matmul(A, psi), A.T)
-            phi_b_model = np.matmul(np.matmul(model.A, model.psi), model.A.T)
+            phi_b = np.matmul(np.matmul(A, Ψ), A.T)
+            phi_b_model = np.matmul(np.matmul(model.A, model.Ψ), model.A.T)
 
             L1_error = np.abs(phi_b - phi_b_model).mean()
-            abs_mean = (np.abs(phi_b).mean() + np.abs(phi_b_model).mean()) * .5
-            percent_error = L1_error / abs_mean * 100
+            abs_μ = (np.abs(phi_b).mean() + np.abs(phi_b_model).mean()) * .5
+            percent_error = L1_error / abs_μ * 100
             phi_b_L1_errors.append(percent_error)
             print('Testing phi_b with {} classes: {} percent error'.format(
                   n_classes, percent_error))

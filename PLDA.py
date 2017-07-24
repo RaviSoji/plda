@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import operator
 import numpy as np
 from scipy.linalg import eigh
@@ -26,13 +27,13 @@ class PLDA:
         self.n_avg = None     # (float) See last sentence on p. 536.
         self.S_b = None       # (n x n ndarray) Between class scatter.
         self.S_w = None       # (n x n 2d ndarray) Mean within class scatter.
-        self.lambda_b = None  # (n x n 2d ndarray)
-        self.lambda_w = None  # (n x n 2d ndarray)
+        self.Λ_b = None       # (n x n 2d ndarray)
+        self.Λ_w = None       # (n x n 2d ndarray)
 
         # Parameters used to generate pdfs for likelihood maximization.
         self.W = None         # (n x n 2d ndarray)
         self.A = None         # (n x n 2d ndarray)
-        self.psi = None       # (n x n 2d ndarray)
+        self.Ψ = None         # (n x n 2d ndarray)
 
         # Data structure holding all parameters - intended for the user.
         self.params = self.get_params_data_structure()
@@ -92,23 +93,23 @@ class PLDA:
         structure.update({'m': None})
         structure.update({'N': None})
         structure.update({'n_avg':None})
-        structure.update({'lambda_b':None})
-        structure.update({'lambda_w':None})
-        structure.update({'psi':None})
+        structure.update({'Λ_b':None})
+        structure.update({'Λ_w':None})
+        structure.update({'Ψ':None})
         structure.update({'S_b': None})
         structure.update({'S_w': None})
         structure.update({'W': None})
 
         for label in self.data.keys():
-            cluster_mean_key = 'v_' + str(label)
-            structure.update({cluster_mean_key: None})
+            μ_k_key = 'v_' + str(label)
+            structure.update({μ_k_key: None})
 
         return structure
 
     def calc_A(self):
         """ Computes the matrix A, which is used to compute u: x = m + Au.
 
-        EQUATION: A = W^{-T} (n_avg/(n_avg - 1)[lambda_w]) ** .5
+        EQUATION: A = W^{-T} (n_avg/(n_avg - 1)[Λ_w]) ** .5
 
         DESCRIPTION: Note that the average class sample size is used here, 
                       not the total or individual class sample sizes. See
@@ -120,13 +121,13 @@ class PLDA:
 
         PARAMETERS
          n_avg      (float): Mean sample size of the classes.
-         lambda_w (ndarray): Diagonalized S_w (i.e. [W^T][S_w][W]).
+         Λ_w (ndarray): Diagonalized S_w (i.e. [W^T][S_w][W]).
                               [n_dims x n_dims]
         RETURNS
          A        (ndarray): The (un)whitening matrix. [n_dims x n_dims]
 
         """
-        A = self.n_avg / (self.n_avg - 1) * self.lambda_w
+        A = self.n_avg / (self.n_avg - 1) * self.Λ_w
         A[np.isclose(A, 0)] = 0
         A = np.sqrt(A)
         inv_T_W = np.linalg.inv(self.W.T)
@@ -141,7 +142,7 @@ class PLDA:
             SD = np.abs(.001 * min_val)
             A += np.random.normal(0, SD, A.shape)
             print('WARNING: the matrix A is singular. Gaussian noise, ' +
-                  'with mean = 0 and SD = abs(.001 * np.min(A)) was added.' +
+                  'with μ = 0 and SD = abs(.001 * np.min(A)) was added.' +
                   'Matrix rank was {}, and  A.shape[0] was {}'.format(
                    np.linalg.matrix_rank(A), A.shape[0]))
 
@@ -189,12 +190,12 @@ class PLDA:
         return len(self.data.keys())
 
 
-    def calc_lambda_b(self):
+    def calc_Λ_b(self):
         """ Diagonalized S_b - for maximizing the likelihood of the PLDA model.
 
-        EQUATION: lambda_b = [W^T][S_b][W]
+        EQUATION: Λ_b = [W^T][S_b][W]
 
-        DESCRIPTION: See p. 537 to see how lambda_b is used to compute the 
+        DESCRIPTION: See p. 537 to see how Λ_b is used to compute the 
                       parameters that maximize the PLDA model's likelihood.
         ARGUMENTS
          None
@@ -205,21 +206,21 @@ class PLDA:
          S_b  (ndarray): The between-class scatter matrix. See p 532.
                           [n_dims x n_dims]
         RETURNS
-         lambda_b  (ndarray): S_b diagonalized by W. [n_dims x n_dims]
+         Λ_b  (ndarray): S_b diagonalized by W. [n_dims x n_dims]
 
         """
         W = self.W
         S_b = self.S_b
-        lambda_b = np.matmul(np.matmul(W.T, S_b), W)
+        Λ_b = np.matmul(np.matmul(W.T, S_b), W)
 
-        return np.around(lambda_b, 13)
+        return np.around(Λ_b, 13)
 
-    def calc_lambda_w(self):
+    def calc_Λ_w(self):
         """ Diagonalized S_w - for maximizing the likelihood of the PLDA model.
  
-        EQUATION: lambda_w = [W^T][S_w][W]
+        EQUATION: Λ_w = [W^T][S_w][W]
 
-        DESCRIPTION: See p. 537 to see how lambda_b is used to compute the
+        DESCRIPTION: See p. 537 to see how Λ_b is used to compute the
                       parameters that maximize the PLDA model's likelihood.
         ARGUMENTS
          None
@@ -230,14 +231,14 @@ class PLDA:
          S_w      (ndarray): Within-class scatter matrix. [n_dims x n_dims]
 
         RETURNS
-         lambda_w (ndarary): S_w, the within-class scatter matrix, diagonalized
+         Λ_w      (ndarray): S_w, the within-class scatter matrix, diagonalized
                               by W. [n_dims x n_dims]
         """
         W = self.W
         S_w = self.S_w
-        lambda_w = np.matmul(np.matmul(W.T, S_w), W)
+        Λ_w = np.matmul(np.matmul(W.T, S_w), W)
 
-        return np.around(lambda_w, 13)
+        return np.around(Λ_w, 13)
 
     def calc_m(self):
         """ Computes the mean of all the examples in the dataset.
@@ -254,18 +255,18 @@ class PLDA:
           -- stats[label]         (dict): Stores the mean, covariance, and
                                            sample size for the class 'label'.
           -- stats[label]['n']     (int): Sample size for the class 'label'.
-          -- stats[label]['mean']  (int): Mean for the class 'label'.
+          -- stats[label]['μ']  (int): Mean for the class 'label'.
         
         RETURNS
          m  (ndarray): Computes the mean of the data/examples. [n_dims x 1]
 
         """
-        means = []
+        μs = []
         N = self.N
         for label in self.stats.keys():
             weight = self.stats[label]['n'] / N
-            means.append(weight * self.stats[label]['mean'])
-        m = np.array(means).sum(axis=0)
+            μs.append(weight * self.stats[label]['μ'])
+        m = np.array(μs).sum(axis=0)
 
         return m
 
@@ -298,11 +299,11 @@ class PLDA:
         
         return float(self.N) / float(self.K)
 
-    def calc_psi(self):
+    def calc_Ψ(self):
         """ Calculates the covariance of the whitened cluster centers.
 
-        EQUATION: psi = max(0, [(n-1) / n * [lambda_b]/[lambda_w]] - 1/n)
-                  Also, note that phi_b = [A][psi][A.T]
+        EQUATION: Ψ = max(0, [(n-1) / n * [Λ_b]/[Λ_w]] - 1/n)
+                  Also, note that phi_b = [A][Ψ][A.T]
 
         DESCRIPTION: Remember, that for this algorithm, one way to deal with
                       unequal numbers of examples between the classes is to
@@ -312,43 +313,43 @@ class PLDA:
 
         PARAMETERS
          n_avg    (float): Average sample size of the data classes.
-         lambda_w (ndarray): Within-class scatter matrix diagonalized by the
+         Λ_w    (ndarray): Within-class scatter matrix diagonalized by the
                               matrix W. W is the set of eigenvectors that
                               solve the generalized eigenvalue problem on
                               p. 537.
-         lambda_b (ndarray): Between-class scatter matrix diagonalized by the
+         Λ_b    (ndarray): Between-class scatter matrix diagonalized by the
                               matrix W. W is the set of eigenvectors that
                               solve the generalized eigenvalue problem on
                               p. 537.
         RETURNS
-         psi      (ndarray): Covariance of the cluster centers in whitened
+         Ψ      (ndarray): Covariance of the cluster centers in whitened
                               data space. [n_dims x n_dims]
         """
         weight = (self.n_avg - 1) / self.n_avg
-        lambda_w = self.lambda_w.diagonal().copy()
-        lambda_w[np.isclose(lambda_w, 0)] = 0
-        lambda_b = self.lambda_b.diagonal().copy()
-        lambda_b[np.isclose(lambda_b, 0)] = 0
+        Λ_w = self.Λ_w.diagonal().copy()
+        Λ_w[np.isclose(Λ_w, 0)] = 0
+        Λ_b = self.Λ_b.diagonal().copy()
+        Λ_b[np.isclose(Λ_b, 0)] = 0
   
         with np.errstate(divide='ignore', invalid='ignore'):
-            psi = weight * lambda_b / lambda_w
+            Ψ = weight * Λ_b / Λ_w
 
-        psi[np.isnan(psi)] = 0
-        psi = psi - (1 / self.n_avg)
+        Ψ[np.isnan(Ψ)] = 0
+        Ψ = Ψ - (1 / self.n_avg)
 
-        psi[psi < 0] = 0
-        psi[np.isinf(psi)] = 0
-        psi = np.diag(psi)
+        Ψ[Ψ < 0] = 0
+        Ψ[np.isinf(Ψ)] = 0
+        Ψ = np.diag(Ψ)
 
-        return psi
+        return Ψ
 
     def calc_S_b(self):
         """ Computes the "between-class" scatter matrix.
 
         DESCRIPTION: n used here is NOT n_avg. n_avg is used only for
-                     computing (1) lambda_w, (2) lambda_b, (3) psi, (4) and A.
+                     computing (1) Λ_w, (2) Λ_b, (3) Ψ, (4) and A.
 
-        EQUATION: S_w = sum_k{
+        EQUATION: S_w = Σ_k{
                           (n_k)[(m_k - m)(m_k - m).T]
                         } / N
                   See p. 532, Equations (1).
@@ -362,7 +363,7 @@ class PLDA:
           -- stats[label]             (dict): Stores the mean, sample size,
                                                and covariance for the class
                                                'label'.
-          -- stats[label]['mean']  (ndarray): Mean for the class 'label'.
+          -- stats[label]['μ']  (ndarray): Mean for the class 'label'.
                                                [n_dims x 1]
           -- stats[label]['n']         (int): Sample size for the class 'label'.
 
@@ -374,9 +375,9 @@ class PLDA:
          # get_sample_sizes() depends on self.stats
         weights = n_list / self.N
 
-        means = self.get_means()
-         # get_means() depends on self.stats
-        mk_minus_m = np.array(means) - self.m
+        μs = self.get_μs()
+         # get_μs() depends on self.stats
+        mk_minus_m = np.array(μs) - self.m
         S_b = np.matmul(mk_minus_m.T * weights, mk_minus_m)
 
         return S_b
@@ -386,10 +387,10 @@ class PLDA:
 
         DESCRIPTION: Class statistics were computed using numpy functions,
                       where covariance is normalized with (n - 1), so
-                       cov_k * (n-1) = sum_i_in_C_k{(x^i - m_k)(x^i - m_k).T}.
+                       cov_k * (n-1) = Σ_{i_in_C_k}{(x^i - m_k)(x^i - m_k).T}.
 
-        EQUATION: S_w = sum_k{ 
-                          sum_{i_in_C_k}{ 
+        EQUATION: S_w = Σ_k{ 
+                          Σ_{i_in_C_k}{ 
                             [(x^i - m_k)(x^i - m_k).T] 
                           }
                         } / N
@@ -428,7 +429,7 @@ class PLDA:
     def calc_W(self):
         """ Computes W by solving the generalized eigenvalue problem on p. 537.
 
-        EQUATION: [S_b][W] = [lambda][S_w][W]; [S_b - S_w][W] = lambda
+        EQUATION: [S_b][W] = [Λ][S_w][W]; [S_b - S_w][W] = Λ
 
         DESCRIPTION: Relies on eigh instead of eig from scipy.linalg. eigh is
                       significantly faster and only requres that the input
@@ -450,7 +451,7 @@ class PLDA:
         return W
 
     def get_covariances(self):
-        """ Extracts all means from the self.stats data structure.
+        """ Extracts all covariances from the self.stats data structure.
 
         ARGUMENTS
          None
@@ -477,7 +478,7 @@ class PLDA:
 
         return covariances
 
-    def get_means(self):
+    def get_μs(self):
         """ Extracts all means from the self.stats data structure.
 
         ARGUMENTS
@@ -488,20 +489,20 @@ class PLDA:
           -- stats.keys()      (dict_keys): The keys are the data class labels.
           -- stats[label]           (dict): Dictionary storing the class
                                              mean, sample size, and covariance.
-          -- stats[label]['mean']  (float): Mean for the class 'label'.
+          -- stats[label]['μ']  (float): Mean for the class 'label'.
 
         RETURNS
-         means (list): Means for the data classes, returned in the same order
+         μs (list): Means for the data classes, returned in the same order
                         as self.stats.keys().
         """
         assert isinstance(self.stats, dict)
 
-        means = []
+        μs = []
         for label in self.stats.keys():
-            mean = self.stats[label]['mean']
-            means.append(mean)
+            μ = self.stats[label]['μ']
+            μs.append(μ)
 
-        return means
+        return μs
 
     def get_sample_sizes(self):
         """ Extracts the sample sizes from the self.stats data structure.
@@ -539,11 +540,11 @@ class PLDA:
          None
 
         RETURNS
-         structure (dict): Has 3 keys, 'mean', 'n', and 'covariance', each of
+         structure (dict): Has 3 keys, 'μ', 'n', and 'covariance', each of
                             which point to 'None'.
         """
         structure = dict()
-        structure.update({'mean': None})
+        structure.update({'μ': None})
         structure.update({'n': None})
         structure.update({'covariance': None})
 
@@ -576,10 +577,10 @@ class PLDA:
          S_b       (ndarray): Between-class scatter matrix. [n_dims x n_dims]
          W         (ndarray): Solution to the eigenvalue problem on p. 537.
                                [n_dims x n_dims]
-         lambda_b  (ndarray): Diagonalized S_b used - to compute the parameters
+         Λ_b  (ndarray): Diagonalized S_b used - to compute the parameters
                               that maximize the model's likelihoods.
                                [n_dims x n_dims]
-         lambda_w  (ndarray): Diagonalized S_w - used to compute the parameters
+         Λ_w  (ndarray): Diagonalized S_w - used to compute the parameters
                               that maximize the model's likelihoods.
                                [n_dims x n_dims]
          A         (ndarray): The matrix that whitens and unwhitens the data.
@@ -614,23 +615,23 @@ class PLDA:
         self.params['W'] = self.calc_W()
         self.W = self.params['W']
 
-        self.params['lambda_b'] = np.around(self.calc_lambda_b(), 13)
-        self.lambda_b = self.params['lambda_b']
+        self.params['Λ_b'] = np.around(self.calc_Λ_b(), 13)
+        self.Λ_b = self.params['Λ_b']
 
-        self.params['lambda_w'] = np.around(self.calc_lambda_w(), 10)
-        self.lambda_w = self.params['lambda_w']
+        self.params['Λ_w'] = np.around(self.calc_Λ_w(), 10)
+        self.Λ_w = self.params['Λ_w']
         
         # Compute the parameters that maximum the model's likelihoods.
         self.params['A'] = self.calc_A()
         self.A = self.params['A']
 
-        self.params['psi'] = self.calc_psi()
-        self.psi = self.params['psi']
+        self.params['Ψ'] = self.calc_Ψ()
+        self.Ψ = self.params['Ψ']
 
 
         for label in self.stats.keys():
-            mean = self.stats[label]['mean']
-            v = self.whiten(mean)
+            μ = self.stats[label]['μ']
+            v = self.whiten(μ)
             self.params['v_' + str(label)] = v
 
     def set_pdfs(self):
@@ -642,14 +643,14 @@ class PLDA:
          None
 
         PARAMETERS
-         psi          (ndarray): Between-class covariance of the whitened
+         Ψ          (ndarray): Between-class covariance of the whitened
                                   class centers. [n_dims x n_dims]
          n_avg  (numpy.float64): Average sample size of the data classes.
          stats           (dict): Holds the mean, sample size, and covariance
                                   matrix for each data class. These are stored
                                   in a dictionary that can be accessed by
                                   using the label as the key: for example,
-                                  stats[label]['mean'].
+                                  stats[label]['μ'].
          params           (dict): Model parameters accessible via keys.
           -- params['v_' + str(label)]  (ndarray): Whitened class center.
          pdfs             (dict): Holds the logpdf method for each data class.
@@ -662,19 +663,19 @@ class PLDA:
          None
 
         """
-        assert np.array_equal(np.diag(self.psi.diagonal()), self.psi)
-         # Verify that psi is diagonal.
+        assert np.array_equal(np.diag(self.Ψ.diagonal()), self.Ψ)
+         # Verify that Ψ is diagonal.
 
-        psi = self.psi.diagonal()
-        n_psi = self.n_avg * psi
-        n_psi_plus_eye = n_psi + 1
+        Ψ = self.Ψ.diagonal()
+        n_Ψ = self.n_avg * Ψ
+        n_Ψ_plus_eye = n_Ψ + 1
 
-        cov = np.diag(1 + psi / n_psi_plus_eye)
-        transformation = np.diag(n_psi / n_psi_plus_eye)
+        cov = np.diag(1 + Ψ / n_Ψ_plus_eye)
+        transformation = np.diag(n_Ψ / n_Ψ_plus_eye)
         for label in self.stats.keys():
-            mean = self.params['v_' + str(label)]
-            mean = np.matmul(transformation, mean)
-            mn_model = multivariate_normal(mean, cov)
+            μ = self.params['v_' + str(label)]
+            μ = np.matmul(transformation, μ)
+            mn_model = multivariate_normal(μ, cov)
             self.pdfs[label] = mn_model.logpdf
 
     def set_stats(self):
@@ -751,9 +752,9 @@ class PLDA:
          stats     (dict): Holds the means, covariances, and sample sizes
                             for all of the data classes. Keys are the class
                             labels.
-          -- stats[label]: Dictionary with the keys 'mean', 'n', and
+          -- stats[label]: Dictionary with the keys 'μ', 'n', and
                             'covariance' indexing the statistics for that
-                            class. Sample size ('n') is type (int), mean
+                            class. Sample size ('n') is type (int), μ
                             is type (numpy.ndarary) with shape (n_dims,),
                             covariance is type (numpy.ndarray) with shape
                             (n_dims, n_dims). 
@@ -902,7 +903,7 @@ class PLDA:
                                    for each data class.
          stats[label]     (dict): Holds statistics for the data class 'label'.
            -- stats[label]['n']               (int): class sample size
-           -- stats[label]['mean']        (ndarray): [1 x n_dims]
+           -- stats[label]['μ']        (ndarray): [1 x n_dims]
            -- stats[label]['covariance']  (ndarray): [n_dims x n_dims]
 
         RETURNS
@@ -915,11 +916,11 @@ class PLDA:
         examples_arr = np.array(examples_list)
 
         n = len(examples_list)
-        mean = examples_arr.mean(axis=0)
+        μ = examples_arr.mean(axis=0)
         cov = np.cov(examples_arr.T)
 
         self.stats[label]['n'] = n
-        self.stats[label]['mean'] = mean
+        self.stats[label]['μ'] = μ
         self.stats[label]['covariance'] = cov
 
     def whiten(self, X):
