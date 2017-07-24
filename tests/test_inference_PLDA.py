@@ -1,0 +1,205 @@
+import numpy as np
+import unittest
+from numpy.random import multivariate_normal as m_normal
+from PLDA import PLDA
+from scipy.linalg import eig
+from scipy.linalg import inv
+from scipy.stats import linregress
+
+
+# NOTE: test_phi_b() and test_phi_w can take  A VERY LONG TIME TO RUN!!
+# Set the parameters to smaller values if you want to make sure the code runs.
+class TestPLDA(unittest.TestCase):
+    def setUp(self, n=100000, n_classes=5, n_dims=5):
+        """ Paramters that the model should recover: phi_w, phi_b, m, S_b. """
+        self.n_dims = n_dims = 2                    # Dimension of the data.
+        self.n_classes = n_classes
+        self.n = n                                  # n for each class.
+
+        self.psi = self.gen_psi(n_dims)              # Diagonal matrix >= 0.
+        self.m = self.gen_m(n_dims)                  # ndarray [1 x n_dims]
+        V = self.gen_V(self.psi, n_classes, n_dims)  # v ~ N(0, psi)
+        U = self.gen_U(n_dims, n, V)                # u ~ N(v, I)
+        self.A, self.S_b = self.gen_A(V, n_classes, n_dims,
+                                   return_S_b=True)
+        X = self.unwhiten(U, self.A, self.m)          # x = m + Au
+        Y = self.gen_labels(n_classes, n)
+        self.labeled_X = self.label(X, Y)
+
+        self.model = PLDA(self.labeled_X)
+
+    def assert_same(self, result, expected):
+        are_same = np.allclose(result, expected)
+        self.assertTrue(are_same)
+
+    def gen_psi(self, n_dims):
+        psi = np.diag(10 / np.random.sample(n_dims))
+
+        return psi
+
+    def gen_m(self, n_dims):
+        m = np.random.randint(-1000, 1000, n_dims).astype(float)
+
+        return m
+
+    def gen_V(self, psi, n_classes, n_dims):
+        """ v ~ N(0, psi): Consult Equations (2) on p. 533.
+
+        DESCRIPTION: Samples whitened class centers from a multivariate
+                      Gaussian distribution centered at 0, with covariance psi.
+                      For testing purposes, we ensure that V.sum(axis=0) = 0. 
+
+        PARAMETERS
+         n_classes      (int): Number of classes.
+         n_dims         (int): Dimensionality of the data.
+         psi        (ndarray): Covariance between whitened class centers.
+                                [n_dims x n_dims] 
+        RETURNS
+         V          (ndarray): Whitened class centers. [n_classes x n_dims] 
+        """
+        assert psi.shape[0] == psi.shape[1]
+
+        mean = np.zeros(n_dims)  # [1 x n_dims] 
+
+        V = m_normal(mean, psi, n_classes)
+        V = V - V.mean(axis=0)  # Center means at origin to control result.
+
+
+        assert np.allclose(V.sum(axis=0), 0)
+
+        return V
+
+    def gen_A(self, V, n_classes, n_dims, return_S_b=False):
+        """ A = [B][inv(lambda ** .5)][Q.T] and assumes same number of data
+             in each class v. """
+        B = np.random.randint(-100, 100, (n_dims, n_dims)).astype(float)
+        big_V = np.matmul(V.T, V)  # V is now a scatter matrix.
+        vals, vecs = eig(big_V)
+        A = B / np.sqrt(vals.real)
+        A = np.matmul(A, vecs.T)
+
+        D = np.matmul(np.matmul(vecs.T, big_V), vecs)
+        assert np.allclose(D, np.diag(vals))
+
+        if return_S_b is True:
+            S_b = 1 /n_classes * np.matmul(np.matmul(A, big_V), A.T)
+            x = np.matmul(A, V.T).T
+
+            S_b_empirical = 1 / n_classes * np.matmul(x.T, x)
+            assert np.allclose(S_b, S_b_empirical)
+
+            return A, S_b
+        else:
+            return A
+
+    def gen_U(self, n_dims, n, V):
+        cov = np.eye(n_dims)
+
+        U = []
+        for v in V:
+            mean = np.zeros(n_dims)
+            U_for_class_v = m_normal(mean, cov, n)
+            U_for_class_v -= U_for_class_v.mean(axis=0)
+            U_for_class_v += v  # Center at v to control test results.
+            U.append(U_for_class_v)
+
+        # To control the test result, each set of u's sums to its respective v.
+        for x in range(len(U)):
+            are_same = np.allclose(V[x], U[x].mean(axis=0))
+            assert are_same ==  True
+
+        U = np.vstack(U)
+
+        return U
+
+    def unwhiten(self, U, A, m):
+        X = np.matmul(A, U.T).T
+        X += m
+
+        return X
+
+    def gen_labels(self, n_classes, n):
+        labels = []
+        for x in range(n_classes):
+            labels += [x] * n
+
+        return labels
+
+    def label(self, data, labels):
+        labeled_data = []
+        for datum, label in zip(data, labels):
+            labeled_data.append((datum, label))
+
+        return labeled_data
+
+    def test_m(self):
+        self.assert_same(self.m, self.model.m)
+
+    def test_S_b(self):
+        self.assert_same(self.S_b, self.model.S_b)
+
+    def experiment(self, n, n_dims, n_classes):
+        psi = self.gen_psi(n_dims)
+        m = self.gen_m(n_dims)
+        V = self.gen_V(psi, n_classes, n_dims)
+        U = self.gen_U(n_dims, n, V)
+        A, S_b = self.gen_A(V, n_classes, n_dims,
+                                   return_S_b=True)
+        X = self.unwhiten(U, A, m)
+        Y = self.gen_labels(n_classes, n)
+        labeled_X = self.label(X, Y)
+ 
+        model = PLDA(labeled_X)
+
+        return A, psi, model
+
+    def test_phi_w_and_phi_b(self):
+        n_experiments = int(np.log10(1000000) / 2)
+        n_list = [100 ** x for x in range(1, n_experiments + 1)]
+        n_list = np.array(n_list).astype(float)
+        n_dims = self.n_dims
+        n_classes = 30 #self.n_classes
+        
+        phi_w_L1_errors = []
+        for n in n_list:
+            A, psi, model = self.experiment(int(n), n_dims, n_classes)
+
+            phi_w = np.matmul(A, A.T)
+            phi_w_model = np.matmul(model.A, model.A.T)
+
+            L1_error = np.abs(phi_w - phi_w_model).mean()
+            abs_mean = (np.abs(phi_w).mean() + np.abs(phi_w_model).mean()) * .5
+            percent_error = L1_error / abs_mean * 100
+            print('Testing phi_w with {} samples: {} percent error'.format(n,
+                  percent_error))
+            phi_w_L1_errors.append(percent_error)
+
+        Y = phi_w_L1_errors
+        X = [x for x in range(len(phi_w_L1_errors))]
+        slope_of_error_vs_N = linregress(X, Y)[0]
+        self.assertTrue(slope_of_error_vs_N < 0)
+
+    def test_phi_b(self):
+        n_classes_list = [4 ** x for x in range(1, 6)]
+        n_list = [100 * n for n in n_classes_list]
+        n_list = np.array(n_list).astype(float)
+        n_dims = self.n_dims
+
+        phi_b_L1_errors = []
+        for n, n_classes in zip(n_list, n_classes_list):
+            A, psi, model = self.experiment(int(n), n_dims, n_classes)
+
+            phi_b = np.matmul(np.matmul(A, psi), A.T)
+            phi_b_model = np.matmul(np.matmul(model.A, model.psi), model.A.T)
+
+            L1_error = np.abs(phi_b - phi_b_model).mean()
+            abs_mean = (np.abs(phi_b).mean() + np.abs(phi_b_model).mean()) * .5
+            percent_error = L1_error / abs_mean * 100
+            phi_b_L1_errors.append(percent_error)
+            print('Testing phi_b with {} classes: {} percent error'.format(
+                  n_classes, percent_error))
+
+        Y = phi_b_L1_errors
+        X = [x for x in range(len(phi_b_L1_errors))]
+        slope_of_error_vs_N = linregress(X, Y)[0]
+        self.assertTrue(slope_of_error_vs_N < 0)
