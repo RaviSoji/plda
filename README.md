@@ -4,8 +4,8 @@
 Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.
 
 ### Python Dependencies
-* numpy
-* scipy
+* numpy 1.13.1
+* scipy 0.19.1
 
 ### Demo and cross-validation dependencies
 * skimage 0.13.0
@@ -15,7 +15,7 @@ pip install scikit-image
 
 * sklearn 0.18.2
 ```
-pip install -U scikit-learn or conda install scikit-learn
+pip install -U scikit-learn
 ```
 
 ### Cross-validation on the Google_Faces Emotions dataset
