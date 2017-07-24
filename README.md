@@ -8,7 +8,7 @@ If all that you want to do is apply this model to a dataset and measure its
  model explainability (not necessarily speed or performance).
 
 ### Paper Citation
-Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.(https://link.springer.com/chapter/10.1007/11744085_41)
+[Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.](https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Python Dependencies
 * numpy 1.13.1
