@@ -1,13 +1,13 @@
 # probabilistic_LDA
 
-### Paper citation
+### Paper Citation
 Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.
 
 ### Python Dependencies
 * numpy 1.13.1
 * scipy 0.19.1
 
-### Demo and cross-validation dependencies
+### Demo and Cross-validation Dependencies
 * skimage 0.13.0
 ```
 pip install scikit-image
@@ -18,7 +18,7 @@ pip install scikit-image
 pip install -U scikit-learn
 ```
 
-### Cross-validation on the Google_Faces Emotions dataset
+### Cross-validation on the Google_Faces Emotions Dataset
 ```
 python3.5 cross_validation_PLDA.py
 ```
