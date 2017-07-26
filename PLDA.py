@@ -9,7 +9,7 @@ from scipy.misc import logsumexp
 class PLDA:
     def __init__(self, data, save_raw=False):
         """ Data should be a list of tuples of (example, label), where
-            example is a flattened ndarray. label can be any data type"""
+            example an [n_dims x 1] ndarray. label can be any data type"""
         self.save_raw = save_raw
         if self.save_raw is True:
             self.raw_data = data
@@ -25,15 +25,15 @@ class PLDA:
         self.m = None         # (ndarray) Mean of the dataset.
         self.N = None         # (int) Number of examples/data.
         self.n_avg = None     # (float) See last sentence on p. 536.
-        self.S_b = None       # (n x n ndarray) Between class scatter.
-        self.S_w = None       # (n x n 2d ndarray) Mean within class scatter.
-        self.Λ_b = None       # (n x n 2d ndarray)
-        self.Λ_w = None       # (n x n 2d ndarray)
+        self.S_b = None       # (n_dims x n_dims ndarray) Between class scatter.
+        self.S_w = None       # (n_dims x n_dims ndarray) Within class scatter.
+        self.Λ_b = None       # (n_dims x n_dims ndarray) Diagonalized S_b
+        self.Λ_w = None       # (n_dims x n_dims ndarray) Diagonalized S_w
 
         # Parameters used to generate pdfs for likelihood maximization.
-        self.W = None         # (n x n 2d ndarray)
-        self.A = None         # (n x n 2d ndarray)
-        self.Ψ = None         # (n x n 2d ndarray)
+        self.W = None         # (n_dims x n_dims ndarray)
+        self.A = None         # (n_dims x n_dims ndarray)
+        self.Ψ = None         # (n_dims x n_dims ndarray)
 
         # Data structure holding all parameters - intended for the user.
         self.params = self.get_params_data_structure()
