@@ -4,26 +4,6 @@ from PLDA import PLDA
 from sklearn.decomposition import PCA
 
 
-def build_google_faces_dataset(load_dir, resized_shape=(100,100)):
-    from skimage.io import imread
-    from skimage.transform import resize
-
-    data_shape=resized_shape
-    imgs = []
-    lbls = []
-    for fname in os.listdir(load_dir):
-        if fname[-4:] == '.jpg':
-            label = ''.join([i for i in fname if not i.isdigit()])
-            label = label[:-4]
-            if label != 'neutral':  # Ignore the 2 'neutral' face images.
-                img = imread(load_dir + fname)
-                img = resize(img, data_shape)
-                img = img.flatten()
-                imgs.append(img)
-                lbls.append(label)
-
-    return imgs, lbls
-
 def gen_artificial_data(n_classes, n_list, n_dims):
     """ Generates a data set from multi-variate Gaussians. """
     assert len(n_list) == n_classes
