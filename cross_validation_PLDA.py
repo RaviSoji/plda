@@ -1,12 +1,13 @@
 import os
 import numpy as np
 from PLDA import PLDA
-from skimage.io import imread
-from skimage.transform import resize
 from sklearn.decomposition import PCA
 
 
-def build_google_faces_dataset(load_dir, resized_shape=(100,100)):
+def build_google_faces_dataset(load_dir, resized_shape):
+from skimage.io import imread
+from skimage.transform import resize
+
     data_shape=resized_shape
     imgs = []
     lbls = []
@@ -14,7 +15,7 @@ def build_google_faces_dataset(load_dir, resized_shape=(100,100)):
         if fname[-4:] == '.jpg':
             label = ''.join([i for i in fname if not i.isdigit()])
             label = label[:-4]
-            if label != 'neutral':
+            if label != 'neutral':  # Ignore the 2 'neutral' face images.
                 img = imread(load_dir + fname)
                 img = resize(img, data_shape)
                 img = img.flatten()
@@ -99,7 +100,7 @@ def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
 
 def main():
     load_dir = os.getcwd() + '/Google_Faces/'
-    imgs, lbls = build_google_faces_dataset(load_dir)
+    imgs, lbls = build_google_faces_dataset(load_dir, resized_shape=(100,100))
 
     X = np.array(imgs)
     Y = np.array(lbls)
