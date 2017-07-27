@@ -3,13 +3,16 @@ import numpy as np
 from PLDA import PLDA
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from numpy.random import multivariate_normal as m_normal
+from numpy.random import randint
+from scipy.stats import norm, chi2
+from matplotlib.patches import Ellipse
 
 
 def gen_artificial_data(n_classes, n_list, n_dims):
     """ Generates a data set from multi-variate Gaussians. """
     assert len(n_list) == n_classes
-    from numpy.random import multivariate_normal as m_normal
-    from numpy.random import randint
     np.random.seed(1)  # Ensures that the same plot is generated every time.
 
     # Generate the within and between class covariance matrices.
@@ -42,7 +45,6 @@ def gen_artificial_data(n_classes, n_list, n_dims):
     return points, labels
 
 def plot_model_results(PLDA_model, ax, MAP_estimate=True):
-    import matplotlib.cm as cm
 
     n_classes = len(PLDA_model.stats)
     colors = cm.rainbow(np.linspace(0, 1, n_classes))
@@ -60,7 +62,6 @@ def cov_ellipse(cov, q=None, nsig=None, **kwargs):
     """ Code is slightly modified, essentially borrowed from: 
          https://stackoverflow.com/questions/18764814/make-contour-of-scatter
     """ 
-    from scipy.stats import norm, chi2
     if q is not None:
         q = np.asarray(q)
     elif nsig is not None:
@@ -80,7 +81,6 @@ def plot_contours(PLDA_model, nsig):
          https://stackoverflow.com/questions/12301071/
                   multidimensional-confidence-intervals
     """
-    from matplotlib.patches import Ellipse
     ells = []
     for label in PLDA_model.stats.keys():
         mean = PLDA_model.stats[label]['μ']

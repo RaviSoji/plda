@@ -49,7 +49,7 @@ python3.5 -m unittest tests/test_units_PLDA.py
 K-folds on facial recognition (where classes are specific people),
  traditionally gets about 40-60% accuracy. Here, we are trying to do emotion
  classification based on very little and uncontrolled data (23-86 samples of
- DIFFERENT faces for each of the 7 emotions) and are finding around 30%
+ DIFFERENT faces for each of the 7 emotions) and are finding around 33%
  accuracy, which is bad, but also above chance level.
 ```
 python3.5 cross_validation_PLDA.py

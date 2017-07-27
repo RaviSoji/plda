@@ -2,11 +2,11 @@ import os
 import numpy as np
 from PLDA import PLDA
 from sklearn.decomposition import PCA
+from skimage.io import imread
+from skimage.transform import resize
 
 
 def build_google_faces_dataset(load_dir, resized_shape):
-from skimage.io import imread
-from skimage.transform import resize
 
     data_shape=resized_shape
     imgs = []
@@ -24,19 +24,33 @@ from skimage.transform import resize
 
     return imgs, lbls
 
+def check_equal_folds(*args, **kwargs):
+    n = args[0].shape[0]
+    k = kwargs['k']
+    warn = n % k != 0
+    if warn:
+        print('\nWARNING')
+        print('\'k\' did not divide the total number of data \'n\': ' +
+              'n % k = {}.'.format(n % k))
+        print('{} subsamples of {} data '.format(k - 1, int(n / k)) + 
+              'each are being tested during each k-folds iteration.')
+       
 def rerun(n_iterations):
     def wrap_CV(CV_func):
         k_folds_scores = []
-        def wrapper(*args):
+        def wrapper(*args, **kwargs):
+            check_equal_folds(*args, **kwargs)
+
             for x in range(n_iterations):
-                scores = CV_func(*args)
+                scores = CV_func(*args, **kwargs)
                 k_folds_scores.append(scores)
                 scores = []
+
             return k_folds_scores
         return wrapper
     return wrap_CV
 
-@rerun(n_iterations=5)
+@rerun(n_iterations=10)  # Number of times to run k-folds functions.
 def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
     """ Cross validation on Google Face emotions dataset, using k-folds.
 
@@ -70,9 +84,7 @@ def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
         k_runs = k
     else:
         k_runs = k - 1
-        print('\'k\' did not divide the total number of data evenly.' +
-              '{} runs with {} data in each will be run.'.format(k_runs,
-                                                                 n // k))
+
     scores = []
     idxs = np.arange(n)
     np.random.shuffle(idxs)
@@ -99,14 +111,18 @@ def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
     
         # Evaluate the model.
         if MAP_estimate is False:
-            predictions = model.predict_class(test_X,
+            classifications = model.predict_class(test_X,
                                               MAP_estimate=MAP_estimate)
+            correct = 0
+            for classification, label in zip(classifications, test_Y):
+                correct += classification == label
+            scores.append(correct / len(test_Y))
         else:
             for run in range(n_runs):
-                predictions = model.predict_class(test_X,
+                classifications = model.predict_class(test_X,
                                                   MAP_estimate=MAP_estimate)
                 correct = 0
-                for classification, label in zip(predictions, test_Y):
+                for classification, label in zip(classifications, test_Y):
                     correct += classification == label
                 scores.append(correct / len(test_Y))
     
