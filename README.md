@@ -28,7 +28,7 @@ pip install -U scikit-learn
 ```
 
 ### Testing (Requires decent computing power! I had access to ~60 CPU cores.)
-cd to the directory containing the respository, the 'PLDA.py' file in particular.
+cd to the repository (i.e. directory containing the respository, the 'PLDA.py' file.
 ```
 cd /Documents/folder/path/to/probabilistic_LDA/ # PLDA.py should be in this folder.
 ```
@@ -46,10 +46,20 @@ python3.5 -m unittest tests/test_units_PLDA.py
 ```
 
 ### Demo with Artificial 2D Gaussian Data
-Data was generated from 10 2D Gaussians: (1) The colors of the points represent
+cd to the folder containing the demo folder:
+```
+cd demo/ # demo.py should be in this folder.
+
+```
+Run the demo:
+```
+python3.5 demo.py
+```
+Training data is generated from 10 2D Gaussians. Colors of the points represent
  the model classifications of randomly generated points and (2) the contours
  depict the 95% confidence intervals (based on 300-900 points per class) of the
- labeled training data.
+ labeled training data. Note that the data were generated with the same covariance
+ because this is one of several import mode assumptions.
 
 ![Figure 1-1](https://github.com/RaviSoji/probabilistic_LDA/blob/master/demo/2D_example.png?raw=True)
 

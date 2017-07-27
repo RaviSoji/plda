@@ -1,13 +1,15 @@
 import os
+import sys
+sys.path.append(os.getcwd() + '/../')
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Ellipse
+from numpy.random import randint
+from numpy.random import multivariate_normal as m_normal
 from PLDA import PLDA
 from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-from numpy.random import multivariate_normal as m_normal
-from numpy.random import randint
 from scipy.stats import norm, chi2
-from matplotlib.patches import Ellipse
 
 
 def gen_artificial_data(n_classes, n_list, n_dims):
