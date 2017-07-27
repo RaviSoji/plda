@@ -19,7 +19,6 @@ def gen_artificial_data(n_classes, n_list, n_dims):
     w_class_cov = np.random.randint(-10, 10, n_dims ** 2)
     w_class_cov = w_class_cov.reshape(n_dims, n_dims)
     w_class_cov = np.matmul(w_class_cov, w_class_cov.T)  # Make symmetric.
-    print(w_class_cov)
     bw_class_cov = randint(100, 10000, n_dims)
 
     bw_class_cov = np.diag(bw_class_cov)
@@ -45,21 +44,36 @@ def gen_artificial_data(n_classes, n_list, n_dims):
     return points, labels
 
 def plot_model_results(PLDA_model, ax, MAP_estimate=True):
+    n_test = 50000  # Number of test data.
+
+    data = np.array([[x, y] for ((x, y), label) in PLDA_model.raw_data])
+    std = np.std(data, axis=0)
+    x = data[:, 0]
+    y = data[:, 1]
+    x_min, x_max = np.amin(x) - .25 * std[0], np.amax(x) + .25 * std[0]
+    y_min, y_max = np.amin(y) - .25 * std[1], np.amax(y) + .25 * std[1]
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
 
     n_classes = len(PLDA_model.stats)
     colors = cm.rainbow(np.linspace(0, 1, n_classes))
-    for i in range(len(PLDA_model.stats)):
-        label = list(PLDA_model.stats.keys())[i]
-        data = np.array(PLDA_model.data[label])
-        x = data[:, 0]
-        y = data[:, 1]
-        c = colors[i]
 
-        ax.scatter(x, y, color=c, s=.5)
+    test_x = np.random.randint(x_min, x_max, n_test)
+    test_y = np.random.randint(y_min, y_max, n_test)
+    classifications = PLDA_model.predict_class(np.array([test_x, test_y]).T,
+                                               MAP_estimate=MAP_estimate)
+
+    idxs = np.argsort(np.array(classifications))
+    classifications = np.array(classifications)[idxs]
+    test_x = test_x[idxs]
+    test_y = test_y[idxs]
+    ax.scatter(test_x, test_y, color=colors[classifications], s=.5)
+
     return ax
 
 def cov_ellipse(cov, q=None, nsig=None, **kwargs):
-    """ Code is slightly modified, essentially borrowed from: 
+    """ Code is slightly modified, but essentially borrowed from: 
          https://stackoverflow.com/questions/18764814/make-contour-of-scatter
     """ 
     if q is not None:
@@ -77,9 +91,7 @@ def cov_ellipse(cov, q=None, nsig=None, **kwargs):
     return width, height, rotation
 
 def plot_contours(PLDA_model, nsig):
-    """ Code is modified, but essentially borrowed from:
-         https://stackoverflow.com/questions/12301071/
-                  multidimensional-confidence-intervals
+    """ Plots contour of the 95% CI of each multivariate Gaussian in the model.
     """
     ells = []
     for label in PLDA_model.stats.keys():
@@ -92,8 +104,6 @@ def plot_contours(PLDA_model, nsig):
     for e in ells: 
         ax1.add_artist(e)
         e.set_facecolor('none')
-    #ax1.set_xlim(-100, 100)
-    #ax1.set_ylim(-100, 100)
 
     return ax1
 
@@ -111,7 +121,7 @@ def main():
         data.append((x, y))
 
     # (3) Build model.
-    model = PLDA(data)
+    model = PLDA(data, save_raw=True)
 
     # (4) Plot 95% CI level contours of Gaussians fit to the TRAINING data
     #      and color TEST points based on the model's prediction. If the model

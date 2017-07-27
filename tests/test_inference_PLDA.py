@@ -17,13 +17,13 @@ class TestPLDA(unittest.TestCase):
         self.n_classes = n_classes
         self.n = n                                  # n for each class.
 
-        self.Ψ = self.gen_Ψ(n_dims)              # Diagonal matrix >= 0.
-        self.m = self.gen_m(n_dims)                  # ndarray [1 x n_dims]
-        V = self.gen_V(self.Ψ, n_classes, n_dims)  # v ~ N(0, Ψ)
+        self.Ψ = self.gen_Ψ(n_dims)                 # Diagonal matrix >= 0.
+        self.m = self.gen_m(n_dims)                 # ndarray [1 x n_dims]
+        V = self.gen_V(self.Ψ, n_classes, n_dims)   # v ~ N(0, Ψ)
         U = self.gen_U(n_dims, n, V)                # u ~ N(v, I)
         self.A, self.S_b = self.gen_A(V, n_classes, n_dims,
                                    return_S_b=True)
-        X = self.unwhiten(U, self.A, self.m)          # x = m + Au
+        X = self.unwhiten(U, self.A, self.m)        # x = m + Au
         Y = self.gen_labels(n_classes, n)
         self.labeled_X = self.label(X, Y)
 
