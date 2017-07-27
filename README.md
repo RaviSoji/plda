@@ -45,6 +45,12 @@ python3.5 -m unittest tests/test_integration_PLDA.py
 python3.5 -m unittest tests/test_units_PLDA.py
 ```
 
+### Demo with Artificial 2D Gaussian Data
+Data was generated from 10 2D Gaussians: (1) The colors of the points represent
+ the model classifications of randomly generated points and (2) the contours
+ depict the 95% confidence intervals (based on 300-900 points per class) of the
+ labeled training data.
+
 ### k-Folds Cross-validation on the Google_Faces Emotions Dataset
 K-folds on facial recognition (where classes are specific people),
  traditionally gets about 40-60% accuracy. Here, we are trying to do emotion
