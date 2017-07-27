@@ -5,8 +5,8 @@ If all that you want to do is apply this model to a dataset and measure its
  performance, you will find the code to be bulky in that it stores parameters,
  variables, and data that you do not need. This code was written for
  an [Explainable Artificial Intelligence project](http://shaftolab.com/people.html)
- ([machine teaching, in particular](http://shaftolab.com/publications.html)) in mind
- , whose objective is model explainability (not necessarily speed or performance),
+ ([machine teaching, in particular](http://shaftolab.com/publications.html)), whose
+ objective is model explainability (not necessarily speed or performance),
  which requires saving parameters and training data.
 
 ### Paper Citation
