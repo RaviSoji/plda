@@ -12,20 +12,14 @@ If all that you want to do is apply this model to a dataset and measure its
 ### Paper Citation
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.](https://link.springer.com/chapter/10.1007/11744085_41)
 
-### Dependencies
+### Model Dependencies
 * numpy 1.13.1
 * scipy 0.19.1
 
-### Cross-validation Dependencies
+### Cross-validation and Demo Dependencies
 * skimage 0.13.0  (for Cross-validation)
-```
-pip install scikit-image
-```
-
-* sklearn 0.18.2  (for for demo and cross-validation)
-```
-pip install -U scikit-learn
-```
+* sklearn 0.18.2  (for Cross-validation)
+* matplotlib 2.0.2  (for Demo) 
 
 ### Testing (Requires decent computing power! I had access to ~60 CPU cores.)
 cd to the repository (i.e. directory containing the respository, the 'PLDA.py' file.
