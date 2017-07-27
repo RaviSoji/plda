@@ -53,7 +53,7 @@ Training data is generated from 10 2D Gaussians. Colors of the points represent
  the model classifications of randomly generated test points. The contours
  depict 95% confidence intervals (based on 300-900 points per class) of the
  labeled training data. Note that the data were generated with the same covariance
- because this is one of several import mode assumptions.
+ because this is one of several central model assumptions.
 
 ![Figure 1-1](https://github.com/RaviSoji/probabilistic_LDA/blob/master/demo/2D_example.png?raw=True)
 
