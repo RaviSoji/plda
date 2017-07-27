@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append(os.getcwd() + '/../')
 import numpy as np
 from PLDA import PLDA
 from sklearn.decomposition import PCA
