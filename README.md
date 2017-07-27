@@ -43,8 +43,8 @@ python3.5 -m unittest tests/test_units_PLDA.py
 cd to the folder containing the demo folder:
 ```
 cd demo/ # demo.py should be in this folder.
-
 ```
+
 Run the demo:
 ```
 python3.5 demo.py
