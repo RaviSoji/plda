@@ -51,6 +51,8 @@ Data was generated from 10 2D Gaussians: (1) The colors of the points represent
  depict the 95% confidence intervals (based on 300-900 points per class) of the
  labeled training data.
 
+![Figure 1-1](https://github.com/RaviSoji/probabilistic_LDA/master/demo/2D_example.png?raw=True)
+
 ### k-Folds Cross-validation on the Google_Faces Emotions Dataset
 K-folds on facial recognition (where classes are specific people),
  traditionally gets about 40-60% accuracy. Here, we are trying to do emotion
