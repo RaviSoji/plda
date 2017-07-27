@@ -8,8 +8,9 @@ from scipy.linalg import inv
 from scipy.stats import linregress
 
 
-# NOTE: test_Φ_b() and test_Φ_w can take  A VERY LONG TIME TO RUN!!
-# Set the parameters to smaller values if you want to make sure the code runs.
+# NOTE: test_Φ_b() and test_Φ_w take 160-190 seconds to run with ~ 60 CPU cores.
+# Setting 'n', 'n_classes', and n_dims to smaller values will run code quickly,
+#  but will likely cause tests to fail.
 class TestPLDA(unittest.TestCase):
     def setUp(self, n=100000, n_classes=5, n_dims=5):
         """ Paramters that the model should recover: Φ_w, Φ_b, m, S_b. """
@@ -61,7 +62,7 @@ class TestPLDA(unittest.TestCase):
         assert Ψ.shape[0] == Ψ.shape[1]
 
         μ = np.zeros(n_dims)  # [1 x n_dims] 
-
+        np.random.seed(0)
         V = m_normal(μ, Ψ, n_classes)
         V = V - V.mean(axis=0)  # Center means at origin to control result.
 
