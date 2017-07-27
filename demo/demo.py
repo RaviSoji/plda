@@ -8,7 +8,6 @@ from matplotlib.patches import Ellipse
 from numpy.random import randint
 from numpy.random import multivariate_normal as m_normal
 from PLDA import PLDA
-from sklearn.decomposition import PCA
 from scipy.stats import norm, chi2
 
 

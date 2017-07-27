@@ -12,17 +12,17 @@ If all that you want to do is apply this model to a dataset and measure its
 ### Paper Citation
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.](https://link.springer.com/chapter/10.1007/11744085_41)
 
-### Python Dependencies
+### Dependencies
 * numpy 1.13.1
 * scipy 0.19.1
 
-### Demo and Cross-validation Dependencies
-* skimage 0.13.0
+### Cross-validation Dependencies
+* skimage 0.13.0  (for Cross-validation)
 ```
 pip install scikit-image
 ```
 
-* sklearn 0.18.2
+* sklearn 0.18.2  (for for demo and cross-validation)
 ```
 pip install -U scikit-learn
 ```
