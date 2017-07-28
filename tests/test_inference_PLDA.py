@@ -184,12 +184,13 @@ class TestPLDA(unittest.TestCase):
         return A, Ψ, model
 
     def test_Φ_w(self):
-    """ Φ_w = [A][A.T]. See p. 533.
-    DESCRIPTION: Since A is a free parameter, t will not necessarily recover
-                  the original A. Φ_w is what really describes the covariance
-                  between cluster means (see p. 533), so that is what you want
-                  to test - it is "closer" to the data".
-    """
+#    """ Φ_w = [A][A.T]. See p. 533.
+#
+#    DESCRIPTION: Since A is a free parameter, t will not necessarily recover
+#                  the original A. Φ_w is what really describes the covariance
+#                  between cluster means (see p. 533), so that is what you want
+#                  to test - it is 'closer' to the data.
+#    """
         n_experiments = int(np.log10(1000000) / 2)
         n_list = [100 ** x for x in range(1, n_experiments + 1)]
         n_list = np.array(n_list).astype(float)
@@ -216,13 +217,13 @@ class TestPLDA(unittest.TestCase):
         self.assertTrue(slope_of_error_vs_N < 0)
 
     def test_Φ_b(self):
-    """ Φ_b = [A][Ψ][A.T]. See p. 533.
-
-    DESCRIPTION: Since A and Ψ are free parameters, they will not necessarily
-                  recover the original A & Ψ. Φ_b is what really describes
-                  the covariance between cluster means (see p. 533), so that
-                  is what you want to test - they are "closer" to the data".
-    """
+#    """ Φ_b = [A][Ψ][A.T]. See p. 533.
+#
+#    DESCRIPTION: Since A and Ψ are free parameters, they will not necessarily
+#                  recover the original A & Ψ. Φ_b is what really describes
+#                  the covariance between cluster means (see p. 533), so that
+#                  is what you want to test - they are 'closer' to the data".
+#    """
         n_classes_list = [4 ** x for x in range(1, 6)]
         n_list = [100 * n for n in n_classes_list]
         n_list = np.array(n_list).astype(float)
