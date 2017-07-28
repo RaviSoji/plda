@@ -43,7 +43,7 @@ def gen_artificial_data(n_classes, n_list, n_dims):
 
     return points, labels
 
-def plot_model_results(PLDA_model, ax, MAP_estimate=True):
+def plot_test_classifications(PLDA_model, ax, MAP_estimate=True):
     n_test = 50000  # Number of test data.
 
     data = np.array([[x, y] for ((x, y), label) in PLDA_model.raw_data])
@@ -90,7 +90,7 @@ def cov_ellipse(cov, q=None, nsig=None, **kwargs):
 
     return width, height, rotation
 
-def plot_contours(PLDA_model, ax, nsig):
+def plot_training_contours(PLDA_model, ax, nsig):
     """ Plots contour of the 95% CI of each multivariate Gaussian in the model.
     """
     ells = []
@@ -121,8 +121,8 @@ def main():
 
     fig = plt.figure(0)
     ax = fig.add_subplot(111)
-    ax = plot_contours(model, ax, nsig=2)
-    plot_model_results(model, ax, MAP_estimate=True)
+    ax = plot_training_contours(model, ax, nsig=2)
+    plot_test_classifications(model, ax, MAP_estimate=True)
     plt.show()
     
     # Plots 95% CI level contours of Gaussians fit to the TRAINING data.
