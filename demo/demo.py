@@ -90,7 +90,7 @@ def cov_ellipse(cov, q=None, nsig=None, **kwargs):
 
     return width, height, rotation
 
-def plot_contours(PLDA_model, nsig):
+def plot_contours(PLDA_model, ax, nsig):
     """ Plots contour of the 95% CI of each multivariate Gaussian in the model.
     """
     ells = []
@@ -99,35 +99,34 @@ def plot_contours(PLDA_model, nsig):
         cov = PLDA_model.stats[label]['covariance']
         w, h, t = cov_ellipse(cov, nsig=2)
         ells.append(Ellipse(mean, width=w, height=h, angle=t))
-    fig = plt.figure(0)
-    ax1 = fig.add_subplot(111)
+
     for e in ells: 
-        ax1.add_artist(e)
+        ax.add_artist(e)
         e.set_facecolor('none')
 
     return ax1
 
 def main():
-    # (1) Generate Artifical data.
     n_classes = 10  # Number of clusters (i.e. multivariate Gaussians)
     n_list = [300 * (x % 3 + 1) for x in range(1, n_classes + 1)]  # Sample size
     n_dims = 2  # Dimensionality of the data.
 
     points, labels = gen_artificial_data(n_classes, n_list, n_dims)
 
-    # (2) Format data for PLDA model.
     data = []
     for x, y in zip(points, labels):
         data.append((x, y))
 
-    # (3) Build model.
     model = PLDA(data, save_raw=True)
 
-    # (4) Plot 95% CI level contours of Gaussians fit to the TRAINING data
-    #      and color TEST points based on the model's prediction. If the model
+    fig = plt.figure(0)
+    ax = fig.add_subplot(111)
+    ax = plot_contours(model, ax, nsig=2)
+    plot_model_results(model, ax, MAP_estimate=True)
+    plt.show()
+    
+    # (4) Plots 95% CI level contours of Gaussians fit to the TRAINING data.
+    #      Colors of points represent model classifications. If the model
     #      is accurate, points inside the counters should be colored the same
     #      as long as there isn't much overlap between the distributions (i.e.
     #      countours).
-    ax = plot_contours(model, nsig=2)
-    plot_model_results(model, ax, MAP_estimate=True)
-    plt.show()
