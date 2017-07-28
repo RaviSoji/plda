@@ -20,10 +20,9 @@ def gen_artificial_data(n_classes, n_list, n_dims):
     w_class_cov = np.random.randint(-10, 10, n_dims ** 2)
     w_class_cov = w_class_cov.reshape(n_dims, n_dims)
     w_class_cov = np.matmul(w_class_cov, w_class_cov.T)  # Make symmetric.
+    
     bw_class_cov = randint(100, 10000, n_dims)
-
     bw_class_cov = np.diag(bw_class_cov)
-    w_class_cov = np.eye(n_dims) * w_class_cov
      # LDA assumes within class covariance to be the same for all clusters,
      #  so do not generate a new one for each mean, unless you want to see
      #  how the model performs when the data does not meet LDA assumptions.
