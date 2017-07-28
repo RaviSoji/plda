@@ -45,17 +45,18 @@ cd to demo.py, and run the file:
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
 python3.5 demo.py
 ```
-Training data is generated from 10 2D Gaussians. Colors of the points represent
- the model classifications of random test points whereas the contours
- depict 95% confidence intervals (based on 300-900 points per class) of the
- labeled training data. Note that training data were generated with the same 
- covariance because this is a central model assumption.
+Training data is randomly generated from 10 2D Gaussians, which are also
+ randomly generated. Colors of the points represent the model classifications 
+ of random test points whereas the contours depict 95% confidence intervals 
+ (based on 300-900 points per class) of the labeled training data. Note that
+ training data were generated with the same covariance because this is a 
+ central model assumption.
 
 ![Figure 1-1](https://github.com/RaviSoji/probabilistic_LDA/blob/master/demo/2D_example.png?raw=True)
 
 ### k-Folds Cross-validation on the Google_Faces Emotions Dataset
 To my knowledge, K-folds on LDA for facial recognition (where classes are 
- specific people), traditionally gets about 40-60% accuracy. Here, we are 
+ specific people) generally gets about 40-60% accuracy. Here, we are 
  trying to do emotion classification based on very little and uncontrolled
  data (23-86 samples of DIFFERENT faces for each of the 7 emotions) and 
  are finding around 33% accuracy, which is bad, but also above chance level.
