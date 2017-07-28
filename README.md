@@ -60,7 +60,7 @@ To my knowledge, K-folds on LDA for facial recognition (where classes are
  data (23-86 samples of DIFFERENT faces for each of the 7 emotions) and 
  are finding around 33% accuracy, which is bad, but also above chance level.
  
-To the the code, cd to cross_validation.py and run the file.
+To the the code, cd to cross_validation.py and run the file:
 ```
 cd Documents/folder/path/to/probabilistic_LDA/cross_validation/ # cross_validation.py should be in this folder.
 python3.5 cross_validation_PLDA.py
