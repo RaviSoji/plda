@@ -125,8 +125,8 @@ def main():
     plot_model_results(model, ax, MAP_estimate=True)
     plt.show()
     
-    # (4) Plots 95% CI level contours of Gaussians fit to the TRAINING data.
-    #      Colors of points represent model classifications. If the model
-    #      is accurate, points inside the counters should be colored the same
-    #      as long as there isn't much overlap between the distributions (i.e.
-    #      countours).
+    # Plots 95% CI level contours of Gaussians fit to the TRAINING data.
+    #  Colors of points represent model classifications. If the model
+    #  is accurate, points inside the counters should be colored the same
+    #  as long as there isn't much overlap between the distributions (i.e.
+    #  countours).
