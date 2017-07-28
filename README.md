@@ -49,9 +49,9 @@ If you want to quickly visualize the model at work, cd to demo.py, and run the f
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
 python3.5 demo.py
 ```
-Training data is randomly generated from 10 2D Gaussians, which are also
- randomly generated. Colors of the points represent the model classifications 
- of random test points whereas the contours depict 95% confidence intervals 
+Training data are randomly generated from 10 2D Gaussians, which are also
+ randomly generated. Colors of the points represent model classifications 
+ of random test points while the contours depict 95% confidence intervals 
  (based on 300-900 points per class) of the labeled training data. Note that
  training data were generated with the same covariance because this is a 
  central model assumption.
