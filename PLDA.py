@@ -24,7 +24,7 @@ from scipy.misc import logsumexp
 class PLDA:
     def __init__(self, data, save_raw=False):
         """ Data should be a list of tuples of (example, label), where
-            example an [n_dims x 1] ndarray. label can be any data type"""
+            example is an [n_dims x 1] ndarray. label can be any data type"""
         self.save_raw = save_raw
         if self.save_raw is True:
             self.raw_data = data
