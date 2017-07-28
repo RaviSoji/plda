@@ -122,7 +122,7 @@ def main():
     fig = plt.figure(0)
     ax = fig.add_subplot(111)
     ax = plot_training_contours(model, ax, nsig=2)
-    plot_test_classifications(model, ax, MAP_estimate=True)
+    plot_test_classifications(model, ax, MAP_estimate=False)
     plt.show()
     
     # Plots 95% CI level contours of Gaussians fit to the TRAINING data.
