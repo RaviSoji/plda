@@ -40,7 +40,11 @@ python3.5 -m unittest tests/test_units_PLDA.py
 ```
 
 ### Demo with Artificial 2D Gaussian Data
-cd to demo.py, and run the file:
+The demo folder contains (1) a demo.py file that will generate the illustration below
+and (2) an IPython notebook that uses the demo to illustrate various attributes
+of the PLDA object.
+
+If you want to quickly visualize the model at work, cd to demo.py, and run the file:
 ```
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
 python3.5 demo.py
