@@ -1,4 +1,5 @@
-# probabilistic_LDA (i.e. probabilistic Linear Discriminant Analysis)
+# probabilistic_LDA 
+# (i.e. Probabilistic Linear Discriminant Analysis)
 
 ### Disclaimer
 If all that you want to do is apply this model to a dataset and measure its
