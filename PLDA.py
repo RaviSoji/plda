@@ -256,6 +256,7 @@ class PLDA:
                                            sample size for the class 'label'.
           -- stats[label]['n']     (int): Sample size for the class 'label'.
           -- stats[label]['μ'] (ndarray): Mean for the class 'label'.
+                                           [n_dims x 1]
         
         RETURNS
          m  (ndarray): Computes the mean of the data/examples. [n_dims x 1]
