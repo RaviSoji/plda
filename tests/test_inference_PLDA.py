@@ -35,11 +35,15 @@ class TestPLDA(unittest.TestCase):
         self.assertTrue(are_same)
 
     def gen_Ψ(self, n_dims):
+        """ Diagonal matrix describing the covariance between clusters.
+        """
         Ψ = np.diag(10 / np.random.sample(n_dims))
 
         return Ψ
 
     def gen_m(self, n_dims):
+        """ Displacement of the mean of the data from the origin.
+        """
         m = np.random.randint(-1000, 1000, n_dims).astype(float)
 
         return m
@@ -95,6 +99,8 @@ class TestPLDA(unittest.TestCase):
             return A
 
     def gen_U(self, n_dims, n, V):
+        """ u ~ N(v, I). 533.
+        """
         cov = np.eye(n_dims)
 
         U = []
@@ -115,6 +121,8 @@ class TestPLDA(unittest.TestCase):
         return U
 
     def unwhiten(self, U, A, m):
+        """ inv(A)[x - m]. See p. 537 Fig. 2.
+        """
         X = np.matmul(A, U.T).T
         X += m
 
@@ -135,9 +143,14 @@ class TestPLDA(unittest.TestCase):
         return labeled_data
 
     def test_m(self):
+        """ Mean of the data: 1 / N * Σ_i(x^i). See p. 532.
+        """
         self.assert_same(self.m, self.model.m)
 
     def test_S_b(self):
+        """ Between-scatter matrix: 1 / N * Σ_k(n_k * [m_k - m][m_k - m].T).
+            See p. 532.
+        """
         self.assert_same(self.S_b, self.model.S_b)
 
     def experiment(self, n, n_dims, n_classes):
@@ -155,7 +168,13 @@ class TestPLDA(unittest.TestCase):
 
         return A, Ψ, model
 
-    def test_Φ_w_and_Φ_b(self):
+    def test_Φ_w(self):
+    """ Φ_w = [A][A.T]. See p. 533.
+    DESCRIPTION: Since A is a free parameter, t will not necessarily recover
+                  the original A. Φ_w is what really describes the covariance
+                  between cluster means (see p. 533), so that is what you want
+                  to test - it is "closer" to the data".
+    """
         n_experiments = int(np.log10(1000000) / 2)
         n_list = [100 ** x for x in range(1, n_experiments + 1)]
         n_list = np.array(n_list).astype(float)
@@ -182,6 +201,13 @@ class TestPLDA(unittest.TestCase):
         self.assertTrue(slope_of_error_vs_N < 0)
 
     def test_Φ_b(self):
+    """ Φ_b = [A][Ψ][A.T]. See p. 533.
+
+    DESCRIPTION: Since A and Ψ are free parameters, they will not necessarily
+                  recover the original A & Ψ. Φ_b is what really describes
+                  the covariance between cluster means (see p. 533), so that
+                  is what you want to test - they are "closer" to the data".
+    """
         n_classes_list = [4 ** x for x in range(1, 6)]
         n_list = [100 * n for n in n_classes_list]
         n_list = np.array(n_list).astype(float)
