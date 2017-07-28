@@ -145,3 +145,6 @@ def main():
     #  is accurate, points inside the counters should be colored the same
     #  as long as there isn't much overlap between the distributions (i.e.
     #  countours).
+
+if __name__ == '__main__':
+    main()

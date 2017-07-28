@@ -164,7 +164,7 @@ def main():
 
     scores = k_folds_CV_PLDA(pca_standardized_X, Y, k=50, MAP_estimate=False)
     scores = np.array(scores)
-    print('Mean: {}'.format(scores.mean()))
+    print('Mean Accuracy: {}'.format(scores.mean()))
     print('Std. Dev.: {}'.format(np.std(scores)))
 
 if __name__ == '__main__':
