@@ -30,7 +30,7 @@ def gen_artificial_data(n_classes, n_list, n_dims):
     # Generate cluster means.
     means = m_normal(np.zeros(n_dims), bw_class_cov, n_classes)
 
-    # Generate points inside each of the clusters.
+    # Generate points from each of the clusters.
     points = []
     for x in range(len(n_list)):
         points.append(m_normal(means[x, :], w_class_cov, n_list[x]))
