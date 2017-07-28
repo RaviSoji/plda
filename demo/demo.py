@@ -104,7 +104,7 @@ def plot_training_contours(PLDA_model, ax, nsig):
         ax.add_artist(e)
         e.set_facecolor('none')
 
-    return ax1
+    return ax
 
 def main():
     n_classes = 10  # Number of clusters (i.e. multivariate Gaussians)

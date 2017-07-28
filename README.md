@@ -32,7 +32,7 @@ To run all tests:
 python3.5 -m unittest discover
 ```
 
-To run only one of the three test files in the tests folder, run the corresponding line/command:
+To run only one of the three test files in the tests folder, run the corresponding line/command, below:
 ```
 python3.5 -m unittest tests/test_inference_PLDA.py
 python3.5 -m unittest tests/test_integration_PLDA.py
