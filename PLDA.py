@@ -343,9 +343,7 @@ class PLDA:
         """
         weight = (self.n_avg - 1) / self.n_avg
         Λ_w = self.Λ_w.diagonal().copy()
-        Λ_w[np.isclose(Λ_w, 0)] = 0
         Λ_b = self.Λ_b.diagonal().copy()
-        Λ_b[np.isclose(Λ_b, 0)] = 0
   
         with np.errstate(divide='ignore', invalid='ignore'):
             Ψ = weight * Λ_b / Λ_w
@@ -593,10 +591,10 @@ class PLDA:
          S_b       (ndarray): Between-class scatter matrix. [n_dims x n_dims]
          W         (ndarray): Solution to the eigenvalue problem on p. 537.
                                [n_dims x n_dims]
-         Λ_b  (ndarray): Diagonalized S_b used - to compute the parameters
+         Λ_b       (ndarray): Diagonalized S_b used - to compute the parameters
                               that maximize the model's likelihoods.
                                [n_dims x n_dims]
-         Λ_w  (ndarray): Diagonalized S_w - used to compute the parameters
+         Λ_w       (ndarray): Diagonalized S_w - used to compute the parameters
                               that maximize the model's likelihoods.
                                [n_dims x n_dims]
          A         (ndarray): The matrix that whitens and unwhitens the data.
@@ -619,7 +617,6 @@ class PLDA:
         self.n_avg = self.params['n_avg']
 
         self.params['S_w'] = self.calc_S_w()
-        self.params['S_b'] = self.calc_S_b()
         self.S_w = self.params['S_w']
 
         self.params['S_b'] = self.calc_S_b()
