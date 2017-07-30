@@ -620,11 +620,9 @@ class PLDA:
 
         self.params['S_w'] = self.calc_S_w()
         self.params['S_b'] = self.calc_S_b()
-        self.params['S_w'] += np.eye(self.params['S_w'].shape[0]) * .000000001
         self.S_w = self.params['S_w']
 
         self.params['S_b'] = self.calc_S_b()
-        self.params['S_b'] += np.eye(self.params['S_b'].shape[0]) * .000000001
         self.S_b = self.params['S_b']
 
         # Calculate intermediate parameters.
