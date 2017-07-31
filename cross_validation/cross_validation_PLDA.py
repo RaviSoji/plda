@@ -66,7 +66,7 @@ def rerun(n_iterations):
         return wrapper
     return wrap_CV
 
-@rerun(n_iterations=10)  # Number of times to run k-folds functions.
+@rerun(n_iterations=10)  # Number of times to run k-folds function.
 def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
     """ Cross validation on Google Face emotions dataset, using k-folds.
 
