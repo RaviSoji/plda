@@ -23,7 +23,7 @@ If all that you want to do is apply this model to a dataset and measure its
 * matplotlib 2.0.2  (for Demo) 
 
 ### Testing (Requires decent computing power! I had access to ~60 CPU cores.)
-First, cd to the repository (i.e. the directory containing the 'PLDA.py' file).
+First, cd to the 'PLDA.py' file.
 ```
 cd /Documents/folder/path/to/probabilistic_LDA/ # PLDA.py should be in this folder.
 ```
