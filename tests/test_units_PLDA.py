@@ -5,6 +5,8 @@ from numpy.random import multivariate_normal as m_normal
 from scipy.linalg import det
 from scipy.linalg import eigh
 from scipy.linalg import inv
+from scipy.stats import multivariate_normal
+
 
 class TestPLDA(unittest.TestCase):
     def setUp(self):
@@ -44,8 +46,9 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(n_keys, 10 + self.K)
 
     def test_calc_A(self):
+        """ inv( [A][(n / (n - 1) * Λ_w) ** (-.5)] ).T = W; See p. 537. """
         self.assert_invertible(self.model.A)
-        # inv( [A][(n / (n - 1) * Λ_w) ** (-.5)] ).T = W; See p. 537.
+
         expected = self.model.Λ_w.diagonal()
         expected = expected * self.model.n_avg / (self.model.n_avg - 1)
         expected = expected ** .5
@@ -56,8 +59,31 @@ class TestPLDA(unittest.TestCase):
         self.assert_array_equal(self.model.W, expected)
 
 #    def test_calc_class_log_probs(self):
-#        pass
-
+#        some_data = np.random.randint(0, 100, 10 * self.n_dims)
+#        some_data = some_data.reshape(10, self.n_dims)
+#
+#        for label in self.model.pdfs.keys():
+#            pdf = self.model.pdfs[label]
+#            log_probs_model = pdf(some_data)
+#
+#            Ψ = self.model.Ψ
+#            n_Ψ = self.model.n_avg * Ψ
+#            n_Ψ_plus_eye = n_Ψ + np.eye(self.n_dims)
+#            cov = Ψ + np.eye(self.n_dims)
+#            cov = cov / n_Ψ_plus_eye
+#            cov[np.isnan(cov)] = 0
+#
+#            transformation = n_Ψ / n_Ψ_plus_eye
+#            transformation[np.isnan(transformation)] = 0
+#
+#            μ = self.model.params['v_' + str(label)]
+#            μ = np.matmul(transformation, μ)
+#            pdf = multivariate_normal(μ, cov).logpdf
+#            log_probs = pdf(some_data)
+#            print(log_probs_model)
+#            print(log_probs)
+#            self.assert_array_equal(log_probs_model, log_probs)
+            
     def test_calc_K(self):
         K = self.model.calc_K()
 
@@ -120,15 +146,15 @@ class TestPLDA(unittest.TestCase):
         """ Verify S_b using Equation (1) on p. 532, section 2. """
         # Assert that m is correctly computed (p. 537, Fig. 2).
         N = np.array(self.n_list).sum()
-        means = np.array(self.model.get_μs())
+        μs = np.array(self.model.get_μs())
         weights = np.array(self.n_list) / N
-        m = (means.T * weights).T.sum(axis=0)
+        m = (μs.T * weights).T.sum(axis=0)
 
         self.assert_array_equal(self.model.m, m)
 
         # Compute S_b.
-        means = np.array(self.model.get_μs())
-        diffs = means - self.model.m
+        μs = np.array(self.model.get_μs())
+        diffs = μs - self.model.m
         S_b = np.matmul(diffs.T * weights, diffs)
 
         self.assert_array_equal(self.model.S_b, S_b)
@@ -139,14 +165,14 @@ class TestPLDA(unittest.TestCase):
         N = np.array(self.n_list).sum()
         S_w = [] # List of within-class scatters for all classes.
         for label in self.model.data.keys():
-            mean = self.model.stats[label]['μ']
+            μ = self.model.stats[label]['μ']
             data = np.array(self.model.data[label])
 
             # Assert that the class mean is computed correctly.
-            is_same = np.array_equal(data.mean(axis=0), mean)
+            is_same = np.array_equal(data.mean(axis=0), μ)
             self.assertTrue(is_same)
 
-            s_w = data - mean
+            s_w = data - μ
             s_w = np.matmul(s_w.T, s_w)  # Scatter within a class.
             S_w.append(s_w)
         S_w = np.array(S_w)
@@ -246,8 +272,37 @@ class TestPLDA(unittest.TestCase):
         n_keys = len(list(self.model.params.keys()))
         self.assertEqual(n_keys, 11 + self.K)
 
-#    def test_set_pdfs(self):
-#        pass
+    def test_set_pdfs(self):
+        """ Not a true unit test because it depends on stats and params. """
+        n_new_data_per_class = 10
+        x = np.array([100] * self.n_dims)
+        model2 = PLDA.PLDA(self.data)
+
+        data = self.data.copy()
+        for label in model2.data.keys():
+             for i in range(n_new_data_per_class):
+                data += [(x, label)]
+
+        model1 = PLDA.PLDA(data)  # model1 should have updated stats or params.
+
+        # model2 should not update pdfs until set_pdfs().
+        for label in model2.data.keys():
+            for i in range(n_new_data_per_class):
+                model2.data[label].append(x)
+
+        model2.set_stats()  # Statistics for all classes should be updated.
+        model2.set_params()
+        model2.set_pdfs()
+
+        for label in model2.pdfs.keys():
+            pdf1 = model1.pdfs[label]
+            pdf2 = model2.pdfs[label]
+            some_data = np.random.randint(0, 100, 10 * self.n_dims)
+            some_data = some_data.reshape(10, self.n_dims)
+            self.assert_array_equal(pdf1(some_data), pdf2(some_data))
+            self.assert_array_equal(pdf1(some_data), pdf2(some_data))
+        
+
     def test_set_stats(self):
         model1 = PLDA.PLDA(self.data)
         model2 = PLDA.PLDA(self.data)
@@ -331,8 +386,56 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(model1.N, model2.N)
         self.assertEqual(model1.n_avg, model2.n_avg)
 
-#    def test_fit(self):
-#        pass
+    def test_fit(self):
+        n_new_data_per_class = 10
+        x = np.array([100] * self.n_dims)
+        model2 = PLDA.PLDA(self.data)
+
+        data = self.data.copy()
+        for label in model2.data.keys():
+             for i in range(n_new_data_per_class):
+                data += [(x, label)]
+
+        model1 = PLDA.PLDA(data)  # model1 should have updated stats or params.
+
+        # model2 should not update anything until fit() is run.
+        for label in model2.data.keys():
+            for i in range(n_new_data_per_class):
+                model2.data[label].append(x)
+
+        model2.fit()  # Now all the data, stats, and params should be updated.
+
+        for label in model2.data.keys():
+            # Only the data should have been updated.
+            # Statistics and parameters should not be updated.
+            data1 = np.array(model1.data[label])
+            data2 = np.array(model2.data[label])
+            self.assert_array_equal(data1, data2)
+
+            μ1 = model1.stats[label]['μ']
+            μ2 = model2.stats[label]['μ']
+            self.assert_array_equal(μ1, μ2)
+
+            cov1 = model1.stats[label]['covariance']
+            cov2 = model2.stats[label]['covariance']
+            self.assert_array_equal(cov1, cov2)
+
+            n1 = model1.stats[label]['n']
+            n2 = model2.stats[label]['n']
+            self.assertEqual(n1, n2)
+
+        self.assert_array_equal(model1.m, model2.m)
+        self.assert_array_equal(model1.S_w, model2.S_w)
+        self.assert_array_equal(model1.S_b, model2.S_b)
+        self.assert_array_equal(model1.W, model2.W)
+        self.assert_array_equal(model1.Λ_w, model2.Λ_w)
+        self.assert_array_equal(model1.Λ_b, model2.Λ_b)
+        self.assert_array_equal(model1.A, model2.A)
+        self.assert_array_equal(model1.m, model2.m)
+        self.assertEqual(model1.K, model2.K)
+        self.assertEqual(model1.N, model2.N)
+        self.assertEqual(model1.n_avg, model2.n_avg)
+
 #    def test_equals(self):
 #        pass
 #    def test_predict_class(self):
