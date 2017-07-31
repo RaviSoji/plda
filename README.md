@@ -35,9 +35,9 @@ python3.5 -m unittest discover
 
 To run only one of the three test files in the tests folder, run the corresponding line/command, below:
 ```
-python3.5 -m unittest tests/test_inference_PLDA.py  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
-python3.5 -m unittest tests/test_integration_PLDA.py  # Runs quickly.
-python3.5 -m unittest tests/test_units_PLDA.py  # Runs quickly.
+python3.5 -m unittest tests.test_inference_PLDA  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
+python3.5 -m unittest tests.test_integration_PLDA  # Runs quickly.
+python3.5 -m unittest tests.test_units_PLDA  # Runs quickly.
 ```
 
 ### Demo with Artificial 2D Gaussian Data

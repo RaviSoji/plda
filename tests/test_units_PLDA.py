@@ -61,7 +61,7 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(n_keys, 10 + self.K)
 
     def test_calc_A(self):
-        """ inv( [A][(n / (n - 1) * Λ_w) ** (-.5)] ).T = W; See p. 537. """
+        """ inv( [A][(n / (n - 1) * Λ_w) ** (-.5)] )^T = W; See p. 537. """
         self.assert_invertible(self.model.A)
 
         expected = self.model.Λ_w.diagonal()
@@ -73,7 +73,8 @@ class TestPLDA(unittest.TestCase):
 
         self.assert_array_equal(self.model.W, expected)
 
-#    def test_calc_class_log_probs(self):
+    def test_calc_class_log_probs(self):
+        print('test_clac_log_probs() still requires writing.')
 #        some_data = np.random.randint(0, 100, 10 * self.n_dims)
 #        some_data = some_data.reshape(10, self.n_dims)
 #
@@ -105,7 +106,7 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(K, self.K)
 
     def test_calc_Λ_b(self):
-        """ Λ_b = [W.T][S_b][W], so S_b = [inv([W.T])][Λ_b][inv([W])]. """
+        """ Λ_b = [W^T][S_b][W], so S_b = [inv([W^T])][Λ_b][inv([W])]. """
         self.assert_diagonal(self.model.Λ_b)
 
         inv_W_T = np.linalg.inv(self.model.W.T)
@@ -451,10 +452,11 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(model1.N, model2.N)
         self.assertEqual(model1.n_avg, model2.n_avg)
 
-#    def test_equals(self):
-#        pass
-#    def test_predict_class(self):
-#        pass
+    def test_equals(self):
+        print('test_equals() still requires writing.')
+
+    def test_predict_class(self):
+        print('test_predict_class() still requires writing.')
 
     def test_to_data_list(self):
         data = self.model.to_data_list()

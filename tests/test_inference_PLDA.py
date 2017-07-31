@@ -91,7 +91,7 @@ class TestPLDA(unittest.TestCase):
         return V
 
     def gen_A(self, V, n_classes, n_dims, return_S_b=False):
-        """ A = [B][inv(Λ ** .5)][Q.T] and assumes same number of data
+        """ A = [B][inv(Λ ** .5)][Q^T] and assumes same number of data
              in each class v. """
         B = np.random.randint(-100, 100, (n_dims, n_dims)).astype(float)
         big_V = np.matmul(V.T, V)  # V is now a scatter matrix.
@@ -163,7 +163,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(self.m, self.model.m)
 
     def test_S_b(self):
-        """ Between-scatter matrix: 1 / N * Σ_k(n_k * [m_k - m][m_k - m].T).
+        """ Between-scatter matrix: 1 / N * Σ_k(n_k * [m_k - m][m_k - m]^T).
             See p. 532.
         """
         self.assert_same(self.S_b, self.model.S_b)
@@ -184,13 +184,13 @@ class TestPLDA(unittest.TestCase):
         return A, Ψ, model
 
     def test_Φ_w(self):
-#    """ Φ_w = [A][A.T]. See p. 533.
-#
-#    DESCRIPTION: Since A is a free parameter, t will not necessarily recover
-#                  the original A. Φ_w is what really describes the covariance
-#                  between cluster means (see p. 533), so that is what you want
-#                  to test - it is 'closer' to the data.
-#    """
+        """ Φ_w = [A][A^T]. See p. 533.
+    
+        DESCRIPTION: Since A is a free parameter, t will not necessarily recover
+                      the original A. Φ_w is what really describes the covariance
+                      between cluster means (see p. 533), so that is what you want
+                      to test - it is 'closer' to the data.
+        """
         n_experiments = int(np.log10(1000000) / 2)
         n_list = [100 ** x for x in range(1, n_experiments + 1)]
         n_list = np.array(n_list).astype(float)
@@ -217,7 +217,7 @@ class TestPLDA(unittest.TestCase):
         self.assertTrue(slope_of_error_vs_N < 0)
 
     def test_Φ_b(self):
-#    """ Φ_b = [A][Ψ][A.T]. See p. 533.
+#    """ Φ_b = [A][Ψ][A^T]. See p. 533.
 #
 #    DESCRIPTION: Since A and Ψ are free parameters, they will not necessarily
 #                  recover the original A & Ψ. Φ_b is what really describes

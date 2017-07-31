@@ -146,8 +146,8 @@ class TestModel(unittest.TestCase):
         cls.assert_invertible(cls.model.A)
 
     def test_A_recovers_W(cls):
-        """ A = inv(W.T)(n / (n-1) * Λ_w) ** .5, therefore
-           inv( A / [n / (n-1) * diagonal(Λ_w)] ** .5 ).T """
+        """ A = inv(W^T)(n / (n-1) * Λ_w) ** .5, therefore
+           inv( A / [n / (n-1) * diagonal(Λ_w)] ** .5 )^T """
         Λ_w = cls.Λ_w
         n = cls.n_avg
         result = (n / (n - 1)) * Λ_w.diagonal()
@@ -159,7 +159,7 @@ class TestModel(unittest.TestCase):
         cls.assert_same(result, cls.model.W)
         
     def test_A_diagonalizes_S_b(cls):
-        """ (inv(A))(S_b)(inv(A.T) should yield a diagonal matrix. """
+        """ (inv(A))(S_b)(inv(A^T) should yield a diagonal matrix. """
         inv_A = inv(cls.model.A)
         S_b = cls.model.S_b
         result = np.matmul(np.matmul(inv_A, S_b), inv_A.T)
@@ -167,7 +167,7 @@ class TestModel(unittest.TestCase):
         cls.assert_diagonal(result)
 
     def test_A_diagonlizes_S_w(cls):
-        """ (inv(A))(S_w)(inv(A.T) should yield a diagonal matrix. """
+        """ (inv(A))(S_w)(inv(A^T) should yield a diagonal matrix. """
         inv_A = inv(cls.model.A)
         S_w = cls.model.S_w
         result = np.matmul(np.matmul(inv_A, S_w), inv_A.T)
@@ -175,7 +175,7 @@ class TestModel(unittest.TestCase):
         cls.assert_diagonal(result)
 
     def test_A_and_Ψ_recover_Φ_b(cls):
-        """ Φ_b = S_b - S_w / (n-1) = (A)(Ψ)(A.T)
+        """ Φ_b = S_b - S_w / (n-1) = (A)(Ψ)(A^T)
         """
         A = cls.model.A
         Ψ = cls.model.Ψ
@@ -197,7 +197,7 @@ class TestModel(unittest.TestCase):
         cls.assertTrue(passes)
 
     def test_A_recovers_Φ_w(cls):
-        """ Φ_w = (A)(A.T) = n / (n-1) * S_w """
+        """ Φ_w = (A)(A^T) = n / (n-1) * S_w """
         A = cls.model.A
         S_w = cls.model.S_w
         n = cls.n_avg
@@ -207,15 +207,15 @@ class TestModel(unittest.TestCase):
         cls.assert_same(Φ_w_1, Φ_w_2)
 
     def test_A_and_Φ_w_make_eye(cls):
-        """ I = (V.T)(Φ_w)(V), where A = inv(V.T)
+        """ I = (V^T)(Φ_w)(V), where A = inv(V^T)
             NOTES:
             (1) There are two ways to compute Φ_w:
-                Φ_w = (A)(A.T)
+                Φ_w = (A)(A^T)
                 Φ_w = n / (n-1) * S_w 
             (2) *** COMPUTE PHI WITH S_w: Φ_w = n/(n-1) * S_w. ***
-            (3) Do NOT use Φ_w = (A)(A.T) because that is trivially true:
-                 (V.T)(Φ_w)(V), where V = inv(A.T), which gives
-                 (inv(A))(A)(A.T)(inv(A.T)) = (I)(I) = I.
+            (3) Do NOT use Φ_w = (A)(A^T) because that is trivially true:
+                 (V^T)(Φ_w)(V), where V = inv(A^T), which gives
+                 (inv(A))(A)(A^T)(inv(A^T)) = (I)(I) = I.
         """
         S_w = cls.model.S_w
         n = cls.n_avg

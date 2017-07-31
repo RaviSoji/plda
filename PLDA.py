@@ -48,14 +48,14 @@ class PLDA:
         self.Λ_w = None       # (ndarray) Diagonalized S_w. [n_dims x n_dims]
 
         # Parameters used to generate pdfs for likelihood maximization.
-        self.W = None         # (n_dims x n_dims ndarray)
-        self.A = None         # (n_dims x n_dims ndarray)
-        self.Ψ = None         # (n_dims x n_dims ndarray)
+        self.W = None         # (ndarray) [n_dims x n_dims]
+        self.A = None         # (ndarray) [n_dims x n_dims]
+        self.Ψ = None         # (ndarray) [n_dims x n_dims]
 
-        # Data structure holding all parameters - intended for the user.
+        # Data structure holding all parameters.
         self.params = self.get_params_data_structure()
 
-        # Data structure holding the likelihoods necessary for classification.
+        # Data structure holding the PDFs necessary for classification.
         self.pdfs = dict()
 
         self.fit()
@@ -320,7 +320,7 @@ class PLDA:
         """ Calculates the covariance of the whitened cluster centers.
 
         EQUATION: Ψ = max(0, [(n-1) / n * [Λ_b]/[Λ_w]] - 1/n)
-                  Also, note that Φ_b = [A][Ψ][A.T]
+                  Also, note that Φ_b = [A][Ψ][A^T]
 
         DESCRIPTION: Remember, that for this algorithm, one way to deal with
                       unequal numbers of examples between the classes is to
@@ -365,7 +365,7 @@ class PLDA:
                      computing (1) Λ_w, (2) Λ_b, (3) Ψ, (4) and A.
 
         EQUATION: S_w = Σ_k{
-                          (n_k)[(m_k - m)(m_k - m).T]
+                          (n_k)[(m_k - m)(m_k - m)^T]
                         } / N
                   See p. 532, Equations (1).
         ARGUMENTS
@@ -402,11 +402,11 @@ class PLDA:
 
         DESCRIPTION: Class statistics were computed using numpy functions,
                       where covariance is normalized with (n - 1), so
-                       cov_k * (n-1) = Σ_{i_in_C_k}{(x^i - m_k)(x^i - m_k).T}.
+                       cov_k * (n-1) = Σ_{i_in_C_k}{(x^i - m_k)(x^i - m_k)^T}.
 
         EQUATION: S_w = Σ_k{ 
                           Σ_{i_in_C_k}{ 
-                            [(x^i - m_k)(x^i - m_k).T] 
+                            [(x^i - m_k)(x^i - m_k)^T] 
                           }
                         } / N
                   See p. 532, Equations (1).
