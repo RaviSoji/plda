@@ -24,7 +24,6 @@ from skimage.transform import resize
 
 
 def build_google_faces_dataset(load_dir, resized_shape):
-
     data_shape=resized_shape
     imgs = []
     lbls = []
@@ -77,7 +76,7 @@ def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
                   the k sets of data are randomly selected.
     ARGUMENTS
      X         (ndarray): Rows of data examaples. [n x n_dims]
-     Y         (ndarray): Labels corresponding to the rows of X. [n_dims x 1]
+     Y         (ndarray): Labels corresponding to the rows of X. [n x 1]
      k             (int): k in k-folds. The number of subsets/subsamples to
                            to break the data into. During each run, all but
                            one set is used as training data, and the remaining
