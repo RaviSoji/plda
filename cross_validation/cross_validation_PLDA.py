@@ -71,9 +71,9 @@ def k_folds_CV_PLDA(X, Y, k=5, MAP_estimate=True):
     """ Cross validation on Google Face emotions dataset, using k-folds.
 
     DESCRIPTION: If MAP_estimate is set to False, n_runs number of runs
-                  are run for each of the k-subsamples runs as well. 
-                  This function runs several iterations of k-folders such that
-                  the k sets of data are randomly selected.
+                  are conducted for each of the k-subsamples. 
+                 This function is entirely rerun via the decorator such
+                  that the k sets of data are randomly selected each time.
     ARGUMENTS
      X         (ndarray): Rows of data examaples. [n x n_dims]
      Y         (ndarray): Labels corresponding to the rows of X. [n x 1]
