@@ -144,15 +144,15 @@ def leave_n_out(X, Y, n, max_runs='default'):
             yield (train_X, train_Y), (test_X, test_Y)
 
         else:
-            print('Warning: max_runs was not set to default, so estimate of
-                   performance will be more biased.')
+            print('Warning: max_runs was not set to default, so estimate of' +
+                   'performance will be more biased.')
             break
 
 def predict_leave_n_out(X, Y, n=10, MAP_estimate=True, max_runs='default'):
     predicted_ys = []
     actual_ys = []
     for (train_x, train_y), (test_x, test_y) in leave_n_out(X, Y, n):
-        training_data = [(x, y) for (x, y) zip(train_X, train_Y)]
+        training_data = [(x, y) for (x, y) in zip(train_X, train_Y)]
         model = PLDA(training_data)
 
         predictions = model.predict_class(test_X, MAP_estimate=MAP_estimate)
@@ -167,7 +167,7 @@ def get_scores(actual_Y, predicted_Y, return_confusion_matrix=True):
     classes = set(actual_Y)
     n_total = len(actualY)
     model_predictions = {y: 0 for y in classes}
-    matrix = {y: model_predictions for y in classes}}
+    matrix = {y: model_predictions for y in classes}
 
     for actual, predicted in zip(actual_Y, predicted_Y):
         matrix[actual][predicted] += 1
