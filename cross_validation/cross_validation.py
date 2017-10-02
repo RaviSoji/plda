@@ -212,37 +212,88 @@ def remove_neutral_faces(images, labels):
 
     return images, labels
 
+def cv(X, Y, model_class, train_idxs, test_idxs):
+    data = [(x, y) for (x, y) in zip(X, Y)]
+    training_pairs = []
+    test_imgs = []
+    for i, (x, y) in enumerate(data):
+        if i in train_idxs:
+            training_pairs.append((x, y))
+        if i in test_idxs:
+            test_imgs.append(x)
+    test_imgs = np.asarray(test_imgs)
 
-def main():
-    """ ---------- GOOGLE FACES DATASET --------- """
-    google_faces_dir = os.getcwd() + '/Google_Faces/'
-    X, Y = load_jpgs_and_lbls(google_faces_dir, dataset='google', as_grey=True)
-    X, Y = remove_neutral_faces(X, Y)
-    # Remove the 2 neutral images in the Google dataset.
-    X = preprocess_faces(X)
+    model = model_class(training_pairs)
+    predictions = model.predict_class(test_imgs)
 
-    # Leave n=1 out.
-    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
-    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
+    return predictions
+    
 
-    print(scores, confusion_matrix, classes)
-#    # Leave 0 out.
-#    training_data = [(x, y) for (x, y) in zip(X, Y)]
-#    model = PLDA(training_data)
-#    predictions = model.predict_class(X)
-#    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
-#
-#    """ ---------- CAFE DATASET --------- """
-#    cafe_faces_dir = os.getcwd() + '/cafe_data/'
-#    X, Y = load_jpgs_and_lbls(cafe_faces_dir, dataset='cafe', as_grey=True)
+
+def cross_validate_plda():
+    X = np.load('preprocessed.npy')
+    Y = np.load('labels.npy')
+    idxs = np.arange(X.shape[0])
+    np.random.shuffle(idxs)
+    test_idxs = list(idxs[:10])
+    predictions_leave_none = []
+    predictions_leave_one = []
+
+    for test_idx in test_idxs:
+        print(test_idx)
+        predictions_leave_none += cv(X, Y, PLDA, idxs, [test_idx])
+        leave_one_training_idxs = [idx for idx in idxs if idx != test_idx]
+        predictions_leave_one += cv(X, Y, PLDA, leave_one_training_idxs, [test_idx])
+
+    percent_correct = (np.asarray(predictions_leave_none) == \
+                       np.asarray(predictions_leave_one)).sum() / len(test_idxs)
+
+
+    print(percent_correct)
+#    """ ---------- GOOGLE FACES DATASET --------- """
+#    google_faces_dir = os.getcwd() + '/Google_Faces/'
+#    X, Y = load_jpgs_and_lbls(google_faces_dir, dataset='google', as_grey=True)
+#    X, Y = remove_neutral_faces(X, Y)
+#    # Remove the 2 neutral images in the Google dataset.
 #    X = preprocess_faces(X)
 #
 #    # Leave n=1 out.
 #    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
 #    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
 #
+#    print(scores, confusion_matrix, classes)
 #    # Leave 0 out.
 #    training_data = [(x, y) for (x, y) in zip(X, Y)]
 #    model = PLDA(training_data)
 #    predictions = model.predict_class(X)
 #    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
+#
+    """ ---------- CAFE DATASET --------- """
+#    cafe_faces_dir = os.getcwd() + '/../sessions_imgs/'
+#    X, Y = load_jpgs_and_lbls(cafe_faces_dir, dataset='cafe', as_grey=True)
+#    X = preprocess_faces(X)
+#    X = np.load('preprocessed.npy')
+#    Y = np.load('labels.npy')
+#
+#    overall_scores = []
+#    confusion_matrices = []
+#    class_lists = []
+#    # Leave n=1 out.
+#
+#    # Leave 0 out.
+#    print('Leave out number: 0')
+#    training_data = [(x, y) for (x, y) in zip(X, Y)]
+#    model = PLDA(training_data)
+#    predictions = model.predict_class(X)
+#    score, (confusion_matrix, classes) = get_scores(predictions, Y)
+#
+#    ns_leave_out = [1, 2, 5, 10, 25, 50, 100, 250, 500]
+#    for number in ns_leave_out:
+#        print('Leave {} out.'.format(number))
+#        predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=number)
+#        score, (confusion_matrix, classes) = get_scores(predictions, true_labels)
+#        overall_scores.append(score)
+#        confusion_matrices.append(confusion_matrix)
+#        class_lists.append(classes)
+#
+#    return overall_scores, confusion_matrices, class_lists
