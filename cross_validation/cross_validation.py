@@ -14,10 +14,13 @@
 # ==============================================================================
 
 import os
+import sys
 import numpy as np
 from skimage.io import imread
 from scipy.misc import imresize
 from sklearn.decomposition import PCA
+sys.path.insert(0, '../')
+from PLDA import PLDA
 
 
 def load_jpgs_and_lbls(directory, dataset, as_grey=True):
@@ -37,18 +40,20 @@ def load_jpgs_and_lbls(directory, dataset, as_grey=True):
     """
     assert isinstance(directory, str)
     assert dataset == 'cafe' or dataset == 'google'
-    assert as_grey == True
+    assert as_grey is True
 
     images = []
     labels = []
     for fname in os.listdir(directory):
         if fname.endswith('.jpg'):
+            print('Loading: {}'.format(fname))
             img = imread(directory + '/' + fname, as_grey=as_grey)
             images.append(img)
             label = get_label(fname, dataset=dataset)
             labels.append(label)
 
     return images, labels
+
 
 def get_label(filename, dataset):
     if dataset == 'cafe':
@@ -61,7 +66,9 @@ def get_label(filename, dataset):
         return label
 
     else:
-        raise ValueError('dataset must be set to either \"cafe\" or \"google\".')
+        raise ValueError('Dataset must be set to either ' +
+                         '\"cafe\" or \"google\".')
+
 
 def get_smallest_shape(images):
     smallest_size = -1
@@ -71,7 +78,7 @@ def get_smallest_shape(images):
             smallest_size = img.shape[0]
 
     return (smallest_size, smallest_size)
-                
+
 
 def get_principal_components(flattened_images, n_components='default',
                              default_pct_variance_explained=.96):
@@ -93,11 +100,12 @@ def get_principal_components(flattened_images, n_components='default',
         cum_pct_variance = (sorted_eig_vals / sorted_eig_vals.sum()).cumsum()
         idxs = np.argwhere(cum_pct_variance >= default_pct_variance_explained)
         n_components = np.squeeze(idxs)[0]
-        
+
     V = pca.components_[:n_components + 1, :].T
     principal_components = np.matmul(X, V)
 
     return principal_components
+
 
 def preprocess_faces(images, n_components='default', resize_shape='default'):
     """ Notes: Images are all square, but not the same size. We resize all the
@@ -119,8 +127,9 @@ def preprocess_faces(images, n_components='default', resize_shape='default'):
 
     return preprocessed
 
+
 def leave_n_out(X, Y, n, max_runs='default'):
-    """ n is the number to leave out for the test set(s). 
+    """ n is the number to leave out for the test set(s).
         Note that this code uses set subtraction to get the training indices,
         so this will mean that ordering of the training sets will be similar.
     """
@@ -134,40 +143,43 @@ def leave_n_out(X, Y, n, max_runs='default'):
         if x < max_runs:
             test_idxs = idxs[x: x + n]
             training_idxs = set(idxs) - set(test_idxs)
-            training_idxs = np.asarray(list(training_idxs))
-    
+            training_idxs = np.asarray(list(training_idxs)).astype(int)
+
             train_X = X[training_idxs, :]
-            train_Y = Y[training_idxs]
+            train_Y = [Y[idx] for idx in training_idxs]
             test_X = X[test_idxs, :]
-            test_Y = Y[test_idxs]
-    
+            test_Y = [Y[idx] for idx in test_idxs]
+
             yield (train_X, train_Y), (test_X, test_Y)
 
         else:
             print('Warning: max_runs was not set to default, so estimate of' +
-                   'performance will be more biased.')
+                  'performance will be more biased.')
             break
 
-def predict_leave_n_out(X, Y, n=10, MAP_estimate=True, max_runs='default'):
+
+def predict_leave_n_out(X, Y, model_class, n=10, MAP_estimate=True,
+                        max_runs='default'):
     predicted_ys = []
     actual_ys = []
     for (train_x, train_y), (test_x, test_y) in leave_n_out(X, Y, n):
-        training_data = [(x, y) for (x, y) in zip(train_X, train_Y)]
-        model = PLDA(training_data)
+        training_data = [(x, y) for (x, y) in zip(train_x, train_y)]
+        model = model_class(training_data)
 
-        predictions = model.predict_class(test_X, MAP_estimate=MAP_estimate)
+        predictions = model.predict_class(test_x, MAP_estimate=MAP_estimate)
 
         predicted_ys += [y for y in predictions]
         actual_ys += [y for y in test_y]
 
     return predicted_ys, actual_ys
 
-def get_scores(actual_Y, predicted_Y, return_confusion_matrix=True):
+
+def get_scores(predicted_Y, actual_Y, return_confusion_matrix=True):
     assert len(actual_Y) == len(predicted_Y)
     classes = set(actual_Y)
-    n_total = len(actualY)
+    n_total = len(actual_Y)
     model_predictions = {y: 0 for y in classes}
-    matrix = {y: model_predictions for y in classes}
+    matrix = {y: model_predictions.copy() for y in classes}
 
     for actual, predicted in zip(actual_Y, predicted_Y):
         matrix[actual][predicted] += 1
@@ -181,15 +193,56 @@ def get_scores(actual_Y, predicted_Y, return_confusion_matrix=True):
     if return_confusion_matrix is False:
         return score
     else:
-        return score, confusion_matrix
-    
-#def cross_validate(X, Y, return_class_scores):
-#    fit
-#    predict
-#    return scores
+        confusion_matrix = np.zeros((len(classes), len(classes)))
+        classes = list(classes)
+        for j, class_j in enumerate(classes):
+            for k, class_k in enumerate(classes):
+                confusion_matrix[j, k] = matrix[class_j][class_k]
+
+        confusion_matrix = confusion_matrix.T / confusion_matrix.sum(axis=1)
+        confusion_matrix = confusion_matrix.T
+        return score, (confusion_matrix, classes)
+
+
+def remove_neutral_faces(images, labels):
+    for i, label in enumerate(labels):
+        if label == 'neutral':
+            del images[i]
+            del labels[i]
+
+    return images, labels
+
 
 def main():
-    img_dir = ''
-    X, Y = load_jpgs_and_lbls(img_dir, as_grey=True)
+    """ ---------- GOOGLE FACES DATASET --------- """
+    google_faces_dir = os.getcwd() + '/Google_Faces/'
+    X, Y = load_jpgs_and_lbls(google_faces_dir, dataset='google', as_grey=True)
+    X, Y = remove_neutral_faces(X, Y)
+    # Remove the 2 neutral images in the Google dataset.
     X = preprocess_faces(X)
 
+    # Leave n=1 out.
+    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
+    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
+
+    print(scores, confusion_matrix, classes)
+#    # Leave 0 out.
+#    training_data = [(x, y) for (x, y) in zip(X, Y)]
+#    model = PLDA(training_data)
+#    predictions = model.predict_class(X)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
+#
+#    """ ---------- CAFE DATASET --------- """
+#    cafe_faces_dir = os.getcwd() + '/cafe_data/'
+#    X, Y = load_jpgs_and_lbls(cafe_faces_dir, dataset='cafe', as_grey=True)
+#    X = preprocess_faces(X)
+#
+#    # Leave n=1 out.
+#    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
+#
+#    # Leave 0 out.
+#    training_data = [(x, y) for (x, y) in zip(X, Y)]
+#    model = PLDA(training_data)
+#    predictions = model.predict_class(X)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
