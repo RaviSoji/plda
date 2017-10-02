@@ -46,6 +46,7 @@ def load_jpgs_and_lbls(directory, dataset, as_grey=True):
     labels = []
     for fname in os.listdir(directory):
         if fname.endswith('.jpg'):
+            print('Loading: {}'.format(fname))
             img = imread(directory + '/' + fname, as_grey=as_grey)
             images.append(img)
             label = get_label(fname, dataset=dataset)
@@ -224,23 +225,24 @@ def main():
     predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
     scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
 
-    # Leave 0 out.
-    training_data = [(x, y) for (x, y) in zip(X, Y)]
-    model = PLDA(training_data)
-    predictions = model.predict_class(X)
-    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
-
-    """ ---------- CAFE DATASET --------- """
-    cafe_faces_dir = os.getcwd() + '/cafe_data/'
-    X, Y = load_jpgs_and_lbls(cafe_faces_dir, dataset='cafe', as_grey=True)
-    X = preprocess_faces(X)
-
-    # Leave n=1 out.
-    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
-    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
-
-    # Leave 0 out.
-    training_data = [(x, y) for (x, y) in zip(X, Y)]
-    model = PLDA(training_data)
-    predictions = model.predict_class(X)
-    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
+    print(scores, confusion_matrix, classes)
+#    # Leave 0 out.
+#    training_data = [(x, y) for (x, y) in zip(X, Y)]
+#    model = PLDA(training_data)
+#    predictions = model.predict_class(X)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
+#
+#    """ ---------- CAFE DATASET --------- """
+#    cafe_faces_dir = os.getcwd() + '/cafe_data/'
+#    X, Y = load_jpgs_and_lbls(cafe_faces_dir, dataset='cafe', as_grey=True)
+#    X = preprocess_faces(X)
+#
+#    # Leave n=1 out.
+#    predictions, true_labels = predict_leave_n_out(X, Y, PLDA, n=1)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, true_labels)
+#
+#    # Leave 0 out.
+#    training_data = [(x, y) for (x, y) in zip(X, Y)]
+#    model = PLDA(training_data)
+#    predictions = model.predict_class(X)
+#    scores, (confusion_matrix, classes) = get_scores(predictions, Y)
