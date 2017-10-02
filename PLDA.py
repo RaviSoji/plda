@@ -164,7 +164,7 @@ class PLDA:
 
         return A
 
-    def calc_class_log_probs(self, data, consider_new_class=False):
+    def calc_class_log_probs(self, data):
         """ Computes the probability of each datum being in each class.
 
         DESCRIPTION: Probabilities are the likelihoods of the data being
@@ -172,9 +172,6 @@ class PLDA:
         ARGUMENTS
          data             (ndarray): Data for which probabilities are being
                                       computed. [n x n_dims]
-         consider_new_class  (bool): True will lead the function to also compute
-                                      the probability of not being in
-                                      any of the existing classes.
         PARAMETERS
          pdfs                (dict): Holds the multivariate Gaussian pdfs for
                                       each class, where keys are the labels.
@@ -193,10 +190,7 @@ class PLDA:
             pdf = self.pdfs[label]
             log_probs.append(pdf(data))
         
-        if consider_new_class is True:
-            raise NotImplementedError
-        else:
-            log_probs = np.array(log_probs).T
+        log_probs = np.array(log_probs).T
 
         return log_probs
 
@@ -798,15 +792,12 @@ class PLDA:
 
         return equal
 
-    def predict_class(self, data, MAP_estimate=True, return_probs=False,
-                      consider_new_class=False):
+    def predict_class(self, data, MAP_estimate=True, return_probs=False):
         """ Classifies data into an existing or new class.
 
         DESCRIPTION: If MAP_estimate is set to false, the classification is
                       done probabilitically using the normed vector of class
                       likelihood probabilities.
-                     If consider_new_class is set to true, the probability of
-                      the data not being in an existing class is also computed.
         ARGUMENTS
          data             (ndarray): Flattened examples/data. [n x n_dims]
          MAP_estimate        (bool): Whether the labels should be selected
@@ -814,10 +805,6 @@ class PLDA:
          return_probs        (bool): Whether the unnormed probabilities of the
                                       data being in each class should be
                                       returned.
-         consider_new_class  (bool): Whether or not the model should compute
-                                      the probability of belonging to a class
-                                      that is not in the existing set of
-                                      classes.
         PARAMETERS
          pdfs               (dict): Stores the log multivariate Gaussian pdfs
                                      for each class. Keys are the class labels.
@@ -835,32 +822,29 @@ class PLDA:
                                      each class. [n x n_dims]
         """
         assert isinstance(data, np.ndarray)
-        unnormed_logprobs = self.calc_class_log_probs(data, consider_new_class)
+        n_data = data.shape[0]
+        if n_data == 1:
+            data = np.squeeze(data)
+            data = np.asarray([data, data])
+
+        unnormed_logprobs = self.calc_class_log_probs(data)
         probs = np.exp(unnormed_logprobs.T - logsumexp(unnormed_logprobs, 
                        axis=1)).T
 
         labels = [label for label in self.stats.keys()]
-        if consider_new_class is True:
-            raise NotImplementedError
-            labels.append('not_in_existing_class')
-            # TODO: implement code that automatically creates new classes as
-            #       necessary, instead of dumping data into one 'other' class.
 
-        if MAP_estimate is True and consider_new_class is False:
+        if MAP_estimate is True:
             label_idxs = np.argmax(probs, axis=1)
             MAP_predictions = [labels[idx] for idx in label_idxs]
             
             if return_probs is False:
-                return MAP_predictions
+                return MAP_predictions[:n_data]
             else:
                 unnormed_probs = np.exp(unnormed_logprobs)
-                return MAP_predictions, unnormed_probs
-        elif MAP_estimate is False and consider_new_class is False:
+                return MAP_predictions[n_data], unnormed_probs
+
+        elif MAP_estimate is False:
             assert data.shape[0] == probs.shape[0]
-            if len(data.shape) == 1:
-                n_data = 1
-            else:
-                n_data = data.shape[0]
 
             predictions = []
             for idx in range(n_data):
