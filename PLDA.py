@@ -830,18 +830,21 @@ class PLDA:
         unnormed_logprobs = self.calc_class_log_probs(data)
         probs = np.exp(unnormed_logprobs.T - logsumexp(unnormed_logprobs, 
                        axis=1)).T
-
+        if MAP_estimate == False:
+            for i, row in enumerate(probs):
+                if row.sum() > 1:
+                    probs[i] = probs[i] / row.sum()
         labels = [label for label in self.stats.keys()]
 
         if MAP_estimate is True:
-            label_idxs = np.argmax(probs, axis=1)
+            label_idxs = np.argmax(unnormed_logprobs, axis=1)
             MAP_predictions = [labels[idx] for idx in label_idxs]
             
             if return_probs is False:
                 return MAP_predictions[:n_data]
             else:
                 unnormed_probs = np.exp(unnormed_logprobs)
-                return MAP_predictions[n_data], unnormed_probs
+                return MAP_predictions[:n_data], unnormed_probs[:n_data]
 
         elif MAP_estimate is False:
             assert data.shape[0] == probs.shape[0]
