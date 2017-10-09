@@ -16,6 +16,7 @@
 # -*- coding: utf-8 -*-
 import operator
 import numpy as np
+from numpy.core.umath_tests import inner1d
 from scipy.linalg import eigh
 from scipy.stats import multivariate_normal
 from scipy.misc import logsumexp
@@ -194,6 +195,78 @@ class PLDA:
 
         return log_probs
 
+    def calc_marginal_likelihoods(self, X=None, return_log=True):
+        """ EQ 6 in the paper is incorrect. Refer to Kevin Murphy's cheatsheet.
+         
+         In [63]: marg_likes = []
+         
+         In [64]: 
+         
+         In [64]: n = len(data_ang)
+             ...: for x in psi:
+             ...:     prob = -.5 * np.log(x * n + 1)
+             ...:     marg_likes.append(prob)
+             ...:     
+         
+         In [65]: data_ang_whitened = model.whiten(np.asarray(data_ang))
+         
+         In [66]: for i, x in enumerate(marg_likes):
+             ...:     prob = -.5 * n * np.log(2 * np.pi)
+             ...:     marg_likes[i] += prob
+             ...:     
+         
+         In [67]: sum_squared_x = (data_ang_whitened ** 2).sum(axis=0)
+             ...: for i in range(len(marg_likes)):
+             ...:     marg_likes[i] += -.5 * sum_squared_x[i]
+             ...:     
+         
+         In [68]: for i in range(len(marg_likes)):
+             ...:     marg_likes[i] += psi[i] * (n ** 2) * squared_mean_x[i] / 2 / (n * psi[i] + 1)
+             ...:     
+         
+         In [69]: marg_likes[0]
+         Out[69]: -290.34006227649525
+         
+         In [70]: marg_likes[i]
+         Out[70]: -305.23026272046576
+         
+         
+         
+         """
+        assert isinstance(return_log, bool)
+
+        log_probs = []
+        for label in self.stats.keys():
+            if X is None:
+                data = np.asarray(self.data[label])
+            else:
+                assert isinstance(X, list)
+                data = self.data[label]
+                for datum in X:
+                    assert datum.shape == data[-1].shape
+                    data.append(datum)
+                data = np.asarray(data)
+            data = self.whiten(data)
+               
+            n = data.shape[0]
+            m = 0
+            prior = self.Ψ.diagonal()
+            prior
+            mean = data.mean(axis=0)
+
+            log_prob = -.5 * n * np.log(2 * np.pi)  # OK
+            log_prob += -.5 * np.log(n * prior + 1)  # OK
+            log_prob += -.5 * inner1d(data.T, data.T)  # OK
+            log_prob += (mean ** 2) * (n ** 2) * prior / (2 * (n * prior + 1))  # OK
+
+            log_probs.append(log_prob.sum())
+
+        if return_log is True:
+            return np.asarray(log_probs)
+        else:
+            return np.exp(log_probs)
+            
+            
     def calc_K(self):
         """ Calculates the number of classes in the labeled data. """
 
@@ -903,7 +976,7 @@ class PLDA:
                                    for each data class.
          stats[label]     (dict): Holds statistics for the data class 'label'.
            -- stats[label]['n']               (int): class sample size
-           -- stats[label]['μ']        (ndarray): [1 x n_dims]
+           -- stats[label]['μ']           (ndarray): [1 x n_dims]
            -- stats[label]['covariance']  (ndarray): [n_dims x n_dims]
 
         RETURNS
