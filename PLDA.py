@@ -196,43 +196,16 @@ class PLDA:
         return log_probs
 
     def calc_marginal_likelihoods(self, X=None, return_log=True):
+
         """ EQ 6 in the paper is incorrect. Refer to Kevin Murphy's cheatsheet.
-         
-         In [63]: marg_likes = []
-         
-         In [64]: 
-         
-         In [64]: n = len(data_ang)
-             ...: for x in psi:
-             ...:     prob = -.5 * np.log(x * n + 1)
-             ...:     marg_likes.append(prob)
-             ...:     
-         
-         In [65]: data_ang_whitened = model.whiten(np.asarray(data_ang))
-         
-         In [66]: for i, x in enumerate(marg_likes):
-             ...:     prob = -.5 * n * np.log(2 * np.pi)
-             ...:     marg_likes[i] += prob
-             ...:     
-         
-         In [67]: sum_squared_x = (data_ang_whitened ** 2).sum(axis=0)
-             ...: for i in range(len(marg_likes)):
-             ...:     marg_likes[i] += -.5 * sum_squared_x[i]
-             ...:     
-         
-         In [68]: for i in range(len(marg_likes)):
-             ...:     marg_likes[i] += psi[i] * (n ** 2) * squared_mean_x[i] / 2 / (n * psi[i] + 1)
-             ...:     
-         
-         In [69]: marg_likes[0]
-         Out[69]: -290.34006227649525
-         
-         In [70]: marg_likes[i]
-         Out[70]: -305.23026272046576
-         
-         
-         
-         """
+        ARGUMENTS
+         X        (ndarray): NON-whitened data. [n x n_dims]
+         return_log  (bool): Whether to return normal or log probabilities.
+
+        RETURNS
+         log_probs          (ndarray): If return_log is True. [n_classes x 1]
+         np.exp(log_probs)  (ndarray): If return_log is False. [n_classes x 1]
+        """
         assert isinstance(return_log, bool)
 
         log_probs = []
