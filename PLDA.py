@@ -235,7 +235,7 @@ class PLDA:
             log_probs.append(log_prob.sum())
 
         if return_log is True:
-            return np.asarray(log_probs)
+            return log_probs
         else:
             return np.exp(log_probs)
             
