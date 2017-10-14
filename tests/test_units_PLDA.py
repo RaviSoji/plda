@@ -73,8 +73,8 @@ class TestPLDA(unittest.TestCase):
 
         self.assert_array_equal(self.model.W, expected)
 
-    def test_calc_class_log_probs(self):
-        print('test_clac_log_probs() still requires writing.')
+    def test_calc_posterior_predictives(self):
+        print('test_calc_posterior_predictives() still requires writing.')
 #        some_data = np.random.randint(0, 100, 10 * self.n_dims)
 #        some_data = some_data.reshape(10, self.n_dims)
 #
