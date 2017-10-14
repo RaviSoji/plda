@@ -165,7 +165,7 @@ class PLDA:
 
         return A
 
-    def calc_class_log_probs(self, data):
+    def calc_posterior_predictives(self, data, return_log=True):
         """ Computes the probability of each datum being in each class.
 
         DESCRIPTION: Probabilities are the likelihoods of the data being
@@ -193,7 +193,11 @@ class PLDA:
         
         log_probs = np.array(log_probs).T
 
-        return log_probs
+        if return_log is True:
+            return log_probs
+
+        else: return np.exp(log_probs)
+
 
     def calc_marginal_likelihoods(self, X=None, return_log=True):
 
@@ -873,7 +877,7 @@ class PLDA:
             data = np.squeeze(data)
             data = np.asarray([data, data])
 
-        unnormed_logprobs = self.calc_class_log_probs(data)
+        unnormed_logprobs = self.calc_posterior_predictives(data)
         probs = np.exp(unnormed_logprobs.T - logsumexp(unnormed_logprobs, 
                        axis=1)).T
         if MAP_estimate == False:
