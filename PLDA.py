@@ -186,12 +186,12 @@ class PLDA:
                                       [n x n_dims]
         """
         data = self.whiten(data)
+
         log_probs = []
         for label in self.stats.keys():
             pdf = self.pdfs[label]
             log_probs.append(pdf(data))
-        
-        log_probs = np.array(log_probs).T
+        log_probs = np.stack(log_probs, axis=-1)
 
         if return_log is True:
             return log_probs
@@ -228,7 +228,6 @@ class PLDA:
             n = data.shape[0]
             m = 0
             prior = self.Ψ.diagonal()
-            prior
             mean = data.mean(axis=0)
 
             log_prob = -.5 * n * np.log(2 * np.pi)  # OK
@@ -868,51 +867,60 @@ class PLDA:
                                      data, where the labels are selected
                                      probabilistically. Order of the list is
                                      the same as the data.
-         unnormed_probs  (ndarray): Unnormed probabilities of the data being in
+         unnormed_log_probs  (ndarray): Unnormed probabilities of the data being in
                                      each class. [n x n_dims]
         """
         assert isinstance(data, np.ndarray)
-        n_data = data.shape[0]
-        if n_data == 1:
+        assert isinstance(MAP_estimate, bool)
+
+        if np.prod(data.shape) == data.shape[0]:
             data = np.squeeze(data)
             data = np.asarray([data, data])
+            one_datum = True
+
+        else: one_datum = False
 
         unnormed_logprobs = self.calc_posterior_predictives(data)
-        probs = np.exp(unnormed_logprobs.T - logsumexp(unnormed_logprobs, 
-                       axis=1)).T
+        shape = list(unnormed_logprobs.shape)
+        shape[-1] = 1
+        norms = logsumexp(unnormed_logprobs, axis=-1).reshape(tuple(shape))
+        probs = np.exp(unnormed_logprobs - norms)
+
         if MAP_estimate == False:
-            for i, row in enumerate(probs):
+            for i, _ in np.ndenumerate(probs[...,0]):
+                row = probs[i]
                 if row.sum() > 1:
                     probs[i] = probs[i] / row.sum()
-        labels = [label for label in self.stats.keys()]
+        assert data[..., 0].shape == probs[..., 0].shape 
+
+        # Remember to use the same dictionary as the one in calc_posterior_predictives().
+        labels = np.asarray([label for label in self.stats.keys()])
 
         if MAP_estimate is True:
-            label_idxs = np.argmax(unnormed_logprobs, axis=1)
-            MAP_predictions = [labels[idx] for idx in label_idxs]
+            label_idxs = np.argmax(unnormed_logprobs, axis=-1)
+            MAP_predictions = labels[label_idxs]
+
+            if one_datum:
+                MAP_predictions = MAP_predictions[0]
+                unnormed_logprobs = unnormed_logprobs[0]
             
             if return_probs is False:
-                return MAP_predictions[:n_data]
+                return MAP_predictions
+
             else:
-                unnormed_probs = np.exp(unnormed_logprobs)
-                return MAP_predictions[:n_data], unnormed_probs[:n_data]
+                return MAP_predictions, np.exp(unnormed_log_probs)
 
-        elif MAP_estimate is False:
-            assert data.shape[0] == probs.shape[0]
-
-            predictions = []
-            for idx in range(n_data):
-                predictions.append(np.random.multinomial(1, probs[idx, :]))
-            predictions = np.array(predictions)
-            label_idxs = np.argmax(predictions, axis=1)
-            prob_predictions = [labels[idx] for idx in label_idxs]
+        else:
+            label_idxs = np.empty(probs[..., 0].shape, dtype='int64')
+            for idx, _ in np.ndenumerate(probs[..., 0]):
+                label_idxs[idx] = np.argmax(np.random.multinomial(1, probs[idx]))
+            predictions = labels[label_idxs]
 
             if return_probs is False:
-                return prob_predictions
+                return predictions
+
             else:
-                unnormed_probs = np.exp(unnormed_logprobs)
-                return prob_predictions, unnormed_probs
-        else:
-            raise ValueError('Invalid parameters for the function.')
+                return predictions, np.exp(unnormed_log_probs)
 
 
     def to_data_list(self):
@@ -993,6 +1001,9 @@ class PLDA:
         """
         inv_A = np.linalg.inv(self.A)
         U = X - self.m
+        shape = U.shape
+        U = U.reshape(np.prod(shape[:-1]).astype(int), shape[-1])
         U = np.matmul(inv_A, U.T).T
+        U = U.reshape(shape)
 
         return U
