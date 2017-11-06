@@ -1,7 +1,7 @@
 # probabilistic_LDA 
 (i.e. Probabilistic Linear Discriminant Analysis)
 
-UPDATE: I am currently doing a significant revamp of the code so it is more cleaner, simpler, more general, and slightly faster. Check back Nov. 12, 2017.
+UPDATE: I am currently doing a significant revamp of the code so it is cleaner, simpler, more general, and slightly faster. Check back Nov. 12, 2017.
 
 ### Disclaimer
 If all that you want to do is apply this model to a dataset and measure its
