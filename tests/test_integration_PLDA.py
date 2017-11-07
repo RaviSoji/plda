@@ -75,7 +75,6 @@ class TestModel(unittest.TestCase):
         cls.Λ_w = cls.calc_Λ_w(cls)
         cls.A = cls.calc_A(cls)
         cls.Ψ = cls.calc_Ψ(cls)
-#        cls.pdfs = cls.get_pdfs()
 
         cls.model = PLDA(cls.data)
 
@@ -175,7 +174,7 @@ class TestModel(unittest.TestCase):
         cls.assert_diagonal(result)
 
     def test_A_and_Ψ_recover_Φ_b(cls):
-        """ Φ_b = S_b - S_w / (n-1) = (A)(Ψ)(A^T)
+        """ Φ_b = S_b - S_w / (n-1) = (A)(Ψ)(A^T), see p. 533 and p. 536.
         """
         A = cls.model.A
         Ψ = cls.model.Ψ
@@ -197,7 +196,7 @@ class TestModel(unittest.TestCase):
         cls.assertTrue(passes)
 
     def test_A_recovers_Φ_w(cls):
-        """ Φ_w = (A)(A^T) = n / (n-1) * S_w """
+        """ Φ_w = (A)(A^T) = n / (n-1) * S_w, see p. 533 and p. 536."""
         A = cls.model.A
         S_w = cls.model.S_w
         n = cls.n_avg
@@ -208,14 +207,14 @@ class TestModel(unittest.TestCase):
 
     def test_A_and_Φ_w_make_eye(cls):
         """ I = (V^T)(Φ_w)(V), where A = inv(V^T)
-            NOTES:
-            (1) There are two ways to compute Φ_w:
-                Φ_w = (A)(A^T)
-                Φ_w = n / (n-1) * S_w 
-            (2) *** COMPUTE PHI WITH S_w: Φ_w = n/(n-1) * S_w. ***
-            (3) Do NOT use Φ_w = (A)(A^T) because that is trivially true:
-                 (V^T)(Φ_w)(V), where V = inv(A^T), which gives
-                 (inv(A))(A)(A^T)(inv(A^T)) = (I)(I) = I.
+        NOTES:
+        (1) There are two ways to compute Φ_w:
+            Φ_w = (A)(A^T)
+            Φ_w = n / (n-1) * S_w 
+        (2) *** COMPUTE PHI WITH S_w: Φ_w = n/(n-1) * S_w. ***
+        (3) Do NOT use Φ_w = (A)(A^T) because that is trivially true:
+             (V^T)(Φ_w)(V), where V = inv(A^T), which gives
+             (inv(A))(A)(A^T)(inv(A^T)) = (I)(I) = I.
         """
         S_w = cls.model.S_w
         n = cls.n_avg
@@ -224,9 +223,6 @@ class TestModel(unittest.TestCase):
         Φ_w = n / (n - 1) * S_w
         result = np.matmul(np.matmul(V.T, Φ_w), V)
         cls.assert_same(result, np.eye(cls.n_dims))
-
-#    def test_pdfs(cls):
-#        cls.assert_same()
 
     def assert_same(cls, result, expected):
         are_same = np.allclose(result, expected)
@@ -287,9 +283,6 @@ class TestModel(unittest.TestCase):
         return S_b
 
     def calc_W(cls):
-        """ scipy.linalg.eigh is faster than scipy.linalg.eig. Only constraint
-            is that the input matrices must be symmetric. 
-        """
         __, W = eigh(cls.S_b, cls.S_w)
 
         return W
@@ -324,7 +317,3 @@ class TestModel(unittest.TestCase):
         Ψ = np.maximum(Ψ, 0)
 
         return Ψ
-
-#    def gen_pdfs(cls):
-#
-#        return pdfs
