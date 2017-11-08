@@ -28,35 +28,25 @@ class PLDA:
         self.params = dict()
         self.data = dict()
 
-        self.N = None  # OK
-        self.K = None  # OK
-        self.n_avg = None  # OK
-        self.m = None  # array_equal passes
-        self.S_b = None  # OK
-        self.S_w = None  # array_equal fails but all_close passes
+        self.N = None
+        self.K = None
+        self.n_avg = None
+        self.m = None
+        self.S_b = None
+        self.S_w = None
 
-        # Failures are most likely due to optimization of S_w.
-        # If predictions, etc. don't work out, compute these the old way.
-        self.W = None  # FAILS
-        self.Λ_b = None  # array_equal fails, but all_close passes
-        self.Λ_w = None  # array_equal passes
+        self.W = None
+        self.Λ_b = None
+        self.Λ_w = None
 
-        self.A = None  # FAILS
-        self.Ψ = None  # array_equal fails, but all_close passes
+        self.A = None
+        self.Ψ = None
 
         self.data = self.mk_data_dict(X, Y, fnames)
-        self.fit()  # Runs the Ioffe (2006) optimization procedure to fit data.
+        self.fit()
 
     @staticmethod
     def mk_data_dict(X, Y, fnames=None):
-        """ Makes a dictionary, whose keys index class data and statistics.
-
-        DESCRIPTION: This data structure is a dictionary of dictionaries. The
-                      outer dictionary stores a dictionary for each unique
-                      label (i.e. data class) in Y. The inner dictionaries
-                      hold the data, file fnames, means, covariances, and
-                      sample sizes for the label/data class they represent.
-        """
         if fnames is None:
             fnames = len(Y) * [None]
         X, Y, fnames = np.asarray(X), np.asarray(Y), np.asarray(fnames)
@@ -86,31 +76,12 @@ class PLDA:
         return data
 
     def calc_m(self, means, ns, N):
-        """ Returns the mean of the unwhitened (non-latent space) dataset.
-
-        ARGUMENTS
-         means  (ndarray), shape=(n_unique_labels, n_data_dims)
-           Row-wise means of the classes in the training data.
-
-         ns  (ndarray), shape=(n_unique_labels,)
-           Sample sizes for each of the classes in the training data.
-
-        RETURN
-         m  (ndarray), shape=(n_unique_labels,)
-           The vector centering the data, i.e. the mean of the training data.
-
-        """
         means, ns = np.asarray(means), np.asarray(ns)
         weights = ns / N
 
         return (means * weights[:, None]).sum(axis=-2)
 
     def fit(self):
-        """ Fits the plda model parameters to the data.
-
-        DESCRIPTION: The optimization procedure follows Ioffe, 2006.
-                      See p. 537, Fig. 2.
-        """
         means, labels1 = self.get_means(return_labels=True)
         ns, labels2 = self.get_ns(return_labels=True)
         covs, labels3 = self.get_covs(return_labels=True)
@@ -134,7 +105,8 @@ class PLDA:
         self.params['n_avg'] = self.N / self.K
         self.n_avg = self.params['n_avg']
 
-        self.params['S_w'] = self.calc_S_w(np.asarray(covs), np.asarray(ns), self.N)
+        self.params['S_w'] = self.calc_S_w(np.asarray(covs), np.asarray(ns),
+                                           self.N)
         self.S_w = self.params['S_w']
 
         self.params['S_b'] = self.calc_S_b(np.asarray(means), np.asarray(ns),
@@ -161,63 +133,12 @@ class PLDA:
         self.relevant_dims = self.get_relevant_dims(self.Ψ)
 
     def calc_W(self, S_b, S_w):
-        """ Computes W by solving the generalized eigenvalue problem on p. 537.
-
-        EQUATION:
-         Vector form
-          \mathbf{S_b}\mathbf{w} = \lambda\mathbf{S_w}\mathbf{w}
-         Matrix form
-          \mathbf{S_b}\mathbf{W} = \mathbf{\lambda}\mathbf{S_w}\mathbf{W}
-
-         Solving for W:
-         (\mathbf{S_b} - \mathbf{S_w})\mathbf{W} = \mathbf{\Lambda}
-
-        DESCRIPTION: Relies on eigh instead of eig from scipy.linalg. eigh is
-                      significantly faster and only requres that the input
-                      matrices be symmetric, which S_b & S_w are.
-        ARGUMENT
-         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
-           Between-class scatter matrix. [n_dims x n_dims]
-
-         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
-           Within-class scatter matrix. [n_dims x n_dims]
-
-        RETURNS
-         W  (ndarray), shape=(n_data_dims, n_data_dims)
-           Solution to the generalized eigenvalue problem above, where the
-           columns are eigenvectors. [n_dims x n_dims]
-
-        """
-        eigenvalues, W = eigh(S_b, S_w)
         # W is the array of eigenvectors, where each column is a vector.
+        eigenvalues, W = eigh(S_b, S_w)
 
         return W
 
     def calc_A(self, n_avg, Λ_w, W):
-        """ Computes the matrix A, which is used to compute u: x = m + Au.
-
-        DESCRIPTION: Note that the average class sample size is used here,
-                      not the total or individual class sample sizes. See
-                      p. 536 for more information on alternative ways of
-                      dealing with unequal class sample sizes and p. 537
-                      for equations.
-        EQUATION: 
-         \mathbf{A} = \mathbf{W}^{-\top}
-                      (\frac{\bar n}{\bar n - 1}
-                       \mathbf{\Lambda_w})^{1/2}
-        ARGUMENTS
-         n_avg  (float)
-           Mean sample size of the classes, i.e. avg. number of training data
-           per class.
-
-         Λ_w  (ndarray), shape=(n_data_dims, n_data_dims)
-           Diagonalized S_w.
-
-        RETURNS
-         A  (ndarray), shape=(n_data_dims, n_data_dims)
-           Matrix that transforms the latent space to the data space.
-
-        """
         A = n_avg / (n_avg - 1) * Λ_w.diagonal()
         A[np.isclose(A, 0)] = 0
         A = np.sqrt(A)
@@ -241,25 +162,6 @@ class PLDA:
         return A
 
     def calc_S_b(self, mks, ns, m, N):
-        """ See p. 532, EQ 1 in Ioffe, 2006.
-
-        ARGUMENTS
-         mks  (ndarray), shape=(n_unique_labels, n_data_dims)
-           Means of the classes of data.
-
-         ns  (ndarray), shape=(n_unique_labels,)
-           Sample sizes for each class of data (i.e. for each unique Y label).
-
-         m  (ndarray), shape=(n_data_dims,)
-           Mean of the training data.
-
-         N  (int)
-           Total number of training data.
-
-        RETURN
-         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
-             Between-scatter matrix.
-        """
         assert ns.sum() == N
 
         weights = ns / N
@@ -268,23 +170,6 @@ class PLDA:
         return np.matmul(mk_minus_m.T * weights, mk_minus_m)
 
     def calc_S_w(self, covs, ns, N):
-        """ See p. 532, EQ 1 in Ioffe, 2006.
-
-        ARGUMENTS
-         covs  (ndarray), shape=(n_unique_labels, n_data_dims, n_data_dims)
-           Covariance matrix for each class of data (i.e. each unique Y label).
-
-         ns  (ndarray), shape=(n_unique_labels,)
-           Sample sizes for each class of data (i.e. for each unique Y label).
-
-         N  (int)
-           Total number of training data.
-
-        RETURNS
-         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
-           Within-scatter matrix.
-
-        """
         assert ns.sum() == N
 
         scaling_constants = (ns - 1) / N  # np.cov uses (n - 1) to norm.
@@ -292,79 +177,12 @@ class PLDA:
         return (covs * scaling_constants[:, None, None]).sum(axis=0)
 
     def calc_Λ_b(self, S_b, W):
-        """ Diagonalized S_b - for maximizing the likelihood of the PLDA model.
-
-        DESCRIPTION: See p. 537 to see how Λ_b is used to compute the
-                      parameters that maximize the PLDA model's likelihood.
-        EQUATION
-         \mathbf{\Lambda_b} = \mathbf{W}^{\top}
-                              \mathbf{S_w}
-                              \mathbf{W}
-        ARGUMENTS
-         W  (ndarray), shape=(n_data_dims, n_data_dims)
-           Eigenvectors solving the generalized eigenvalue problem on p. 537.
-
-         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
-           The between-class scatter matrix. See p 532.
-
-        RETURNS
-         Λ_b  (ndarray): S_b diagonalized by W. [n_dims x n_dims]
-
-        """
         return np.matmul(np.matmul(W.T, S_b), W)
 
     def calc_Λ_w(self, S_w, W):
-        """ Diagonalized S_w - for maximizing the likelihood of the PLDA model.
-
-        DESCRIPTION: See p. 537 to see how Λ_w is used to compute the
-                      parameters that maximize the PLDA model's likelihood.
-        EQUATION
-         \mathbf{\Lambda_b} = \mathbf{W}^{\top}
-                              \mathbf{S_w}
-                              \mathbf{W}
-        ARGUMENTS
-         W  (ndarray), shape=(n_data_dims, n_data_dims)
-           Eigenvectors that solve the generalized eigenvalue problem on p. 537.
-
-         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
-           Within-class scatter matrix.
-
-        RETURNS
-         Λ_w  (ndarray), shape=(n_data_dims, n_data_dims)
-           S_w diagonalized by W.
-
-        """
         return np.matmul(np.matmul(W.T, S_w), W)
 
     def calc_Ψ(self, Λ_w, Λ_b, n_avg):
-        """ Calculates the covariance of the 'whitened' cluster means.
-
-        EQUATION:
-         \mathbf{\Psi} = \max(0, \frac{n - 1}{n}
-                                 \Big(\frac{\mathbf{\Lambda_b}}
-                                           {\mathbf{\Lambda_w}}\Big)
-                               - \frac{1}{n})
-
-        DESCRIPTION: Following Ioffe, 2006, I use n_{avg} in place of 'n'
-                      for the optimization procedure. Remember, that this is
-                      just one way to deal with unequal sample sizes.
-                      See p. 537, Fig 2 in Ioffe, 2006 for more details.
-        ARGUMENTS
-         Λ_w  (ndarray), shape=(n_data_dims, n_data_Dims)
-          Should be a diagonal martix that is obtained from diagonalizing
-          S_w, using W. See p. 537, Fig. 2 in Ioffe, 2006.
-
-         Λ_b  (ndarray), shape=(n_data_dims, n_data_dims)
-          Should be a diagonal martix that is obtained from diagonalizing
-          S_b, using W. See p. 537, Fig. 2 in Ioffe, 2006.
-
-         n_avg  (float)
-          Average sample size of the data classes.
-
-        RETURNS
-         Ψ  (ndarray), shape=(n_data_dims, n_data_dims)
-          Latent space covariance of the cluster centers.
-        """
         weight = (n_avg - 1) / n_avg
         Λ_w = Λ_w.diagonal()
         Λ_b = Λ_b.diagonal()
@@ -382,22 +200,6 @@ class PLDA:
         return Ψ
 
     def get_ns(self, return_labels=False):
-        """ Returns the number of training data in each class.
-
-        ARGUMENT
-         return_labels  (bool)
-           Determines whether or not to return the labels. If they are
-           returned, they are returned in the same order as the sample sizes.
-
-        RETURNS
-         ns  (list)
-           A list of the sample sizes in each class of the training data.
-
-         labels  (list)
-           A list of the labels of the returned sample sizes, sorted
-           in the same order.
-
-        """
         labels = list(self.data.keys())
         ns = []
         for label in labels:
@@ -409,23 +211,6 @@ class PLDA:
             return ns, labels
 
     def get_means(self, return_labels=False):
-        """ Returns the means of the training data in each class.
-
-        ARGUMENT
-         return_labels  (bool)
-           Determines whether or not to return the labels. If they are
-           returned, they are returned in the same order as the means.
-
-        RETURNS
-         means  (list)
-           A list of the means for each class in the training data. The means
-           are 1D np.ndarrays with shape (n_data_dims,).
-
-         labels  (list)
-           A list of the labels of the returned sample sizes, sorted
-           in the same order.
-
-        """
         labels = list(self.data.keys())
         means = []
         for label in labels:
@@ -437,23 +222,6 @@ class PLDA:
             return means, labels
 
     def get_covs(self, return_labels=False):
-        """ Returns the covariances of the training data in each class.
-
-        ARGUMENT
-         return_labels  (bool)
-           Determines whether or not to return the labels. If they are
-           returned, they are returned in the same order as the covariances.
-
-        RETURNS
-         covs  (list)
-           A list of the covariances for each class in the training data. The
-           means are 2D np.ndarrays with shape (n_data_dims, n_data_dims).
-
-         labels  (list)
-           A list of the labels of the returned sample sizes, sorted
-           in the same order.
-
-        """
         labels = list(self.data.keys())
         covs = []
         for label in labels:
@@ -465,21 +233,6 @@ class PLDA:
             return covs, labels
 
     def get_relevant_dims(self, Ψ, n=None):
-        """ Returns the indices of the largest elements on a matrix diagonal.
-
-        ARGUMENT
-         Ψ  (ndarray), shape=(n_dims, n_dims)
-           A square matrix.
-
-         n  (int)
-           If set to None, the default setting is to return indices for ALL
-           non-zero elements on the main diagonal.
-
-        RETURN
-         relevant_dims  (ndarray), shape=(number of non-zero diagonal elements,)
-           Indices of the largest elements on Ψ's diagonal. The number of
-           elements to return is determined, by the argument 'n'.
-        """
         if n is None:
             relevant_dims = np.squeeze(np.argwhere(Ψ.diagonal() != 0))
         else:
@@ -489,22 +242,6 @@ class PLDA:
         return relevant_dims
 
     def add_datum(self, datum, label, fname=None):
-        """ Adds a new datum to the dataset, but does NOT run fit()!
-
-        ARGUMENTS
-         datum  (ndarray), shape=(n_data_dims,)
-           Must be the same the dimension as the training data.
-
-         label  (string)
-           This will be used as a dictionary key, so it MUST be hashable.
-
-        PARAMETERS
-         data   (dict)
-           Dictionary of dictionaries that store data for a particular class.
-
-        RETURNS
-         None
-        """
         existing_labels = list(self.data.keys())
         if label not in existing_labels:
             assert isinstance(datum,
@@ -524,12 +261,6 @@ class PLDA:
 
     def calc_marginal_likelihoods(self, data, ms=None, tau_diags=None,
                                   standardize_data=None):
-        """ returns an ndarray, whose last dimension corresponds to the data
-             class in seld.stats.keys().
-            axis -1: dimension of data
-            axis -2: sets of data to compute marginal likelihoods for
-            etc.
-        """
         assert isinstance(standardize_data, bool)
 
         if tau_diags is None:
@@ -580,50 +311,6 @@ class PLDA:
 
     def calc_posteriors(self, return_covs_as_diags=True, dims=None,
                         return_labels=False):
-        """ Returns the posterior means and covariances of the data class means.
-
-        DESCRIPTION: The model is a conjugate multivariate Normal-Normal model.
-                      The likelihood is Gaussian, N(u|v, I), the prior on the
-                      mean is Gaussian (v|0, Ψ), and covariance is known to be
-                      the identity matrix.
-        EQUATION
-         p(v^k \mid u_1^k, u_2^k, ...u_n^k) = 
-           N(v \mid \frac{\Psi}{n \Psi + I} \sum_i^n u_i^k,
-                    \frac{\Psi}{n \Psi + I})
-         where k indexes a particular class and n is the total number of data
-         in that class, k.
-
-        ARGUMENTS
-         return_covs_as_diags  (bool)
-           Whether to return the covariances of the posterior distributions
-           on the means of the data classes as matrices, or just vectors of
-           the diagonals.
-
-         dims  (n_data_dims)
-           Because the covariances are diagonal matrices, this tells us that
-           the Gaussians are independent between all the dimensions. This
-           argument can be set to compute the posterior for a subset of the
-           dimensions. If set to None, the function computes the posterior
-           for all dimensions along which the prior covariance is 0.
-
-         return_labels  (bool)
-           Whether to return the labels of the rows in means and cov_diags.
-
-        RETURNS
-        means  (ndarray), shape=(n_unique_labels, n_data_dims)
-          The means of the posterior distributions on the means of the data
-          classes.
-
-        cov_diags  (ndarray), shape=(n_unique_labels, n_data_dims)
-          The diagonals of the covariance matrices for the posterior
-          distributions on the means of the data classes. Recall that
-          these will be diagonal matrices.
-          
-        labels  (list)
-          Data/class labels (i.e. y) of the rows in means and cov_diags. This
-          is an optional return, specified by the return_labels argument.
-
-        """
         if dims is None:
             relevant_dims = np.arange(self.Ψ.diagonal().shape[0])
         else:
@@ -653,8 +340,8 @@ class PLDA:
         elif return_labels is False:
             return np.asarray(means), np.asarray(cov_diags)
 
-    def calc_posterior_predictives(self, data, standardize_data, return_log=True,
-                                   return_labels=False):
+    def calc_posterior_predictives(self, data, standardize_data,
+                                   return_log=True, return_labels=False):
         assert isinstance(return_labels, bool)
         assert isinstance(return_log, bool)
         assert isinstance(standardize_data, bool)
@@ -677,9 +364,392 @@ class PLDA:
             return probs
 
     def whiten(self, X):
-        """ Standardizes the data, X. See p. 534, section 3.1 of Ioffe, 2006.
+        assert X.shape[-1] == self.m.shape[0] == self.A.shape[0]
 
-        EQUATIONS: 
+        shape = X.shape
+        X = X.reshape(np.prod(shape[:-1]).astype(int), shape[-1])
+        inv_A = np.linalg.inv(self.A)
+        U = X - self.m
+        U = np.matmul(U, inv_A.T)
+
+        return U.reshape(shape)
+
+    mk_data_dict.__doc__ = """
+        Makes a dictionary, whose keys index class data and statistics.
+
+        DESCRIPTION: This data structure is a dictionary of dictionaries. The
+                      outer dictionary stores a dictionary for each unique
+                      label (i.e. data class) in Y. The inner dictionaries
+                      hold the data, file fnames, means, covariances, and
+                      sample sizes for the label/data class they represent.
+        """
+
+    calc_m.__doc__ = """
+        Returns the mean of the unwhitened (non-latent space) dataset.
+
+        ARGUMENTS
+         means  (ndarray), shape=(n_unique_labels, n_data_dims)
+           Row-wise means of the classes in the training data.
+
+         ns  (ndarray), shape=(n_unique_labels,)
+           Sample sizes for each of the classes in the training data.
+
+        RETURN
+         m  (ndarray), shape=(n_unique_labels,)
+           The vector centering the data, i.e. the mean of the training data.
+
+        """
+
+    fit.__doc__ = """
+        Fits the plda model parameters to the data.
+
+        DESCRIPTION: The optimization procedure follows Ioffe, 2006.
+                      See p. 537, Fig. 2.
+        """
+
+    calc_W.__doc__ = """
+        Computes W by solving the generalized eigenvalue problem on p. 537.
+
+        EQUATION:
+         Vector form
+          \mathbf{S_b}\mathbf{w} = \lambda\mathbf{S_w}\mathbf{w}
+         Matrix form
+          \mathbf{S_b}\mathbf{W} = \mathbf{\lambda}\mathbf{S_w}\mathbf{W}
+
+         Solving for W:
+         (\mathbf{S_b} - \mathbf{S_w})\mathbf{W} = \mathbf{\Lambda}
+
+        DESCRIPTION: Relies on eigh instead of eig from scipy.linalg. eigh is
+                      significantly faster and only requres that the input
+                      matrices be symmetric, which S_b & S_w are.
+        ARGUMENT
+         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
+           Between-class scatter matrix. [n_dims x n_dims]
+
+         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
+           Within-class scatter matrix. [n_dims x n_dims]
+
+        RETURNS
+         W  (ndarray), shape=(n_data_dims, n_data_dims)
+           Solution to the generalized eigenvalue problem above, where the
+           columns are eigenvectors. [n_dims x n_dims]
+
+        """
+
+    calc_A.__doc__ = """
+        Computes the matrix A, which is used to compute u: x = m + Au.
+
+        DESCRIPTION: Note that the average class sample size is used here,
+                      not the total or individual class sample sizes. See
+                      p. 536 for more information on alternative ways of
+                      dealing with unequal class sample sizes and p. 537
+                      for equations.
+        EQUATION:
+         \mathbf{A} = \mathbf{W}^{-\top}
+                      (\frac{\bar n}{\bar n - 1}
+                       \mathbf{\Lambda_w})^{1/2}
+        ARGUMENTS
+         n_avg  (float)
+           Mean sample size of the classes, i.e. avg. number of training data
+           per class.
+
+         Λ_w  (ndarray), shape=(n_data_dims, n_data_dims)
+           Diagonalized S_w.
+
+        RETURNS
+         A  (ndarray), shape=(n_data_dims, n_data_dims)
+           Matrix that transforms the latent space to the data space.
+
+        """
+
+    calc_S_b.__doc__ = """
+        Computes the between-scatter matrix. See p.532, EQ1 in Ioffe, 2006.
+
+        ARGUMENTS
+         mks  (ndarray), shape=(n_unique_labels, n_data_dims)
+           Means of the classes of data.
+
+         ns  (ndarray), shape=(n_unique_labels,)
+           Sample sizes for each class of data (i.e. for each unique Y label).
+
+         m  (ndarray), shape=(n_data_dims,)
+           Mean of the training data.
+
+         N  (int)
+           Total number of training data.
+
+        RETURN
+         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
+             Between-scatter matrix.
+        """
+
+    calc_S_w.__doc__ = """
+        Computes the within-scatter matrix. See p.532, EQ 1 in Ioffe, 2006.
+
+        ARGUMENTS
+         covs  (ndarray), shape=(n_unique_labels, n_data_dims, n_data_dims)
+           Covariance matrix for each class of data (i.e. each unique Y label).
+
+         ns  (ndarray), shape=(n_unique_labels,)
+           Sample sizes for each class of data (i.e. for each unique Y label).
+
+         N  (int)
+           Total number of training data.
+
+        RETURNS
+         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
+           Within-scatter matrix.
+
+        """
+
+    calc_Λ_b.__doc__ = """
+        Diagonalized S_b - for maximizing the likelihood of the PLDA model.
+
+        DESCRIPTION: See p. 537 to see how Λ_b is used to compute the
+                      parameters that maximize the PLDA model's likelihood.
+        EQUATION
+         \mathbf{\Lambda_b} = \mathbf{W}^{\top}
+                              \mathbf{S_w}
+                              \mathbf{W}
+        ARGUMENTS
+         W  (ndarray), shape=(n_data_dims, n_data_dims)
+           Eigenvectors solving the generalized eigenvalue problem on p. 537.
+
+         S_b  (ndarray), shape=(n_data_dims, n_data_dims)
+           The between-class scatter matrix. See p 532.
+
+        RETURNS
+         Λ_b  (ndarray): S_b diagonalized by W. [n_dims x n_dims]
+
+        """
+
+    calc_Λ_w.__doc__ = """
+        Diagonalized S_w - for maximizing the likelihood of the PLDA model.
+
+        DESCRIPTION: See p. 537 to see how Λ_w is used to compute the
+                      parameters that maximize the PLDA model's likelihood.
+        EQUATION
+         \mathbf{\Lambda_b} = \mathbf{W}^{\top}
+                              \mathbf{S_w}
+                              \mathbf{W}
+        ARGUMENTS
+         W  (ndarray), shape=(n_data_dims, n_data_dims)
+           Eigenvectors solving the generalized eigenvalue problem on p. 537.
+
+         S_w  (ndarray), shape=(n_data_dims, n_data_dims)
+           Within-class scatter matrix.
+
+        RETURNS
+         Λ_w  (ndarray), shape=(n_data_dims, n_data_dims)
+           S_w diagonalized by W.
+
+        """
+
+    calc_Ψ.__doc__ = """
+        Calculates the covariance of the 'whitened' cluster means.
+
+        EQUATION:
+         \mathbf{\Psi} = \max(0, \frac{n - 1}{n}
+                                 \Big(\frac{\mathbf{\Lambda_b}}
+                                           {\mathbf{\Lambda_w}}\Big)
+                               - \frac{1}{n})
+
+        DESCRIPTION: Following Ioffe, 2006, I use n_{avg} in place of 'n'
+                      for the optimization procedure. Remember, that this is
+                      just one way to deal with unequal sample sizes.
+                      See p. 537, Fig 2 in Ioffe, 2006 for more details.
+        ARGUMENTS
+         Λ_w  (ndarray), shape=(n_data_dims, n_data_Dims)
+          Should be a diagonal martix that is obtained from diagonalizing
+          S_w, using W. See p. 537, Fig. 2 in Ioffe, 2006.
+
+         Λ_b  (ndarray), shape=(n_data_dims, n_data_dims)
+          Should be a diagonal martix that is obtained from diagonalizing
+          S_b, using W. See p. 537, Fig. 2 in Ioffe, 2006.
+
+         n_avg  (float)
+          Average sample size of the data classes.
+
+        RETURNS
+         Ψ  (ndarray), shape=(n_data_dims, n_data_dims)
+          Latent space covariance of the cluster centers.
+        """
+
+    get_ns.__doc__ = """
+        Returns the number of training data in each class.
+
+        ARGUMENT
+         return_labels  (bool)
+           Determines whether or not to return the labels. If they are
+           returned, they are returned in the same order as the sample sizes.
+
+        RETURNS
+         ns  (list)
+           A list of the sample sizes in each class of the training data.
+
+         labels  (list)
+           A list of the labels of the returned sample sizes, sorted
+           in the same order.
+
+        """
+
+    get_means.__doc__ = """
+        Returns the means of the training data in each class.
+
+        ARGUMENT
+         return_labels  (bool)
+           Determines whether or not to return the labels. If they are
+           returned, they are returned in the same order as the means.
+
+        RETURNS
+         means  (list)
+           A list of the means for each class in the training data. The means
+           are 1D np.ndarrays with shape (n_data_dims,).
+
+         labels  (list)
+           A list of the labels of the returned sample sizes, sorted
+           in the same order.
+
+        """
+
+    get_covs.__doc__ = """
+        Returns the covariances of the training data in each class.
+
+        ARGUMENT
+         return_labels  (bool)
+           Determines whether or not to return the labels. If they are
+           returned, they are returned in the same order as the covariances.
+
+        RETURNS
+         covs  (list)
+           A list of the covariances for each class in the training data. The
+           means are 2D np.ndarrays with shape (n_data_dims, n_data_dims).
+
+         labels  (list)
+           A list of the labels of the returned sample sizes, sorted
+           in the same order.
+
+        """
+
+    get_relevant_dims.__doc__ = """
+        Returns the indices of the largest elements on a matrix diagonal.
+
+        ARGUMENT
+         Ψ  (ndarray), shape=(n_dims, n_dims)
+           A square matrix.
+
+         n  (int)
+           If set to None, the default setting is to return indices for ALL
+           non-zero elements on the main diagonal.
+
+        RETURN
+         relevant_dims  (ndarray), shape=(number of largest diagonal elements,)
+           Indices of the largest elements on Ψ's diagonal. The number of
+           elements to return is determined, by the argument 'n'.
+        """
+
+    add_datum.__doc__ = """
+        Adds a new datum to the dataset, but does NOT run fit()!
+
+        ARGUMENTS
+         datum  (ndarray), shape=(n_data_dims,)
+           Must be the same the dimension as the training data.
+
+         label  (string)
+           This will be used as a dictionary key, so it MUST be hashable.
+
+        PARAMETERS
+         data   (dict)
+           Dictionary of dictionaries that store data for a particular class.
+
+        RETURNS
+         None
+        """
+
+    calc_marginal_likelihoods.__doc__ = """
+        Computes the marginal likelihood of data.
+
+        DESCRIPTION: EQ 6 on p.535 is incorrect. See notes or Kevin Murphy's
+                      cheat sheet on conjugate analysis of the Gaussian.
+        ARGUMENTS
+         data  (ndarray), shape=(..., n_data_to_compute_prob_for, n_data_dims)
+           axis -1: dimension of data. If you are setting ms or tau_diags,
+                     length of this axis should be same as ms and tau_diags.
+           axis -2: sets of data to compute marginal likelihoods for
+
+         ms  (ndarray), shape=(n_unique_labels, n_data_dims)
+           Means of the data classes.
+
+         tau_diags  (ndarray), shape=(n_unique_labels, n_data_dims)
+           The diagonals of the covariances of the data classes. These
+           are assumed to be coming from diagonal matrices, i.e. covariance
+           matrix with only diagonal entries, which indicates the dimensions
+           are linearly independent.
+
+         standardize_data  (bool)
+           Must be set to true or false to indicate whether or not to transform
+           data to latent space. If data is already in latent space, set this
+           to false. If not, set it to True.
+
+        RETURNS
+         log_probs  (ndarray), shape=(...)
+
+             returns an ndarray, whose last dimension corresponds to the data
+             class in seld.stats.keys().
+            etc.
+        """
+
+    calc_posteriors.__doc__ = """
+        Returns the posterior means and covariances of the data class means.
+
+        DESCRIPTION: The model is a conjugate multivariate Normal-Normal model.
+                      The likelihood is Gaussian, N(u|v, I), the prior on the
+                      mean is Gaussian (v|0, Ψ), and covariance is known to be
+                      the identity matrix.
+        EQUATION
+         p(v^k \mid u_1^k, u_2^k, ...u_n^k) =
+           N(v \mid \frac{\Psi}{n \Psi + I} \sum_i^n u_i^k,
+                    \frac{\Psi}{n \Psi + I})
+         where k indexes a particular class and n is the total number of data
+         in that class, k.
+
+        ARGUMENTS
+         return_covs_as_diags  (bool)
+           Whether to return the covariances of the posterior distributions
+           on the means of the data classes as matrices, or just vectors of
+           the diagonals.
+
+         dims  (n_data_dims)
+           Because the covariances are diagonal matrices, this tells us that
+           the Gaussians are independent between all the dimensions. This
+           argument can be set to compute the posterior for a subset of the
+           dimensions. If set to None, the function computes the posterior
+           for all dimensions along which the prior covariance is 0.
+
+         return_labels  (bool)
+           Whether to return the labels of the rows in means and cov_diags.
+
+        RETURNS
+        means  (ndarray), shape=(n_unique_labels, n_data_dims)
+          The means of the posterior distributions on the means of the data
+          classes. These are sorted in the same order as cov_diags.
+
+        cov_diags  (ndarray), shape=(n_unique_labels, n_data_dims)
+          The diagonals of the covariance matrices for the posterior
+          distributions on the means of the data classes. Recall that
+          these will be diagonal matrices.
+
+        labels  (list)
+          Class labels (i.e. y) of the rows in means and cov_diags. This
+          is an optional return, specified by the return_labels argument.
+        """
+
+#    calc_posterior_predictives.__doc__ =
+
+    whiten.__doc__ = """
+        Standardizes the data, X. See p. 534, section 3.1 of Ioffe, 2006.
+
+        EQUATIONS:
          Vector form
            \mathbf{A}^{-1}(\mathbf{x} - \mathbf{m})
 
@@ -688,7 +758,7 @@ class PLDA:
 
         ARGUMENT
          X  (ndarray), shape=(..., n_data_dims)
-           Rows of unwhitened/unstandardized data. 
+           Rows of unwhitened/unstandardized data.
 
         PARAMETERS
          A  (ndarray), shape=(n_data_dims)
@@ -701,12 +771,3 @@ class PLDA:
          U  (ndarray), shape=(..., n_data_dims)
            Rows of whitened/standardized data.
         """
-        assert X.shape[-1] == self.m.shape[0] == self.A.shape[0]
-
-        shape = X.shape
-        X = X.reshape(np.prod(shape[:-1]).astype(int), shape[-1])
-        inv_A = np.linalg.inv(self.A)
-        U = X - self.m
-        U = np.matmul(U, inv_A.T)
-
-        return U.reshape(shape)
