@@ -186,6 +186,8 @@ class PLDA:
                                       [n x n_dims]
         """
         data = self.whiten(data)
+        relevant_dims = np.squeeze(np.argwhere(self.Ψ.diagonal() != 0))
+        data = data[..., relevant_dims]
 
         log_probs = []
         for label in self.stats.keys():
@@ -198,51 +200,65 @@ class PLDA:
 
         else: return np.exp(log_probs)
 
-
-    def calc_marginal_likelihoods(self, X=None, return_log=True):
-
-        """ EQ 6 in the paper is incorrect. Refer to Kevin Murphy's cheatsheet.
-        ARGUMENTS
-         X        (ndarray): NON-whitened data. [n x n_dims]
-         return_log  (bool): Whether to return normal or log probabilities.
-
-        RETURNS
-         log_probs          (ndarray): If return_log is True. [n_classes x 1]
-         np.exp(log_probs)  (ndarray): If return_log is False. [n_classes x 1]
+    def calc_posteriors(self, return_covs_as_cov_diags=True):
+        """ Returns the means and covariances of the posterior disitributions
+            on the means of the data classes.
         """
-        assert isinstance(return_log, bool)
+        if return_covs_as_cov_diags is False:
+            raise NotImplementedError
+        Ψ = self.Ψ.diagonal()
+        relevant_dims = np.squeeze(np.argwhere(Ψ != 0))
+
+        Ψ = Ψ[relevant_dims]
+        μs = self.whiten(np.asarray(self.get_μs()))
+        μs = μs[:, relevant_dims]
+        ns = np.asarray(self.get_sample_sizes())
+        sums = (μs.T * ns).T
+        cov_diags = []
+        means = []
+
+        for n, μ, sum_u in zip(ns, μs, sums):
+            cov_diag = Ψ / (1 + n * Ψ)
+            mean = sum_u * cov_diag
+            cov_diags.append(cov_diag)
+            means.append(mean)
+            
+        return np.asarray(means), np.asarray(cov_diags), relevant_dims
+
+    def calc_marginal_likelihoods(self, U, ms, tau_diags):
+        """ returns an ndarray, whose last dimension corresponds to the data
+             class in seld.stats.keys().
+            axis -1: dimension of data
+            axis -2: sets of data to compute marginal likelihoods for
+            etc.
+        """
+        if len(U.shape) == 1:
+            U = U[None, :]  # axis -2 is now has shape 1.
+        if len(ms.shape) == 1:
+            ms = ms[None, :]
+        if len(tau_diags.shape) == 1:
+            tau_diags = tau_diags[None, :]
+
+        assert U.shape[-1] == ms.shape[-1]
+        assert ms.shape == tau_diags.shape
+        assert len(ms.shape) == 2
+
+        n = U.shape[-2]
+        mean_u = U.mean(axis=-2)
+        squared_u = U ** 2
 
         log_probs = []
-        for label in self.stats.keys():
-            if X is None:
-                data = np.asarray(self.data[label])
-            else:
-                assert isinstance(X, list)
-                data = self.data[label]
-                for datum in X:
-                    assert datum.shape == data[-1].shape
-                    data.append(datum)
-                data = np.asarray(data)
-            data = self.whiten(data)
-               
-            n = data.shape[0]
-            m = 0
-            prior = self.Ψ.diagonal()
-            mean = data.mean(axis=0)
+        for m, tau in zip(ms, tau_diags):
+            log_constants = -.5 * n * np.log(2 * np.pi) - .5 * np.log(n * tau + 1)
+            exponent_1s = -.5 * (squared_u.sum(axis=-2) + (m ** 2 / tau))
+            exponent_2s = ((n ** 2) * tau * (mean_u ** 2)) + (m ** 2 / tau) + (2 * n * mean_u * m)
+            exponent_2s /= 2 * (n * tau + 1)
+    
+            log_probs.append((log_constants + exponent_1s + exponent_2s).sum(axis=-1))
+    
+        return np.stack(log_probs,axis=-1)
 
-            log_prob = -.5 * n * np.log(2 * np.pi)  # OK
-            log_prob += -.5 * np.log(n * prior + 1)  # OK
-            log_prob += -.5 * inner1d(data.T, data.T)  # OK
-            log_prob += (mean ** 2) * (n ** 2) * prior / (2 * (n * prior + 1))  # OK
 
-            log_probs.append(log_prob.sum())
-
-        if return_log is True:
-            return log_probs
-        else:
-            return np.exp(log_probs)
-            
-            
     def calc_K(self):
         """ Calculates the number of classes in the labeled data. """
 
@@ -722,14 +738,16 @@ class PLDA:
         assert np.array_equal(np.diag(self.Ψ.diagonal()), self.Ψ)
          # Verify that Ψ is diagonal.
 
-        Ψ = self.Ψ.diagonal()
+        relevant_dims = np.squeeze(np.argwhere(self.Ψ.diagonal() != 0))
+        Ψ = self.Ψ.diagonal()[relevant_dims]
         n_Ψ = self.n_avg * Ψ
         n_Ψ_plus_eye = n_Ψ + 1
 
-        cov = np.diag(1 + Ψ / n_Ψ_plus_eye)
+        cov_diag = 1 + Ψ / n_Ψ_plus_eye
+        cov = np.diag(cov_diag)
         transformation = np.diag(n_Ψ / n_Ψ_plus_eye)
         for label in self.stats.keys():
-            μ = self.params['v_' + str(label)]
+            μ = self.params['v_' + str(label)][relevant_dims]
             μ = np.matmul(transformation, μ)
             m_normal = multivariate_normal(μ, cov)
             self.pdfs[label] = m_normal.logpdf
@@ -841,7 +859,8 @@ class PLDA:
 
         return equal
 
-    def predict_class(self, data, MAP_estimate=True, return_probs=False):
+    def predict_class(self, data, MAP_estimate=True, return_probs=False,
+                      standardize_data=None):
         """ Classifies data into an existing or new class.
 
         DESCRIPTION: If MAP_estimate is set to false, the classification is
@@ -872,7 +891,9 @@ class PLDA:
         """
         assert isinstance(data, np.ndarray)
         assert isinstance(MAP_estimate, bool)
-
+        assert isinstance(standardize_data, bool)
+        if standardize_data is True:
+            data = self.whiten(data)
         if np.prod(data.shape) == data.shape[0]:
             data = np.squeeze(data)
             data = np.asarray([data, data])
@@ -880,7 +901,10 @@ class PLDA:
 
         else: one_datum = False
 
-        unnormed_logprobs = self.calc_posterior_predictives(data)
+        means, cov_diags, relevant_dims = self.calc_posteriors()
+        data = data[..., None, relevant_dims]
+        unnormed_logprobs = self.calc_marginal_likelihoods(data, means, cov_diags)
+
         shape = list(unnormed_logprobs.shape)
         shape[-1] = 1
         norms = logsumexp(unnormed_logprobs, axis=-1).reshape(tuple(shape))
@@ -891,7 +915,7 @@ class PLDA:
                 row = probs[i]
                 if row.sum() > 1:
                     probs[i] = probs[i] / row.sum()
-        assert data[..., 0].shape == probs[..., 0].shape 
+        #assert data[..., 0].shape == probs[..., 0].shape 
 
         # Remember to use the same dictionary as the one in calc_posterior_predictives().
         labels = np.asarray([label for label in self.stats.keys()])

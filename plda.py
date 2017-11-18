@@ -729,7 +729,7 @@ class PLDA:
          return_labels  (bool)
            Whether to return the labels of the rows in means and cov_diags.
 
-        RETURNS
+       RETURNS
         means  (ndarray), shape=(n_unique_labels, n_data_dims)
           The means of the posterior distributions on the means of the data
           classes. These are sorted in the same order as cov_diags.
