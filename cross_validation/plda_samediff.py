@@ -52,7 +52,8 @@ class SameDiffTask:
         return np.stack((X1, X2), axis=-2), np.stack((Y1, Y2), axis=-1), \
                np.stack((fnames1, fnames2), axis=-1)
 
-    def cross_validate(self, n=None, num_shuffles=1, return_2d_array=True):
+    def cross_validate(self, n=None, num_shuffles=1, leave_out=True,
+                       return_2d_array=False):
         assert n > 0 and isinstance(n, int)
         assert num_shuffles > 0 and isinstance(num_shuffles, int)
 
@@ -75,8 +76,9 @@ class SameDiffTask:
                 end = start + n
                 test_idxs = idxs[start:end]
                 test_pair_idxs = self.get_unique_idx_pairs(test_idxs)
-                results = self.run(test_pair_idxs[:, 0], test_pair_idxs[:, 1],
-                                   leave_out=True)
+                results, col_titles = self.run(test_pair_idxs[:, 0],
+                                              test_pair_idxs[:, 1],
+                                              leave_out=leave_out)
                 shuffle_results.append(results)
             all_results.append(np.asarray(shuffle_results))
 
@@ -84,10 +86,10 @@ class SameDiffTask:
         if return_2d_array is True:
             all_results = all_results.reshape(-1, all_results.shape[-1])
 
-        return all_results
+        return all_results, col_titles
 
 
-    def run(self, idxs1, idxs2, leave_out=False):
+    def run(self, idxs1, idxs2, leave_out, return_log=True):
         assert isinstance(leave_out, bool)
 
         if leave_out is False:
@@ -95,22 +97,65 @@ class SameDiffTask:
         else:
             idxs = np.arange(self.Y.shape[0])
             train_idxs = np.asarray(list(set(idxs) - set(idxs1) - set(idxs2)))
-            train_X = self.X[train_idxs, :]
-            train_Y = self.Y[train_idxs]
-            train_fnames = self.fnames[train_idxs]
-            self.fit_model(train_X, train_Y, train_fnames)
+            self.fit_model(self.X[train_idxs, :],
+                           self.Y[train_idxs],
+                           self.fnames[train_idxs])
         
         data_pairs, lbl_pairs, fname_pairs = self.gen_pairs(idxs1, idxs2)
         truth = lbl_pairs[:, 0] == lbl_pairs[:, 1]
         predictions, log_probs_same  = self.predict_same_diff(data_pairs)
 
+        results, col_titles = self.tidy_data(predictions, truth,
+                                             log_probs_same,
+                                             lbl_pairs, fname_pairs,
+                                             prob_type='same',
+                                             leave_out=leave_out,
+                                             return_log=return_log)
+
+        return results, col_titles
+
+    def tidy_data(self, predictions, truth, log_probs, lbl_pairs, fname_pairs,
+                  prob_type='same', leave_out=False, return_log=False):
+        assert predictions.shape == truth.shape
+        assert lbl_pairs.shape == fname_pairs.shape
+        assert predictions.shape[0] == lbl_pairs.shape[0]
+        assert lbl_pairs.shape[1] == 2
+        assert prob_type == 'same' or prob_type == 'diff'
+        assert isinstance(leave_out, bool), isinstance(return_log, bool)
+
         truth = np.squeeze(truth)
         lbl_pairs = np.squeeze(lbl_pairs)
         fname_pairs = np.squeeze(fname_pairs)
 
-        return np.stack([truth, predictions, log_probs_same,
-                         lbl_pairs[..., 0], lbl_pairs[..., 1],
-                         fname_pairs[..., 0], fname_pairs[..., 1]], axis=-1)
+        col_titles = ['prediction', 'truth',
+                      'stimulus_label_1','stimulus_label_2',
+                      'stimulus_filename_1','stimulus_filename_2']
+        results = [predictions, truth,
+                   lbl_pairs[..., 0], lbl_pairs[..., 1],
+                   fname_pairs[..., 0], fname_pairs[..., 1]]
+
+        col_titles.append('leave_out')
+        if leave_out is True:
+            results.append([True] * len(predictions))
+        elif leave_out is False:
+            results.append([False] * len(predictions))
+
+        if return_log is True and prob_type == 'same':
+            col_titles.append('log_prob_same')
+            results.append(log_probs)
+        elif return_log is True and prob_type =='diff':
+            col_titles.append('log_prob_diff')
+            results.append(log_probs)
+        elif return_log is False and prob_type == 'same':
+            col_titles.append('prob_same')
+            results.append(np.exp(log_probs))
+        elif return_log is False and prob_type == 'diff':
+            col_titles.append('prob_diff')
+            results.append(np.exp(log_probs))
+        else:
+            raise ValueError
+
+        return np.stack(results, axis=-1), np.asarray(col_titles)
 
     def calc_probs_diff(self, data_pairs):
         """
@@ -178,13 +223,13 @@ class SameDiffTask:
         else:
             return np.exp(log_probs)
 
-    def predict_same_diff(self, img_pairs, return_log=True, MAP_estimate=True):
+    def predict_same_diff(self, data_pairs, return_log=True, MAP_estimate=True):
         assert isinstance(return_log, bool)
         assert isinstance(MAP_estimate, bool)
-        assert len(img_pairs.shape) > 1
+        assert len(data_pairs.shape) > 1
 
         log_chance = np.log(.5)
-        log_ps_same = self.calc_prob_same_diff(img_pairs, return_prob='same')
+        log_ps_same = self.calc_prob_same_diff(data_pairs, return_prob='same')
 
         if MAP_estimate is False:
             predictions = log_ps_same.shape
@@ -206,20 +251,255 @@ class SameDiffTask:
         else:
             return predictions, np.exp(log_ps_same)
 
+    fit_model.__doc__ = """
+        Fits the plda model to the task, using X and Y.
+    
+        ARGUMENTS
+         X  (ndarray), shape=(n_data, n_data_dims)
+           The data, sorted row-wise. That is, each column is a datum,
+           and the columns are the values at those dimensions.
+    
+         Y  (ndarray), shape=(n_data,)
+           Labels of the data, sorted in the same order as X.
+    
+         fnames  (ndarray), shape=(n_data,), optional
+           Filenames of the data, sorted in the same order as X.
+    
+        RETURNS
+         None
+        """
+
     fnames_to_idxs.__doc__ = """
+         Converts an ndarray of filenames to indices indexing the model's data.
+    
         ARGUMENT
-         fname_ndarray  (ndarray): Contains filenames that may or may not be
-                                    repeated.
+         fname_ndarray  (ndarray), shape=(...)
+           Contains filenames that may or may not be repeated.
+    
         RETURN
-         idx_array      (ndarray): Has same shape as fname_ndarray, but with
-                                    integer entries. These integers replace
-                                    the string filenames with indices that
-                                    index the filenames in self.fnames.
+         idx_array  (ndarray):
+           Has same shape as fname_ndarray, but with integer entries. These
+           integers replace the string filenames with indices that
+           index the filenames in self.fnames.
+    
         EXAMPLE:
-         fname_ndarray[0] == self.fnames[idx_array[0]]  # True
-         print(fname_ndarray[0])  # 'img_name.jpg'
-         print(idx_array[0])   # 54
-         (self.fnames[54])  # 'img_name.jpg'
+         fname_ndarray[0] == self.fnames[idx_array[0]]
+         fname_ndarray[0]  # 'img_name.jpg'
+         idx_array[0]   # 54
+         self.fnames[54]  # 'img_name.jpg'
+        """
+
+    get_unique_idx_pairs.__doc__ = """
+        Takes a vector of numbers and generates a list of all unique pairs.
+
+        DESCRIPTION: More specifically, this function takes a vector of values,
+                      and then essentially finds all the possible ways to
+                      "choose 2" WITH replacement.
+                     Order within pairs doesn't matter, so a vector of length N
+                      will result in pairings with unique pairs of elements.
+                     Also, note that some of these pairs will be two copies of
+                      the same datum.
+        ARGUMENTS
+         idxs  (ndarray), shape=(n_unique_idxs,)
+           Unique indices, indexing the data in self.fnames.
+         
+        RETURNS
+         idx_pairs  (ndarray), shape=(n_combos, 2)
+           All the possible (unique) ways one could select two data.
+        """
+
+    gen_pairs.__doc__ = """
+        Generates pairs of data, labels, and filenames using indices.
+
+        ARGUMENTS
+         idxs_1  (ndarray), shape=(...)
+           An array of unique integers.
+
+         idxs_2  (ndarray), shape=(...)
+           An array of unique integers.
+         
+        RETURNS
+          X_pairs  (ndarray), shape=(..., 2, n_data_dims)
+            Pairs of data.
+
+          Y_pairs  (ndarray), shape=(..., 2)
+            Pairs of labels, in the same order as X_pairs.
+
+          fname_pairs  (ndarray), shape=(..., 2)
+            Pairs of filenames, in the same order as X_pairs.
+        """
+
+    cross_validate.__doc__ = """
+        Performs cross validation with plda via the same-different task.
+
+        DESCRIPTION: During any particular "shuffle" the order of the data is
+                      essentially randomized.
+                     Then, the first n data in this shuffled list are selected
+                      to be the test set. If leave_out is set to True, these
+                      are ommitted during model training. After this, the
+                      function increments by 1 and does the same thing, but
+                      this time with the 1st to (n + 1)'th data. This continues
+                      until there are no more data left, i.e. (n_data - n + 1)
+                      runs.
+                     If num_shuffles is greater than zero, the data are
+                      re-shuffled, and the process is run that number of times.
+        ARGUMENTS
+         n  (int)
+           Number of data to test on.
+
+         num_shuffles  (int)
+           Number of times to re-run the cross-validation on newly shuffled
+           data. This matters only when your dataset is small..
+           
+         leave_out  (bool), optional
+           Whether or not to leave the 'n' data out of the training set before
+           testing on the 'n' data. Default value is True (recommended).
+
+         return_2d_array  (bool), optional
+           Whether to return the results as a 2D ndarray.
+
+        RETURNS
+         results  (ndarray), shape=SEE BELOW.
+           If return_2d_array is False,
+               shape=(num_shuffles + 1, n_data - n + 1, n_combos, 3 + n_classes)
+            First dimension corresponds to a particular shuffle.
+            Second dimension corresponds to runs with training data left
+            Third dimension corresponds to the number of unique data combos.
+             See the get_unique_idx_pairs() method for details.
+            The fourth dimension represents the actual data, whose column
+             labels are returned as col_titles.
+           If return_2d_array is True,
+            shape=(num_shuffles + 1) * (n_data - n + 1) * n, 3 + n_classes
+
+         col_titles  (ndarray), shape=(8,)
+           Titles of the "columns" (i.e. last dimension)
+        """
+
+    run.__doc__ = """
+        Uses plda to evaluate whether pairs of data are "same" or "different".
+
+        ARGUMENTS
+         idxs1  (ndarray), shape=(n_pairs,)
+           Indices indexing one of the two data to be compared on the
+           same-different task.
+
+         idxs2  (ndarray), shape=(n_pairs,)
+           Indices indexing one of the two data to be compared on the
+           same-different task.
+
+         leave_out  (bool)
+           Whether or not to leave out the test data during training. Set to
+           False by default.
+
+         return_log  (bool)
+           Whether or not to return probabilities of the two stimuli being
+           the "same" as log probabilities or not.
+     
+        RETURNS
+         results  (ndarray), shape=(n_pairs, 8)
+           Results of the plda model being run on the indexed pairs of data.
+
+         col_titles (ndarray), shape=(8,)
+           Titles for each of the columns in the second dimension of results.
+        """
+
+    calc_probs_diff.__doc__ = """
+        Computes the probs of two data being generated by different classes.
+
+        DESCRIPTION: Uses the marginal likelihood equation. See jupyter
+                     notebook for mathematical details
+        ARGUMENTS
+         data_pairs  (ndarray), shape=(..., 2, n_data_dims)
+           Pairs of data to for which the model will make "same" and
+           "different" evaluations.
+         
+        RETURNS
+         log_ps_diff  (ndarray), shape=(..., n_unique_labels, n_unique_labels)
+           Log joint probabilities of the two data being generated by different
+           classes. The diagonals are set to -inf because the probabilities of
+           "same" are computed differently -- see calc_probs_same(). 
+           SEE ALSO jupyter notebook notes on the mathematical details.
+        """
+
+    calc_probs_same.__doc__ = """
+        Computes the probs of two data being generated by the same class.
+
+        DESCRIPTION: Uses the marginal likelihood equation. See jupyter
+                     notebook for mathematical details
+        ARGUMENTS
+         data_pairs  (ndarray), shape=(..., 2, n_data_dims)
+           Pairs of data to for which the model will make "same" and
+           "different" evaluations.
+         
+        RETURNS
+         log_ps_same  (ndarray), shape=(..., n_unique_classes)
+          Probabilities that both data were generated from the same
+          distribution.
+        """
+
+    calc_prob_same_diff.__doc__ = """
+        Calculates the probabilities of data pairs being in the same category.
+
+        DESCRIPTION: See the jupyter notebook for mathematical details.
+
+        ARGUMENTS
+         data_pairs  (ndarray), shape=(..., 2, n_data_dims)
+           Pairs of data to for which the model will make "same" and
+           "different" evaluations.
+
+         return_log  (bool)
+           Whether or not return the logarithm of probabilities.
+
+         norm_probs  (bool)
+           Whether or not to normalize the probabilities.
+
+         return_prob  (str)
+           Must be set to either "same" or "diff". This determines whether
+           the function returns the probabilities of the two data being
+           generated by the same or different distributions.
+    
+        RETURNS
+          probabilities  (ndarray), shape=(...)
+            Model certainty about "same" and "different" judgements.
+            If return_log is set to True, these are log probabilities.
+            If norm_probs is set to True, these are also normalized.
+            Whether to return probabilities of "same" or to return
+            probabilities of "different" is determined by the return_prob
+            argument.
+        """
+
+    predict_same_diff.__doc__ = """
+        Uses the plda to predict whether two data are in the same category.
+
+        DESCRIPTION: See calc_prob_same_diff(), calc_probs_same()
+                      calc_probs_diff() for more detail.
+                     See also the jupyter notebook for notes on the math.
+
+        ARGUMENTS
+         data_pairs  (ndarray), shape=(..., 2, n_data_dims)
+           Pairs of data to for which the model will make "same" and
+           "different" evaluations.
+
+         return_log  (bool)
+           Whether or not return the logarithm of probabilities.
+
+         MAP_estimate  (bool)
+           Whether or not to predict using the MAP estimate or predict
+           probabilistically.
+
+         return_prob  (str)
+           Must be set to either "same" or "diff". This determines whether
+           the function returns the probabilities of the two data being
+           generated by the same or different distributions.
+     
+        RETURNS
+         predictions  (ndarray), shape=(...)
+          Model evaluations, predicting whether the pairs of data are from
+          the same data generating distributions or not.
+
+         probabilities  (ndarray), shape=(...)
+          Probabilities associated with the predictions. These are log values
+          if return_log is set to True.
         """
 
 def main():
