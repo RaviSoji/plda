@@ -18,6 +18,7 @@ class SameDiffTask:
         self.Y = np.asarray(Y)
         self.fnames = np.asarray(fnames)
         self.model = None
+        self.n = self.X.shape[0]
 
         assert self.X.shape[0] == self.Y.shape[0] == self.fnames.shape[0]
         assert len(self.X.shape) == 2
@@ -70,7 +71,7 @@ class SameDiffTask:
             yield image_pair, label_pair
 
 
-    def cross_validate(self, n=None, num_shuffles=1, return_2d_array=True):
+    def cross_validate(self, n, num_shuffles=1, return_2d_array=True):
         assert n >= 0 and isinstance(n, int)
         assert num_shuffles > 0 and isinstance(num_shuffles, int)
 
@@ -144,7 +145,7 @@ class SameDiffTask:
         assert data.shape[1] > 1
         assert isinstance(return_log, bool)
 
-        log_probs = self.model.calc_class_log_probs(data)
+        log_probs = self.model.calc_posterior_predictives(data)
         log_probs = (log_probs.T - logsumexp(log_probs, axis=1)).T
     
         if return_log is True:
@@ -172,6 +173,39 @@ class SameDiffTask:
     
         else:
             return np.exp(log_probs_same)
+
+    def is_diagonal(self, matrix):
+        diagonal = matrix.diagonal()
+        new_matrix = np.diag(diagonal)
+
+        return np.array_equal(matrix, new_matrix)
+
+    def calc_prob_same_NEW(self, data, prior_mean, prior_cov):
+        assert len(data.shape) == 2
+        assert len(prior_mean.shape) == 1
+        assert self.is_diagonal(prior_cov)
+        
+        m = prior_mean
+        cov = prior_cov.diagonal()
+        mean_x = data.mean(axis=-2)
+        sqrd_x = data ** 2
+        sqrd_m = prior_mean ** 2
+        n_dims = data.shape[-1]
+        n = data.shape[-2]
+        
+        log_constant = -.5 * n_dims * n * np.log(2 * np.pi) 
+        log_constant -= .5 * np.log(n * cov + 1).sum()
+
+        exponent1 = -.5 * sqrd_x.sum(axis=-2)
+        exponent1 -= .5 * sqrd_m / cov
+        exponent2 = cov * (n ** 2) * (mean_x ** 2)
+        exponent2 += sqrd_m / cov
+        exponent2 += 2 * n * m * mean_x
+        exponent2 /= 2 * (n * cov + 1)
+
+        log_prob = log_constant + exponent1.sum() + exponent2.sum()
+
+        return log_prob
     
     
     def calc_prob_diff(self, log_posterior_predictive_ps, return_log=True,
