@@ -348,9 +348,11 @@ class PLDAClassification:
         """
 
 def main():
-    X = np.load()
-    Y = np.load()
-    fnames = np.load()
+    idxs = np.load('mouth_open_idxs.npy')
+    X = np.load('X.npy')[idxs]
+    Y = np.load('Y.npy')[idxs]
+    fnames = np.load('fnames.npy')[idxs]
+
     plda_classification = PLDAClassification(X, Y, fnames)
     results_leave_in = plda_classification.cross_validate(n=1)
     results_leave_out = plda_classification.cross_validate(n=1)
