@@ -356,6 +356,11 @@ class PLDA:
         means = means[:, relevant_dims]
         covs = covs[:, relevant_dims]
 
+        if len(covs.shape) < 2:
+            means = means[:, None]
+            covs = covs[:, None]
+            data = data[:, None]
+
         probs = self.calc_marginal_likelihoods(data, means, covs,
                                                standardize_data=False)
         if return_labels is True:
