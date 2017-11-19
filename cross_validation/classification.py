@@ -133,7 +133,7 @@ class PLDAClassification:
 
         log_pps, \
         labels = model.calc_posterior_predictives(X[..., None, :],
-                                                  standardize_data=True,
+                                                  standardize_data,
                                                   return_labels=True)
         axis = len(np.squeeze(X).shape) - 1
         idxs = np.argmax(log_pps, axis=axis)
