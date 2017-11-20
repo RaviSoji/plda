@@ -21,7 +21,7 @@ import numpy as np
 from plda import PLDA
 
 
-class PLDAClassification:
+class Classifier:
     def __init__(self, X, Y, fnames=None):
         assert len(X.shape) == 2
         assert X.shape[0] == Y.shape[0]
@@ -353,7 +353,7 @@ def main():
     Y = np.load('Y.npy')[idxs]
     fnames = np.load('fnames.npy')[idxs]
 
-    plda_classification = PLDAClassification(X, Y, fnames)
+    plda_classification = Classifier(X, Y, fnames)
     results_leave_in = plda_classification.cross_validate(n=1)
     results_leave_out = plda_classification.cross_validate(n=1)
 

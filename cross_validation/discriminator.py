@@ -24,7 +24,7 @@ from itertools import combinations_with_replacement
 from scipy.misc import logsumexp
 
 
-class SameDiffTask:
+class Discriminator:
     """ X, Y, and fnames are assumed to be sorted in the same order. """
     def __init__(self, X, Y, fnames):
         assert X.shape[0] == Y.shape[0] == fnames.shape[0]
