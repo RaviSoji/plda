@@ -47,9 +47,6 @@ class SameDiffTask:
         return idx_array.astype(int)
 
     def get_unique_idx_pairs(self, idxs):
-        """ E.g. If [1, 5] and [5, 1] are in one list,
-            this function makes sure one of them is used.
-        """
         idx_pairs = []
         for pair in combinations_with_replacement(idxs, 2):
             idx_pairs.append(list(pair))
@@ -173,10 +170,6 @@ class SameDiffTask:
         return np.stack(results, axis=-1), np.asarray(col_titles)
 
     def calc_probs_diff(self, data_pairs):
-        """
-        Array columns and rows are ordered the same way the labels are in
-         self.model.stats.keys()
-        """
         assert data_pairs.shape[-2] == 2
         assert len(data_pairs.shape) > 1
 
@@ -306,6 +299,9 @@ class SameDiffTask:
 
     get_unique_idx_pairs.__doc__ = """
         Takes a vector of numbers and generates a list of all unique pairs.
+
+        DESCRIPTION: By unique I mean that if [1, 5] and [5, 1] are in one
+                     list, this function makes sure only one of them is used.
 
         DESCRIPTION: More specifically, this function takes a vector of values,
                       and then essentially finds all the possible ways to
