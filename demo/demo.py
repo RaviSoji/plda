@@ -114,6 +114,8 @@ def main():
     # Classify test data using the plda model.
     predictions, log_probs = task.predict(test, model=model,
                                           standardize_data=True)
+
+    # Plot test data, colored by model classifications.
     colors = cm.rainbow(np.linspace(0, 1, n_gaussians))
     unique = np.unique(predictions)
     c = lbls_to_clrs(predictions, [pair for pair in zip(unique, colors)])
