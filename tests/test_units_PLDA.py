@@ -26,7 +26,7 @@ from scipy.stats import multivariate_normal
 class TestPLDA(unittest.TestCase):
     def setUp(self):
         self.K = 10
-        self.n_dims = 2
+        self.n_dims = 10
 
         self.μ_list = [np.ones(self.n_dims) * x * 10 for x in range(self.K)]
         self.n_list = [100 * (x % 2 + 1) for x in range(self.K)]
@@ -315,6 +315,9 @@ class TestPLDA(unittest.TestCase):
             pdf2 = model2.pdfs[label]
             some_data = np.random.randint(0, 100, 10 * self.n_dims)
             some_data = some_data.reshape(10, self.n_dims)
+
+            relevant_dims = np.squeeze(np.argwhere(model1.Ψ.diagonal() != 0))
+            some_data = some_data[..., relevant_dims]
             self.assert_array_equal(pdf1(some_data), pdf2(some_data))
             self.assert_array_equal(pdf1(some_data), pdf2(some_data))
         
