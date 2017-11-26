@@ -71,7 +71,7 @@ class PLDA:
             data[y]['mean'] = X_y.mean(axis=0)
             data[y]['n'] = count
             data[y]['cov'] = np.cov(X_y.T)
-            data[y]['fnames'] = fnames[idxs]
+            data[y]['fnames'] = list(fnames[idxs])
 
         return data
 
@@ -237,7 +237,7 @@ class PLDA:
             relevant_dims = np.squeeze(np.argwhere(Ψ.diagonal() != 0))
         else:
             assert isinstance(n, int)
-            relevant_dims = np.argsort(Ψ)[::-1][:n]
+            relevant_dims = np.argsort(Ψ.diagonal())[::-1][:n]
 
         return relevant_dims
 
