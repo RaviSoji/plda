@@ -19,13 +19,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 sys.path.append(os.getcwd() + '/../')
-from cross_validation.classification import PLDAClassification
+from cross_validation.classifier import Classifier
 from matplotlib.patches import Ellipse
 from numpy.random import multivariate_normal as m_normal
 from plda import PLDA
 from scipy.stats import norm, chi2
 
 
+# Define helper plotting functions.
 def cov_ellipse(cov, q=None, nsig=None, **kwargs):
     """ Code is slightly modified, but essentially borrowed from: 
          https://stackoverflow.com/questions/18764814/make-contour-of-scatter
@@ -80,7 +81,6 @@ def lbls_to_clrs(lbls, lbl_clr_pairs):
 
     return colors
 
-
 def gen_training_set(n_gaussians, sample_size, n_dims):
     cov = np.random.randint(-10, 10, (n_dims, n_dims))
     cov = np.matmul(cov, cov.T) + np.eye(n_dims) * np.random.rand(n_dims)
@@ -92,30 +92,30 @@ def gen_training_set(n_gaussians, sample_size, n_dims):
 
     return pts, lbls
 
-def main():
+
+if __name__ == '__main__':
     n_gaussians = 5
     sample_size = 100
     n_dims = 2
     n_test = 5000
-
-    # Initialize training data, task, and model.
+    
+    # Initialize training and test data.
     np.random.seed(0)
     train_X, train_Y = gen_training_set(n_gaussians, sample_size, n_dims)
-    task = PLDAClassification(train_X, train_Y)
-    model = PLDA(train_X, train_Y)
-
-    # Generate test data.
+    
     margin = np.sqrt(np.cov(train_X.T).diagonal().sum()) * .1
     (min_x, min_y), (max_x, max_y) = np.min(train_X, axis=0) - margin,\
                                      np.max(train_X, axis=0) + margin
     test = np.asarray([np.random.uniform(min_x, max_x, n_test),
                        np.random.uniform(min_y, max_y, n_test)]).T
-
-    # Classify test data using the plda model.
-    predictions, log_probs = task.predict(test, model=model,
-                                          standardize_data=True)
-
-    # Plot test data, colored by model classifications.
+    
+    # Use plda to classify test data.
+    classifier = Classifier(train_X, train_Y)
+    model = PLDA(train_X, train_Y)
+    predictions, log_probs = classifier.predict(test, model=model,
+                                               standardize_data=True)
+    
+    # Plot classified data.
     colors = cm.rainbow(np.linspace(0, 1, n_gaussians))
     unique = np.unique(predictions)
     c = lbls_to_clrs(predictions, [pair for pair in zip(unique, colors)])
@@ -126,11 +126,13 @@ def main():
         plot_scatter(ax_arr, test[idxs, 0], test[idxs, 1],
                      label=label, c=c[idxs, :], plot_training_cov=True,
                      model=model)
-
-    (min_x, min_y), (max_x, max_y) = np.min(test, axis=0), np.max(test, axis=0)    
+    
+    (min_x, min_y), (max_x, max_y) = np.min(test, axis=0), np.max(test, axis=0)
     ax_arr.set_xlim(min_x, max_x)
     ax_arr.set_ylim(min_y, max_y)
     fig.set_size_inches(10, 10)
     plt.xlabel('Dimension 1', fontsize=12)
     plt.ylabel('Dimension 2', fontsize=12)
     plt.title('Demo', fontsize=20)
+    
+    plt.show()

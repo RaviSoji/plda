@@ -1,8 +1,7 @@
 # probabilistic_LDA 
 (i.e. Probabilistic Linear Discriminant Analysis)
 
-UPDATE: I am currently doing a significant revamp of the code so it is more cleaner, simpler, more general, and slightly faster. Check back Nov. 12, 2017.
-NOV 18 UPDATE: Actually, check back Nov 20 (not Nov 12).
+UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 01, 2017.
 
 ### Disclaimer
 If all that you want to do is apply this model to a dataset and measure its
@@ -21,26 +20,29 @@ If all that you want to do is apply this model to a dataset and measure its
 * scipy 0.19.1
 
 ### Cross-validation and Demo Dependencies
-* skimage 0.13.0  (for Cross-validation)
-* sklearn 0.18.2  (for Cross-validation)
 * matplotlib 2.0.2  (for Demo) 
 
-### Testing (Requires decent computing power! I had access to ~60 CPU cores.)
-First, cd to the 'PLDA.py' file.
+### Preprocess.py Dependencies
+* skimage 0.13.0  (for preprocess.py)
+* sklearn 0.18.2  (for preprocess.py)
+* I have supplied the results from preprocess.py in the cross_validation directory, so running this code is not necessary.
+
+### Testing
+First, cd to the 'plda.py' file.
 ```
 cd /Documents/folder/path/to/probabilistic_LDA/ # PLDA.py should be in this folder.
 ```
 
-To run all tests:
+To run ALL tests:
 ```
 python3.5 -m unittest discover
 ```
 
 To run only one of the three test files in the tests folder, run the corresponding line/command, below:
 ```
-python3.5 -m unittest tests.test_inference_PLDA  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
-python3.5 -m unittest tests.test_integration_PLDA  # Runs quickly.
-python3.5 -m unittest tests.test_units_PLDA  # Runs quickly.
+python3.5 -m unittest tests.test_units # Runs quickly.
+python3.5 -m unittest tests.test_integration  # Runs quickly.
+python3.5 -m unittest tests.test_inference  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
 ```
 
 ### Demo with Artificial 2D Gaussian Data
