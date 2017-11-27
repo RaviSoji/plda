@@ -1,6 +1,5 @@
 # probabilistic_LDA 
 
-
 ### Disclaimer
 UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 01, 2017.
 
