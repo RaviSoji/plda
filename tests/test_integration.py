@@ -62,7 +62,7 @@ class TestModel(unittest.TestCase):
         cls.assertTrue(type(a) == type(b))
 
     def assert_diagonal(cls, A, tolerance=None):
-        """ Tolerance is the number of decimals to round at. """
+        """ Tolerance is the decimal to round. """
         diagonal = A.diagonal()
         if tolerance is not None:
             cls.assert_same(A, np.diag(diagonal), tolerance=tolerance)
@@ -254,6 +254,8 @@ class TestModel(unittest.TestCase):
 
     def test_whiten(cls):
         tolerance = 1e-200
+
+        # Test output, given inputs.
         A = cls.model.A
         m = cls.X.mean(axis=0)
         truth = cls.X - m
@@ -261,6 +263,10 @@ class TestModel(unittest.TestCase):
 
         result = cls.model.whiten(cls.X)
         cls.assert_same(result, truth, tolerance=tolerance)
+
+        # Test recovered input, given outputs: x = Au + m
+        result = np.matmul(result, A.T) + m
+        cls.assert_same(result, cls.X, tolerance=tolerance)
 
     def test_posterior_predictive_and_marginal_for_one_datum_are_equal(cls):
         """ See proof in math notes. """
