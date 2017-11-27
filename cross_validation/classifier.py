@@ -348,15 +348,4 @@ class Classifier:
         """
 
 def main():
-    idxs = np.load('mouth_open_idxs.npy')
-    X = np.load('X.npy')[idxs]
-    Y = np.load('Y.npy')[idxs]
-    fnames = np.load('fnames.npy')[idxs]
-
-    plda_classification = Classifier(X, Y, fnames)
-    results_leave_in = plda_classification.cross_validate(n=1)
-    results_leave_out = plda_classification.cross_validate(n=1)
-
-    experiment_img_names = np.load('')
-    img_idx_arr = plda_classification.to_idxs(experiment_img_names)
-    results_experiment = plda_classification.run(img_idx_arr)
+    raise NotImplementedError
