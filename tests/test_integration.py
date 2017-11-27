@@ -241,12 +241,40 @@ class TestModel(unittest.TestCase):
              (V^T)(Φ_w)(V), where V = inv(A^T), which gives
              (inv(A))(A)(A^T)(inv(A^T)) = (I)(I) = I.
         """
-        tolerance = 1e-13
+        tolerance = 1e-13  # Should be smaller than n / (n - 1).
 
         S_w = cls.model.S_w
         n = cls.model.n_avg
         V = inv(cls.model.A.T)
+        cls.assertTrue(tolerance < (n / (n - 1)))
 
         Φ_w = n / (n - 1) * S_w
         result = np.matmul(np.matmul(V.T, Φ_w), V)
         cls.assert_same(result, np.eye(cls.dims), tolerance=tolerance)
+
+    def test_whiten(cls):
+        tolerance = 1e-200
+        A = cls.model.A
+        m = cls.X.mean(axis=0)
+        truth = cls.X - m
+        truth = np.matmul(truth, np.linalg.inv(A).T)
+
+        result = cls.model.whiten(cls.X)
+        cls.assert_same(result, truth, tolerance=tolerance)
+
+    def test_posterior_predictive_and_marginal_for_one_datum_are_equal(cls):
+        """ See proof in math notes. """
+        pass
+
+    def test_marginal_likelihood_equation(cls):
+        """ EQ is from Kevin Murphy's cheatsheet. More detail in math notes."""
+        pass
+
+    def test_posterior_equation(cls):
+        pass
+
+    def test_marginal_likelihood_with_high_dimensional_input(cls):
+        pass
+
+    def test_posterior_predictive_with_high_dimensional_input(cls):
+        pass
