@@ -30,13 +30,13 @@ class TestPLDA(unittest.TestCase):
         self.shared_cov = np.eye(self.dims)
         self.dist_bw_means = 3
 
+        np.random.seed(0)
         X, Y, fnames = self.gen_data(self.dims, self.n, self.K,
                                      self.shared_cov, self.dist_bw_means)
         self.model = PLDA(X, Y, fnames)
         self.X, self.Y, self.fnames = X, Y, fnames
         
     def gen_data(self, dims, n, K, shared_cov, dist_bw_means):
-        np.random.seed(0)
         X = np.vstack([m_normal(np.ones(dims) * dist_bw_means * x,
                                     shared_cov, n) for x in range(K)])
         Y = np.hstack(['gaussian_{}'.format(k)] * 100 for k in range(5))
@@ -66,7 +66,7 @@ class TestPLDA(unittest.TestCase):
         model_2 = PLDA(X, Y)
         keys = list(model_1.data.keys())
 
-        tolerance = .000000001
+        tolerance = 1e-100
         for i, key in enumerate(keys):
             n_1 = model_1.data[key]['n']
             n_2 = model_2.data[key]['n']
@@ -104,55 +104,51 @@ class TestPLDA(unittest.TestCase):
             self.assert_same(cov_1, np.cov(X_subset.T), tolerance=tolerance)
 
             truth = [None] * int(self.n)
-            self.assertTrue(np.array_equal(fnames_2, np.asarray(truth)))
+            self.assert_same(np.asarray(fnames_2), np.asarray(truth))
 
             fnames_1.sort()
-            self.assertTrue(np.array_equal(fnames_1, fnames[Y == key]))
+            self.assert_same(np.asarray(fnames_1), np.asarray(fnames[Y == key]))
 
     def test_get_ns(self):
         ns_1, labels = self.model.get_ns(return_labels=True)
         ns_2 = self.model.get_ns()
 
-        # Assert that function returns the same order regardless of returns.
+        # Function should return the same ordering for all returns.
         ns_1, ns_2, labels = np.asarray(ns_1), np.asarray(ns_2), np.asarray(labels)
         idxs = np.argsort(labels)
         ns_1, ns_2, labels = ns_1[idxs], ns_2[idxs], labels[idxs]
         self.assert_same(ns_1, ns_2)
 
-        # Assert that returned values come from the correct data structure.
-        for n, key in zip(ns_1, labels):
-            self.assertEqual(self.model.data[key]['n'], n)
-
-        # Assert that all the appropriate labels are returned.
+        # All appropriate labels should be returned.
         truth = np.unique(self.Y)
         np.sort(truth)
         self.assert_same(labels, truth)
+
+        # Testing the actual values is in test_integration.py
 
     def test_get_means(self):
         means_1, labels = self.model.get_means(return_labels=True)
         means_2 = self.model.get_means()
 
-        # Assert that function returns the same order regardless of returns.
+        # Function should return the same ordering for all returns.
         means_1, means_2, = np.asarray(means_1), np.asarray(means_2)
         labels = np.asarray(labels)
         idxs = np.argsort(labels)
         means_1, means_2, labels = means_1[idxs], means_2[idxs], labels[idxs]
         self.assert_same(means_1, means_2)
 
-        # Assert that returned values come from the correct data structure.
-        for mean, key in zip(means_1, labels):
-            self.assertTrue(np.array_equal(self.model.data[key]['mean'], mean))
-
-        # Assert that all the appropriate labels are returned.
+        # All appropriate labels should be returned.
         truth = np.unique(self.Y)
         np.sort(truth)
         self.assert_same(labels, truth)
+
+        # Testing of actual values is in test_integration.py
 
     def test_get_covs(self):
         cov_diags_1, labels = self.model.get_covs(return_labels=True)
         cov_diags_2 = self.model.get_covs()
 
-        # Assert that function returns the same order regardless of returns.
+        # Function should return the same ordering for all returns.
         cov_diags_1, cov_diags_2 = np.asarray(cov_diags_1), np.asarray(cov_diags_2)
         labels = np.asarray(labels)
         idxs = np.argsort(labels)
@@ -160,31 +156,31 @@ class TestPLDA(unittest.TestCase):
                                            cov_diags_2[idxs], labels[idxs]
         self.assert_same(cov_diags_1, cov_diags_2)
 
-        # Assert that returned values come from the correct data structure.
-        for cov, key in zip(cov_diags_1, labels):
-            self.assertTrue(np.array_equal(self.model.data[key]['cov'], cov))
-
-        # Assert that all the appropriate labels are returned.
+        # All appropriate labels should be returned.
         truth = np.unique(self.Y)
         np.sort(truth)
         self.assert_same(labels, truth)
 
+        # Testing of actual values is in test_integration.py
+
     def test_test_calc_m(self):
-        self.assert_same(self.model.m, self.X.mean(axis=0),
-                         tolerance=.000000001)
+        tolerance = 1e-100
+        means = []
+        ns = []
+        for lbl in np.unique(self.Y):
+            means.append(self.X[self.Y == lbl].mean(axis=0))
+            ns.append((self.Y == lbl).sum())
+        N = np.sum(ns)
+
+        m_model = self.model.calc_m(means, ns, N)
+        m_truth = self.X.mean(axis=0)
+
+        self.assert_same(m_model, m_truth, tolerance=tolerance)
 
     def test_fit(self):
-        # Test parameter values the model computes without defined functions.
-        self.assertEqual(self.model.K, self.K)
-        self.assertEqual(self.model.params['K'], self.K)
-
-        self.assertEqual(self.model.N, self.K * self.n)
-        self.assertEqual(self.model.params['N'], self.K * self.n)
-
-        self.assertEqual(self.model.n_avg, self.n)
-        self.assertEqual(self.model.params['n_avg'], self.n)
-
-        # Verify that the parameters of the  model are "fit".
+        self.assertEqual(self.model.params['K'], self.model.K)
+        self.assertEqual(self.model.params['N'], self.model.N)
+        self.assertEqual(self.model.params['n_avg'], self.model.n_avg)
         self.assert_same(self.model.m, self.model.params['m'])
         self.assert_same(self.model.S_w, self.model.params['S_w'])
         self.assert_same(self.model.S_b, self.model.params['S_b'])
@@ -194,13 +190,26 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(self.model.A, self.model.params['A'])
         self.assert_same(self.model.Ψ, self.model.params['Ψ'])
 
+        # TODO: Test pre and post add_datum()
+
     def test_calc_W(self):
-        self.assert_invertible(self.model.W)
-        vals, W = eigh(self.model.S_b, self.model.S_w)
-        self.assert_same(self.model.W, W)
+        tolerance = 1e-100
+        S_b = [[ 17.70840444, 17.96889098, 18.19513973],
+               [ 17.96889098, 18.24564939, 18.46561872],
+               [ 18.19513973, 18.46561872, 18.69940039]]
+        S_w = [[ 0.94088804, -0.05751511,  0.01467744],
+               [-0.05751511,  1.01617648, -0.03831551],
+               [ 0.01467744, -0.03831551,  0.88440609]]
+
+        W_model = self.model.calc_W(S_b, S_w)
+        _, W_truth = eigh(S_b, S_w)
+
+        self.assert_same(W_model, W_truth, tolerance=tolerance)
 
     def test_calc_A(self):
+        tolerance=None
         dims = self.dims
+
         Λ_w = np.diag(np.ones(dims))
         W = np.random.randint(0, 9, self.dims ** 2).reshape(dims, dims) + \
             np.eye(dims)
@@ -212,11 +221,11 @@ class TestPLDA(unittest.TestCase):
         A_truth = np.sqrt(A_truth)
         A_truth = np.matmul(np.linalg.inv(W).T, A_truth)
 
-        self.assert_same(A_model, A_truth, tolerance=None)
+        self.assert_same(A_model, A_truth, tolerance=tolerance)
         self.assert_invertible(self.model.W)
 
     def test_calc_S_b(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         X, Y = self.X, self.Y
         unique_labels, counts = np.unique(Y, return_counts=True)
 
@@ -235,7 +244,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(self.model.S_b, S_b, tolerance=tolerance)
 
     def test_calc_S_w(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         X, Y = self.X, self.Y
         unique_labels = np.unique(Y)
         matrices = []
@@ -250,7 +259,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(self.model.S_w, S_w, tolerance=tolerance)
 
     def test_calc_Λ_b(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         self.assert_diagonal(self.model.Λ_b)
 
         inv_W_T = np.linalg.inv(self.model.W.T)
@@ -260,7 +269,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(result, self.model.S_b, tolerance=tolerance)
 
     def test_calc_Λ_w(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         self.assert_diagonal(self.model.Λ_w)
 
         inv_W_T = np.linalg.inv(self.model.W.T)
@@ -270,7 +279,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(result, self.model.S_w, tolerance=tolerance)
 
     def test_calc_Ψ(self):
-        tolerance = .000000001
+        tolerance = 1e-100
 
         # Recall that Λ_b, Λ_w, and Ψ are all diagonal matrices.
         n = 11
@@ -289,7 +298,7 @@ class TestPLDA(unittest.TestCase):
         self.assertEqual(np.isinf(self.model.Ψ).sum(), 0)
         
     def test_get_relevant_dims(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         Ψ = self.model.Ψ
         diag = Ψ.diagonal()
         relevant_dims = np.argsort(diag)[::-1][:100]
@@ -301,7 +310,7 @@ class TestPLDA(unittest.TestCase):
                          tolerance=tolerance)
         
     def test_add_datum(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         old_model = self.model
 
         # Test adding to existing class, with fname supplied.
@@ -483,14 +492,17 @@ class TestPLDA(unittest.TestCase):
 #    def test_calc_posteriors(self, return_covs_as_diags=True, dims=None,
 #    def test_calc_posterior_predictives(self, data, standardize_data,
     def test_whiten(self):
-        tolerance = .000000001
+        tolerance = 1e-100
         self.model.A = np.eye(self.dims)
-        truth = self.X - self.X.mean(axis=0)
+        m = self.X.mean(axis=0)
+        self.model.m = m
+        truth = self.X - m
         predicted = self.model.whiten(self.X)
         self.assert_same(predicted, truth, tolerance=tolerance)
 
         self.model.A = np.eye(self.dims) * np.arange(1, self.dims + 1)
-        truth = self.X - self.X.mean(axis=0)
+        self.model.m = 2 * m
+        truth = self.X - 2 * m
         truth = np.matmul(truth, np.linalg.inv(self.model.A).T)
         predicted = self.model.whiten(self.X)
         self.assert_same(predicted, truth, tolerance=tolerance)
