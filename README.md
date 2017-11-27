@@ -45,20 +45,20 @@ python3.5 -m unittest tests.test_inference  # Takes a little under 3 minutes to 
 ```
 
 ### Demo with Artificial 2D Gaussian Data
-The demo folder contains (1) a demo.py file, (2) an ipython notebook generating the illustration below, and (3) a .jpg file of the output figure.
+The demo folder contains (1) a demo.py file, (2) a jupyter notebook generating the illustration below, (3) a .jpg file of the output figure, and (4) a jupyter notebook of some simple cross validation tests (see next section).
 
 If you want to quickly visualize the model at work, cd to demo.py, and run the file:
 ```
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
 python3.5 demo.py
 ```
-Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
+Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that the demo training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
 
 ![Figure 1-1](/demo/classification_demo.jpg?raw=True)
 
 
 ### Cross-validation
-I have uploaded a simple jupyter notebook demo of leave n out cross-validation in the demo folder.
+I have uploaded a simple jupyter notebook demo of leave n out cross-validation in the demo folder. It uses the Child Affective Facial Expressions dataset.
 ```
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # cross_validation_demo.ipynb should be in this folder.
 ```
