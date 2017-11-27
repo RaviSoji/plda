@@ -62,7 +62,7 @@ Training data are randomly generated from 10 2D Gaussians, which are also
  training data were generated with the same covariance because this is a 
  central model assumption.
 
-![Figure 1-1](https://github.com/RaviSoji/probabilistic_LDA/demo/classification_demo.jpg?raw=True)
+![Figure 1-1](/demo/classification_demo.jpg?raw=True)
 
 ### k-Folds Cross-validation on the Google_Faces Emotions Dataset
 To my knowledge, K-folds on LDA for facial recognition (where classes are 
