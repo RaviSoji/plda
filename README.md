@@ -46,7 +46,7 @@ python3.5 -m unittest tests.test_inference  # Takes a little under 3 minutes to 
 ```
 
 ### Demo with Artificial 2D Gaussian Data
-The demo folder contains (1) a demo.py file, (2) an ipython notebook generating the illustration below, iand a .jpg file of the output figure.
+The demo folder contains (1) a demo.py file, (2) an ipython notebook generating the illustration below, and (3) a .jpg file of the output figure.
 
 If you want to quickly visualize the model at work, cd to demo.py, and run the file:
 ```
