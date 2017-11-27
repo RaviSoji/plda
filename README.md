@@ -1,9 +1,9 @@
 # probabilistic_LDA 
-(i.e. Probabilistic Linear Discriminant Analysis)
 
-UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 01, 2017.
 
 ### Disclaimer
+UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 01, 2017.
+
 If all that you want to do is apply this model to a dataset and measure its
  performance, you will find the code to be bulky in that it stores parameters,
  variables, and data that you do not need. This code was written for
@@ -22,10 +22,10 @@ If all that you want to do is apply this model to a dataset and measure its
 ### Cross-validation and Demo Dependencies
 * matplotlib 2.0.2  (for Demo) 
 
-### Preprocess.py Dependencies
+### Preprocessing Dependencies (not necessary)
+* For convenience, I supply the preprocessed data in the cross_validation directory.
 * skimage 0.13.0  (for preprocess.py)
 * sklearn 0.18.2  (for preprocess.py)
-* I have supplied the results from preprocess.py in the cross_validation directory, so running this code is not necessary.
 
 ### Testing
 First, cd to the 'plda.py' file.
@@ -46,33 +46,20 @@ python3.5 -m unittest tests.test_inference  # Takes a little under 3 minutes to 
 ```
 
 ### Demo with Artificial 2D Gaussian Data
-The demo folder contains (1) a demo.py file that will generate the illustration below
-and (2) an IPython notebook that uses the demo to illustrate various attributes
-of the PLDA object.
+The demo folder contains (1) a demo.py file, (2) an ipython notebook generating the illustration below, iand a .jpg file of the output figure.
 
 If you want to quickly visualize the model at work, cd to demo.py, and run the file:
 ```
 cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
 python3.5 demo.py
 ```
-Training data are randomly generated from 10 2D Gaussians, which are also
- randomly generated. Colors of the points represent model classifications 
- of random test points while the contours depict 95% confidence intervals 
- (based on 300-900 points per class) of the labeled training data. Note that
- training data were generated with the same covariance because this is a 
- central model assumption.
+Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
 
 ![Figure 1-1](/demo/classification_demo.jpg?raw=True)
 
-### k-Folds Cross-validation on the Google_Faces Emotions Dataset
-To my knowledge, K-folds on LDA for facial recognition (where classes are 
- specific people) generally gets about 40-60% accuracy. Here, we are 
- trying to do emotion classification based on very little and uncontrolled
- data (23-86 samples of DIFFERENT faces for each of the 7 emotions) and 
- are finding around 33% accuracy, which is bad, but also above chance level.
- 
-To run the code, cd to cross_validation.py and run the file:
+
+### Cross-validation
+I have uploaded a simple jupyter notebook demo of leave n out cross-validation in the demo folder.
 ```
-cd Documents/folder/path/to/probabilistic_LDA/cross_validation/ # cross_validation.py should be in this folder.
-python3.5 cross_validation_PLDA.py
+cd Documents/folder/path/to/probabilistic_LDA/demo/ # cross_validation_demo.ipynb should be in this folder.
 ```
