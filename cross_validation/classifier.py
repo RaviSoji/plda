@@ -143,7 +143,7 @@ class Classifier:
 
         return predictions, log_pps
 
-    def to_idxs(self, fname_ndarray):
+    def fnames_to_idxs(self, fname_ndarray):
         idx_array = np.zeros(fname_ndarray.shape)
         for idx, fname in np.ndenumerate(fname_ndarray):
             idx_array[idx] = np.argwhere(self.fnames == fname)
