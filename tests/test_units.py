@@ -493,19 +493,30 @@ class TestPLDA(unittest.TestCase):
 #    def test_calc_posterior_predictives(self, data, standardize_data,
     def test_whiten(self):
         tolerance = 1e-100
-        self.model.A = np.eye(self.dims)
+
         m = self.X.mean(axis=0)
+        A = np.eye(self.dims)
+        self.model.A = A
         self.model.m = m
         truth = self.X - m
         predicted = self.model.whiten(self.X)
         self.assert_same(predicted, truth, tolerance=tolerance)
+        
+        # Test unwhitening: x = Au + m = Iu + m = u + m
+        self.assert_same(predicted + m, self.X, tolerance=tolerance)
 
-        self.model.A = np.eye(self.dims) * np.arange(1, self.dims + 1)
-        self.model.m = 2 * m
-        truth = self.X - 2 * m
-        truth = np.matmul(truth, np.linalg.inv(self.model.A).T)
+        A = np.eye(self.dims) * np.arange(1, self.dims + 1)
+        m = 2 * self.X.mean(axis=0)
+        self.model.A = A
+        self.model.m = m
+        truth = self.X - m
+        truth = np.matmul(truth, np.linalg.inv(A).T)
         predicted = self.model.whiten(self.X)
         self.assert_same(predicted, truth, tolerance=tolerance)
+
+        # Test unwhitening: x = Au + m = inv(A)u + m
+        result = np.matmul(predicted, A) + m
+        self.assert_same(result, self.X, tolerance=tolerance)
 
     def assert_same(self, a, b, tolerance=None):
         if tolerance is None:
@@ -516,7 +527,7 @@ class TestPLDA(unittest.TestCase):
         self.assertTrue(type(a) == type(b))
 
     def assert_diagonal(self, A, tolerance=None):
-        """ Tolerance is the number of decimals to round at. """
+        """ Tolerance is the decimal to round. """
         diagonal = A.diagonal()
         if tolerance is not None:
             self.assert_array_equal(np.around(A, tolerance),
