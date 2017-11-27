@@ -20,7 +20,6 @@ from skimage.io import imread
 from scipy.misc import imresize
 from sklearn.decomposition import PCA
 sys.path.insert(0, '../')
-from PLDA import PLDA
 
 
 def load_jpgs_and_lbls(directory, dataset, as_grey=True, return_fnames=False):
