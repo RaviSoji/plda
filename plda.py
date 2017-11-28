@@ -270,28 +270,22 @@ class PLDA:
         # Handle edge cases in setting relevant_dims, ms, and tau_diags
         if tau_diags is None:
             relevant_dims = self.relevant_dims
-            tau_diags = self.Ψ.diagonal()
+            tau_diags = self.Ψ.diagonal()[None, :]
         else:
             assert len(tau_diags.shape) == 2
             relevant_dims = np.arange(tau_diags.shape[-1])
             assert data.shape[-1] == len(relevant_dims)
 
         if ms is None:
-            ms = np.zeros(tau_diags.shape[-1])
+            ms = np.zeros((1, tau_diags.shape[-1]))
         else:
-            assert len(ms.shape) == 2
             assert data.shape[-1] == ms.shape[-1]
 
+        assert len(ms.shape) == 2
+        assert len(tau_diags.shape) == 2
         # Set up the dimensions to perform the vectorized operations.
-        if len(ms.shape) < 2:
-            ms = ms[None, relevant_dims]
-        else:
-            ms = ms[..., relevant_dims]
-
-        if len(tau_diags.shape) < 2:
-            tau_diags = tau_diags[None, relevant_dims]
-        else:
-            tau_diags = tau_diags[..., relevant_dims]
+        ms = ms[..., relevant_dims]
+        tau_diags = tau_diags[..., relevant_dims]
 
         if standardize_data is True:
             data = self.whiten(data)
