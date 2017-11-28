@@ -24,7 +24,7 @@ from scipy.stats import multivariate_normal
 
 class TestPLDA(unittest.TestCase):
     def setUp(self):
-        self.dims = 3
+        self.dims = 5
         self.n = 100
         self.K = 5
         self.shared_cov = np.eye(self.dims)
@@ -163,7 +163,7 @@ class TestPLDA(unittest.TestCase):
 
         # Testing of actual values is in test_integration.py
 
-    def test_test_calc_m(self):
+    def test_calc_m(self):
         tolerance = 1e-100
         means = []
         ns = []
@@ -207,7 +207,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_same(W_model, W_truth, tolerance=tolerance)
 
     def test_calc_A(self):
-        tolerance=None
+        tolerance = 1e-100
         dims = self.dims
 
         Λ_w = np.diag(np.ones(dims))
@@ -215,11 +215,11 @@ class TestPLDA(unittest.TestCase):
             np.eye(dims)
         n_avg = 9
 
-        A_model = self.model.calc_A(n_avg, Λ_w, W)
-
         A_truth = Λ_w * n_avg / (n_avg - 1)
         A_truth = np.sqrt(A_truth)
         A_truth = np.matmul(np.linalg.inv(W).T, A_truth)
+
+        A_model = self.model.calc_A(n_avg, Λ_w, W)
 
         self.assert_same(A_model, A_truth, tolerance=tolerance)
         self.assert_invertible(self.model.W)
@@ -239,44 +239,54 @@ class TestPLDA(unittest.TestCase):
             diff = mean - m
             S_b.append(n * np.outer(diff, diff))
 
-        S_b = np.asarray(S_b).sum(axis=0) / np.sum(counts)
+        S_b_truth = np.asarray(S_b).sum(axis=0) / np.sum(counts)
+        S_b_model = self.model.calc_S_b(means, counts, m, np.sum(counts))
 
-        self.assert_same(self.model.S_b, S_b, tolerance=tolerance)
+        self.assert_same(S_b_model, S_b_truth, tolerance=tolerance)
 
     def test_calc_S_w(self):
         tolerance = 1e-100
         X, Y = self.X, self.Y
         unique_labels = np.unique(Y)
         matrices = []
+        covs = []
+        ns = []
         for label in unique_labels:
             data = X[Y == label, :]
+            ns.append(len(data))
+            covs.append(np.cov(data.T))
             mean = data.mean(axis=0)
             diffs = data - mean
             for row in diffs:
                 matrices.append(np.outer(row, row))
 
-        S_w = np.asarray(matrices).mean(axis=0)
-        self.assert_same(self.model.S_w, S_w, tolerance=tolerance)
+        S_w_truth = np.asarray(matrices).mean(axis=0)
+        S_w_model = self.model.calc_S_w(covs, np.asarray(ns), np.sum(ns))
+        self.assert_same(S_w_model, S_w_truth, tolerance=tolerance)
 
     def test_calc_Λ_b(self):
         tolerance = 1e-100
-        self.assert_diagonal(self.model.Λ_b)
+        dims = self.dims
+        W = np.diag(np.arange(1, dims + 1))
+        arr = np.random.randint(-100, 100, dims ** 2).reshape(dims, dims)
+        arr[arr == 0] = 1
+        S_b = np.matmul(arr, arr.T)
 
-        inv_W_T = np.linalg.inv(self.model.W.T)
-        result = np.matmul(inv_W_T, self.model.Λ_b)
-        result = np.matmul(result, inv(self.model.W))
-
-        self.assert_same(result, self.model.S_b, tolerance=tolerance)
+        Λ_b_truth = np.matmul(W.T, np.matmul(S_b, W))
+        Λ_b_model = self.model.calc_Λ_w(S_b, W)
+        self.assert_same(Λ_b_model, Λ_b_truth, tolerance=tolerance)
 
     def test_calc_Λ_w(self):
         tolerance = 1e-100
-        self.assert_diagonal(self.model.Λ_w)
+        dims = self.dims
+        W = np.diag(np.arange(1, dims + 1))
+        arr = np.random.randint(-100, 100, dims ** 2).reshape(dims, dims)
+        arr[arr == 0] = 1
+        S_w = np.matmul(arr, arr.T)
 
-        inv_W_T = np.linalg.inv(self.model.W.T)
-        result = np.matmul(inv_W_T, self.model.Λ_w)
-        result = np.matmul(result, inv(self.model.W))
-
-        self.assert_same(result, self.model.S_w, tolerance=tolerance)
+        Λ_w_truth = np.matmul(W.T, np.matmul(S_w, W))
+        Λ_w_model = self.model.calc_Λ_w(S_w, W)
+        self.assert_same(Λ_w_model, Λ_w_truth, tolerance=tolerance)
 
     def test_calc_Ψ(self):
         tolerance = 1e-100
@@ -488,9 +498,88 @@ class TestPLDA(unittest.TestCase):
         new_fnames_truth = np.asarray(new_fnames_truth)
         self.assert_same(new_fnames_model.sort(), new_fnames_truth.sort())
         
-#    def test_calc_marginal_likelihoods(self, data, ms=None, tau_diags=None,
-#    def test_calc_posteriors(self, return_covs_as_diags=True, dims=None,
-#    def test_calc_posterior_predictives(self, data, standardize_data,
+    def test_calc_marginal_likelihoods(self):
+        X = self.X
+        with self.assertRaises(AssertionError):
+            self.model.calc_marginal_likelihoods(X)
+
+        # Assert default shape
+        probs = self.model.calc_marginal_likelihoods(X[:, None, :],
+                                                     standardize_data=True)
+        self.assertEqual(probs.shape[0], (X.shape[0]))
+
+#        # Assert shapes with supplied ms and tau_diags
+#        # Assert shape with ms missing and tau_diags
+#
+#        probs = self.model.calc_marginal_likelihoods(data, standardize_data=False)
+        #self.assertEqual(probs.shape, ())
+
+    def test_calc_posteriors(self):
+        # Assert numbers of returns.
+        n_returns = 2
+        result_1 = self.model.calc_posteriors()
+        self.assertEqual(len(result_1), n_returns)
+
+        result_2 = self.model.calc_posteriors(return_labels=True)
+        self.assertEqual(len(result_2), n_returns + 1)
+
+        for i, thing in enumerate(result_1):
+            self.assert_same(result_1[i], result_2[i])
+
+        # Assert default dimensions of returns.
+        means, covs = self.model.calc_posteriors()
+        means, covs, labels = self.model.calc_posteriors(return_labels=True)
+        self.assertEqual(means.shape, (self.K, self.dims))
+        self.assertEqual(covs.shape, (self.K, self.dims))
+        self.assertEqual(len(labels), self.K)
+
+        # Assert number of set dimensions.
+        if self.dims > 2:
+            n_dims = self.dims - 2
+            dims = np.arange(self.dims)[:n_dims]
+            means, covs, labels = self.model.calc_posteriors(dims=dims, return_labels=True)
+            self.assertEqual(means.shape, (self.K, n_dims))
+            self.assertEqual(covs.shape, (self.K, n_dims))
+            self.assertEqual(len(labels), self.K)
+
+        # Testing the actual probabilities is done in test_integration.py.
+        # Testing whether standardizing the data actually works is also in integration testing.
+
+    def test_calc_posterior_predictives(self):
+        # Assert raise assertion error for unspecified standardize_data
+        # Assert number of arguments with return_labels
+        # assert -2 dimension
+        X = self.X[:, None, :]
+        model = self.model
+
+        # Assert shapes when return_labels=False and standardize_data=True.
+        probs = model.calc_posterior_predictives(X, standardize_data=True)
+        self.assertEqual(probs.shape, (X.shape[0], self.K))
+
+        # Assert shapes when return_labels=True and standardize_data=True.
+        probs, \
+        labels = model.calc_posterior_predictives(X, standardize_data=True,
+                                                  return_labels=True)
+        self.assertEqual(probs.shape, (X.shape[0], self.K))
+        self.assertEqual(len(labels), self.K)
+
+        # Assert shapes when return_labels=False and standardize_data=False.
+        probs = model.calc_posterior_predictives(X, standardize_data=False)
+        self.assertEqual(probs.shape, (X.shape[0], self.K))
+
+        # Assert shapes when return_labels=True and standardize_data=False.
+        probs, \
+        labels = model.calc_posterior_predictives(X, standardize_data=False,
+                                                  return_labels=True)
+        self.assertEqual(probs.shape, (X.shape[0], self.K))
+        self.assertEqual(len(labels), self.K)
+
+        # Test higher dimensional input. More tests in test_integration.py.
+        X = np.asarray([self.X[:, None, :]] * 10)
+        X = np.asarray([X[:, None, :]] * 20)
+        probs = model.calc_posterior_predictives(X, standardize_data=True)
+        self.assertEqual(probs.shape, (20, 10, self.X.shape[0], self.K))
+
     def test_whiten(self):
         tolerance = 1e-100
 

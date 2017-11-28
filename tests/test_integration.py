@@ -21,7 +21,7 @@ from numpy.linalg import matrix_rank
 from plda import PLDA
 from scipy.linalg import eigh, inv
 
-class TestModel(unittest.TestCase):
+class TestPLDA(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dims = 3
@@ -268,9 +268,32 @@ class TestModel(unittest.TestCase):
         result = np.matmul(result, A.T) + m
         cls.assert_same(result, cls.X, tolerance=tolerance)
 
-    def test_posterior_predictive_and_marginal_for_one_datum_are_equal(cls):
+    def test_predictive_and_marginal_are_equal_for_a_datum_via_posterior(cls):
         """ See proof in math notes. """
-        pass
+        tolerance = None
+        model = cls.model
+        relevant_dims = model.relevant_dims
+        assert cls.K > 1
+
+        # Compute marginal probabilities, using the postserior distributions.
+        means, cov_diags = model.calc_posteriors()
+        means, cov_diags = means[:, relevant_dims], cov_diags[:, relevant_dims]
+        assert means.shape == cov_diags.shape
+        if len(means.shape) == 1:
+            means = means.reshape(cls.K, 1)
+            cov_diags = cov_diags.reshape(cls.K, 1)
+
+        U = model.whiten(cls.X)
+        U = U[:, None, relevant_dims]
+
+        probs_1 = model.calc_marginal_likelihoods(U, standardize_data=False,
+                                                 ms=means, tau_diags=cov_diags)
+
+        # Compute posterior predictive probabilities.
+        X = cls.X[:, None, :]
+        probs_2 = model.calc_posterior_predictives(X, standardize_data=True)
+
+        cls.assert_same(probs_1, probs_2, tolerance=tolerance)
 
     def test_marginal_likelihood_equation(cls):
         """ EQ is from Kevin Murphy's cheatsheet. More detail in math notes."""

@@ -311,7 +311,7 @@ class Classifier:
            These are sorted in the same order as 'predictions'.
         """
 
-    to_idxs.__doc__ = """
+    fnames_to_idxs.__doc__ = """
         Converts an ndarray of filenames to indices indexing the model's data.
 
         ARGUMENT

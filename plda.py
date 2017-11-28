@@ -239,6 +239,8 @@ class PLDA:
             assert isinstance(n, int)
             relevant_dims = np.argsort(Ψ.diagonal())[::-1][:n]
 
+        if relevant_dims.shape == ():
+            relevant_dims = relevant_dims.reshape(1,)
         return relevant_dims
 
     def add_datum(self, datum, label, fname=None):
@@ -262,29 +264,40 @@ class PLDA:
     def calc_marginal_likelihoods(self, data, ms=None, tau_diags=None,
                                   standardize_data=None):
         assert isinstance(standardize_data, bool)
+        if standardize_data is True:
+            assert data.shape[-1] == len(self.Ψ.diagonal())
 
+        # Handle edge cases in setting relevant_dims, ms, and tau_diags
         if tau_diags is None:
             relevant_dims = self.relevant_dims
             tau_diags = self.Ψ.diagonal()
         else:
+            assert len(tau_diags.shape) == 2
             relevant_dims = np.arange(tau_diags.shape[-1])
+            assert data.shape[-1] == len(relevant_dims)
 
         if ms is None:
             ms = np.zeros(tau_diags.shape[-1])
+        else:
+            assert len(ms.shape) == 2
+            assert data.shape[-1] == ms.shape[-1]
 
-        if len(data.shape) == 1:
-            data = data[None, relevant_dims]  # axis -2 is now has shape 1.
-        if len(ms.shape) == 1:
+        # Set up the dimensions to perform the vectorized operations.
+        if len(ms.shape) < 2:
             ms = ms[None, relevant_dims]
-        if len(tau_diags.shape) == 1:
+        else:
+            ms = ms[..., relevant_dims]
+
+        if len(tau_diags.shape) < 2:
             tau_diags = tau_diags[None, relevant_dims]
+        else:
+            tau_diags = tau_diags[..., relevant_dims]
 
         if standardize_data is True:
-            U = self.whiten(data)
-        else:
-            U = data
-        U = U[..., relevant_dims]
+            data = self.whiten(data)
+        U = data[..., relevant_dims]
 
+        # Test assumptions baked into the vectorized math operations below.
         assert U.shape[-1] == ms.shape[-1]
         assert ms.shape == tau_diags.shape
         assert 2 == len(ms.shape) == len(tau_diags.shape)
@@ -292,7 +305,6 @@ class PLDA:
         n = U.shape[-2]
         mean_u = U.mean(axis=-2)
         squared_u = U ** 2
-
         log_probs = []
         for m, tau in zip(ms, tau_diags):
             log_constants = -.5 * n * np.log(2 * np.pi) \
@@ -311,6 +323,7 @@ class PLDA:
 
     def calc_posteriors(self, return_covs_as_diags=True, dims=None,
                         return_labels=False):
+        assert type(dims) is np.ndarray or dims is None
         if dims is None:
             relevant_dims = np.arange(self.Ψ.diagonal().shape[0])
         else:
@@ -341,9 +354,8 @@ class PLDA:
             return np.asarray(means), np.asarray(cov_diags)
 
     def calc_posterior_predictives(self, data, standardize_data,
-                                   return_log=True, return_labels=False):
+                                   return_labels=False):
         assert isinstance(return_labels, bool)
-        assert isinstance(return_log, bool)
         assert isinstance(standardize_data, bool)
         assert data.shape[-2] == 1
 
@@ -674,6 +686,9 @@ class PLDA:
     calc_marginal_likelihoods.__doc__ = """
         Computes the marginal likelihood of data.
 
+        NOTE: If you specifs ms or tau_diags, only the first len()th dims
+              as used for computing the probabilities.
+
         DESCRIPTION: EQ 6 on p.535 is incorrect. See notes or Kevin Murphy's
                       cheat sheet on conjugate analysis of the Gaussian.
         ARGUMENTS
@@ -683,13 +698,13 @@ class PLDA:
            axis -2: sets of data to compute marginal likelihoods for
 
          ms  (ndarray), shape=(n_unique_labels, n_data_dims)
-           Means of the data classes.
+           Means of the data classes. len(ms) == 2 must be True.
 
          tau_diags  (ndarray), shape=(n_unique_labels, n_data_dims)
            The diagonals of the covariances of the data classes. These
            are assumed to be coming from diagonal matrices, i.e. covariance
            matrix with only diagonal entries, which indicates the dimensions
-           are linearly independent.
+           are linearly independent. len(tau_diags) == 2 must be True.
 
          standardize_data  (bool)
            Must be set to true or false to indicate whether or not to transform
