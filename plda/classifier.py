@@ -14,11 +14,9 @@
 # ==============================================================================
 
 import os
-import sys
 import warnings
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import numpy as np
-from plda import PLDA
+from .plda import PLDA
 
 
 class Classifier:

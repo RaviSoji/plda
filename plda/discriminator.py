@@ -13,12 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 
-import sys
 import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from plda import PLDA
 import warnings
 import numpy as np
+from .plda import PLDA
 from numpy.core.umath_tests import inner1d
 from itertools import combinations_with_replacement
 from scipy.misc import logsumexp
