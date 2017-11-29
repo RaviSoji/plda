@@ -19,14 +19,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 sys.path.append(os.getcwd() + '/../')
-from cross_validation.classifier import Classifier
 from matplotlib.patches import Ellipse
 from numpy.random import multivariate_normal as m_normal
-from plda import PLDA
+import plda
 from scipy.stats import norm, chi2
 
-
-# Define helper plotting functions.
+# Define a bunch of helper plotting functions.
 def cov_ellipse(cov, q=None, nsig=None, **kwargs):
     """ Code is slightly modified, but essentially borrowed from: 
          https://stackoverflow.com/questions/18764814/make-contour-of-scatter
@@ -92,7 +90,6 @@ def gen_training_set(n_gaussians, sample_size, n_dims):
 
     return pts, lbls
 
-
 if __name__ == '__main__':
     n_gaussians = 5
     sample_size = 100
@@ -110,8 +107,8 @@ if __name__ == '__main__':
                        np.random.uniform(min_y, max_y, n_test)]).T
     
     # Use plda to classify test data.
-    classifier = Classifier(train_X, train_Y)
-    model = PLDA(train_X, train_Y)
+    classifier = plda.Classifier(train_X, train_Y)
+    model = plda.Model(train_X, train_Y)
     predictions, log_probs = classifier.predict(test, model=model,
                                                standardize_data=True)
     

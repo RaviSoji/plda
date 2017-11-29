@@ -16,7 +16,7 @@
 import os
 import warnings
 import numpy as np
-from .plda import PLDA
+from .plda import Model as PLDA
 from numpy.core.umath_tests import inner1d
 from itertools import combinations_with_replacement
 from scipy.misc import logsumexp
