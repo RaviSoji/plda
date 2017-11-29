@@ -22,7 +22,7 @@ from scipy.stats import multivariate_normal
 from scipy.misc import logsumexp
 
 
-class PLDA:
+class Model:
     def __init__(self, X, Y, fnames=None):
         self.relevant_dims = None
         self.params = dict()

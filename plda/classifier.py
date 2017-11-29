@@ -16,7 +16,7 @@
 import os
 import warnings
 import numpy as np
-from .plda import PLDA
+from .plda import Model as PLDA
 
 
 class Classifier:
