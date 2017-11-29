@@ -41,14 +41,14 @@ class Discriminator:
         idx_array = np.zeros(fname_ndarray.shape)
         for idx, fname in np.ndenumerate(fname_ndarray):
             idx_array[idx] = np.argwhere(self.fnames == fname)
-    
+
         return idx_array.astype(int)
 
     def get_unique_idx_pairs(self, idxs):
         idx_pairs = []
         for pair in combinations_with_replacement(idxs, 2):
             idx_pairs.append(list(pair))
-    
+
         return np.asarray(idx_pairs)
 
     def gen_pairs(self, idxs_1, idxs_2):
@@ -58,7 +58,7 @@ class Discriminator:
         Y2 = self.Y[idxs_2]
         fnames1 = self.fnames[idxs_1]
         fnames2 = self.fnames[idxs_2]
-        
+
         return np.stack((X1, X2), axis=-2), np.stack((Y1, Y2), axis=-1), \
                np.stack((fnames1, fnames2), axis=-1)
 
@@ -70,7 +70,7 @@ class Discriminator:
         warnings.warn('run_leave_out() deletes the existing model.')
         if n == 1:
             warnings.warn('n was set to 1. This means all the pairs are' +
-                           '\"same\" trials.')
+                          '\"same\" trials.')
 
         all_results = []
         for curr_shuffle in range(num_shuffles):
@@ -87,8 +87,8 @@ class Discriminator:
                 test_idxs = idxs[start:end]
                 test_pair_idxs = self.get_unique_idx_pairs(test_idxs)
                 results, col_titles = self.run(test_pair_idxs[:, 0],
-                                              test_pair_idxs[:, 1],
-                                              leave_out=leave_out)
+                                               test_pair_idxs[:, 1],
+                                               leave_out=leave_out)
                 shuffle_results.append(results)
             all_results.append(np.asarray(shuffle_results))
 
@@ -97,7 +97,6 @@ class Discriminator:
             all_results = all_results.reshape(-1, all_results.shape[-1])
 
         return all_results, col_titles
-
 
     def run(self, idxs1, idxs2, leave_out, return_log=True):
         assert isinstance(leave_out, bool)
@@ -110,10 +109,10 @@ class Discriminator:
             self.fit_model(self.X[train_idxs, :],
                            self.Y[train_idxs],
                            self.fnames[train_idxs])
-        
+
         data_pairs, lbl_pairs, fname_pairs = self.gen_pairs(idxs1, idxs2)
         truth = lbl_pairs[:, 0] == lbl_pairs[:, 1]
-        predictions, log_probs_same  = self.predict_same_diff(data_pairs)
+        predictions, log_probs_same = self.predict_same_diff(data_pairs)
 
         results, col_titles = self.tidy_data(predictions, truth,
                                              log_probs_same,
@@ -138,8 +137,8 @@ class Discriminator:
         fname_pairs = np.squeeze(fname_pairs)
 
         col_titles = ['prediction', 'truth',
-                      'stimulus_label_1','stimulus_label_2',
-                      'stimulus_filename_1','stimulus_filename_2']
+                      'stimulus_label_1', 'stimulus_label_2',
+                      'stimulus_filename_1', 'stimulus_filename_2']
         results = [predictions, truth,
                    lbl_pairs[..., 0], lbl_pairs[..., 1],
                    fname_pairs[..., 0], fname_pairs[..., 1]]
@@ -153,7 +152,7 @@ class Discriminator:
         if return_log is True and prob_type == 'same':
             col_titles.append('log_prob_same')
             results.append(log_probs)
-        elif return_log is True and prob_type =='diff':
+        elif return_log is True and prob_type == 'diff':
             col_titles.append('log_prob_diff')
             results.append(log_probs)
         elif return_log is False and prob_type == 'same':
@@ -208,12 +207,13 @@ class Discriminator:
 
         log_ps_diff = self.calc_probs_diff(data_pairs)
         log_ps_same = self.calc_probs_same(data_pairs)
-        assert log_ps_diff.shape[-2] == log_ps_diff.shape[-1] == log_ps_same.shape[-1]
+        assert log_ps_diff.shape[-2] == log_ps_diff.shape[-1]
+        assert log_ps_diff.shape[-1] == log_ps_same.shape[-1]
 
         log_prob_diff = logsumexp(log_ps_diff, axis=(-1, -2))
         log_prob_same = logsumexp(log_ps_same, axis=-1) + np.log(6)
-         # Since there are 42 "different probabilities" and 7 " same probabilities.
-         # Multiplying by six makes the prior 50/50 on the same/diff task.
+        # Since there are 42 "different probabilities" and 7 "same".
+        # Multiplying by six makes the prior 50/50 on the same/diff task.
 
         if return_prob == 'same':
             log_probs = log_prob_same
@@ -229,7 +229,8 @@ class Discriminator:
         else:
             return np.exp(log_probs)
 
-    def predict_same_diff(self, data_pairs, return_log=True, MAP_estimate=True):
+    def predict_same_diff(self, data_pairs, return_log=True,
+                          MAP_estimate=True):
         assert isinstance(return_log, bool)
         assert isinstance(MAP_estimate, bool)
         assert len(data_pairs.shape) > 1
@@ -241,7 +242,8 @@ class Discriminator:
             predictions = log_ps_same.shape
             for idx, log_p_same in np.ndenumerate(log_ps_same):
                 p_same = np.exp(log_p_same)
-                prediction = bool(np.random.multinomial(1, [p_same, 1 - p_same])[0])
+                prediction = bool(np.random.multinomial(1,
+                                  [p_same, 1 - p_same])[0])
                 predictions[idx] = prediction
         else:
             predictions = np.zeros(log_ps_same.shape).astype(bool)
@@ -249,9 +251,10 @@ class Discriminator:
             predictions[log_ps_same < log_chance] = False
             bool_idxs = log_ps_same == log_chance
             sz = bool_idxs.sum()
-            guesses = np.random.multinomial(1, [.5, .5], size=sz)[:,0].astype(bool)
+            guesses = np.random.multinomial(1, [.5, .5],
+                                            size=sz)[:, 0].astype(bool)
             predictions[bool_idxs] = guesses
-            
+
         if return_log is True:
             return predictions, log_ps_same
         else:
@@ -259,35 +262,35 @@ class Discriminator:
 
     fit_model.__doc__ = """
         Fits the plda model to the task, using X and Y.
-    
+
         ARGUMENTS
          X  (ndarray), shape=(n_data, n_data_dims)
            The data, sorted row-wise. That is, each column is a datum,
            and the columns are the values at those dimensions.
-    
+
          Y  (ndarray), shape=(n_data,)
            Labels of the data, sorted in the same order as X.
-    
+
          fnames  (ndarray), shape=(n_data,), optional
            Filenames of the data, sorted in the same order as X.
-    
+
         RETURNS
          None
         """
 
     fnames_to_idxs.__doc__ = """
          Converts an ndarray of filenames to indices indexing the model's data.
-    
+
         ARGUMENT
          fname_ndarray  (ndarray), shape=(...)
            Contains filenames that may or may not be repeated.
-    
+
         RETURN
          idx_array  (ndarray):
            Has same shape as fname_ndarray, but with integer entries. These
            integers replace the string filenames with indices that
            index the filenames in self.fnames.
-    
+
         EXAMPLE:
          fname_ndarray[0] == self.fnames[idx_array[0]]
          fname_ndarray[0]  # 'img_name.jpg'
@@ -311,7 +314,7 @@ class Discriminator:
         ARGUMENTS
          idxs  (ndarray), shape=(n_unique_idxs,)
            Unique indices, indexing the data in self.fnames.
-         
+
         RETURNS
          idx_pairs  (ndarray), shape=(n_combos, 2)
            All the possible (unique) ways one could select two data.
@@ -326,7 +329,7 @@ class Discriminator:
 
          idxs_2  (ndarray), shape=(...)
            An array of unique integers.
-         
+
         RETURNS
           X_pairs  (ndarray), shape=(..., 2, n_data_dims)
             Pairs of data.
@@ -359,7 +362,7 @@ class Discriminator:
          num_shuffles  (int)
            Number of times to re-run the cross-validation on newly shuffled
            data. This matters only when your dataset is small..
-           
+
          leave_out  (bool), optional
            Whether or not to leave the 'n' data out of the training set before
            testing on the 'n' data. Default value is True (recommended).
@@ -370,7 +373,9 @@ class Discriminator:
         RETURNS
          results  (ndarray), shape=SEE BELOW.
            If return_2d_array is False,
-               shape=(num_shuffles + 1, n_data - n + 1, n_combos, 3 + n_classes)
+               shape=(num_shuffles + 1,
+                      n_data - n + 1, n_combos,
+                      3 + n_classes)
             First dimension corresponds to a particular shuffle.
             Second dimension corresponds to runs with training data left
             Third dimension corresponds to the number of unique data combos.
@@ -403,7 +408,7 @@ class Discriminator:
          return_log  (bool)
            Whether or not to return probabilities of the two stimuli being
            the "same" as log probabilities or not.
-     
+
         RETURNS
          results  (ndarray), shape=(n_pairs, 8)
            Results of the plda model being run on the indexed pairs of data.
@@ -421,12 +426,12 @@ class Discriminator:
          data_pairs  (ndarray), shape=(..., 2, n_data_dims)
            Pairs of data to for which the model will make "same" and
            "different" evaluations.
-         
+
         RETURNS
          log_ps_diff  (ndarray), shape=(..., n_unique_labels, n_unique_labels)
            Log joint probabilities of the two data being generated by different
            classes. The diagonals are set to -inf because the probabilities of
-           "same" are computed differently -- see calc_probs_same(). 
+           "same" are computed differently -- see calc_probs_same().
            SEE ALSO jupyter notebook notes on the mathematical details.
         """
 
@@ -439,7 +444,7 @@ class Discriminator:
          data_pairs  (ndarray), shape=(..., 2, n_data_dims)
            Pairs of data to for which the model will make "same" and
            "different" evaluations.
-         
+
         RETURNS
          log_ps_same  (ndarray), shape=(..., n_unique_classes)
           Probabilities that both data were generated from the same
@@ -466,7 +471,7 @@ class Discriminator:
            Must be set to either "same" or "diff". This determines whether
            the function returns the probabilities of the two data being
            generated by the same or different distributions.
-    
+
         RETURNS
           probabilities  (ndarray), shape=(...)
             Model certainty about "same" and "different" judgements.
@@ -500,7 +505,7 @@ class Discriminator:
            Must be set to either "same" or "diff". This determines whether
            the function returns the probabilities of the two data being
            generated by the same or different distributions.
-     
+
         RETURNS
          predictions  (ndarray), shape=(...)
           Model evaluations, predicting whether the pairs of data are from
@@ -510,11 +515,3 @@ class Discriminator:
           Probabilities associated with the predictions. These are log values
           if return_log is set to True.
         """
-
-def main():
-    raise NotImplementedError
-
-    # Example of cross validation
-    # Example of running selected examples with leave out
-    # Example of running selected examples with leave in
-    # Take the result of cross validation, and run those test pairs with leave in.

@@ -171,12 +171,12 @@ def preprocess_cafe(dir_raw_cafe_faces, test_fnames_path=None):
         test_fnames = np.load(test_fnames_path)
     else:
         test_fnames = []
-    
+
     preprocessed = preprocess_faces(imgs, n_components='default',
                                     resize_shape=(400, 400))
 
     idxs = np.arange(len(imgs))
-    test_idxs, _  = fnames_to_idxs(test_fnames, fnames)
+    test_idxs, _ = fnames_to_idxs(test_fnames, fnames)
     test_idxs = np.unique(test_idxs)
     train_idxs = np.asarray(list(set(idxs) - set(test_idxs)))
 

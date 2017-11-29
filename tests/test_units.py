@@ -35,12 +35,12 @@ class TestPLDA(unittest.TestCase):
                                      self.shared_cov, self.dist_bw_means)
         self.model = PLDA(X, Y, fnames)
         self.X, self.Y, self.fnames = X, Y, fnames
-        
+
     def gen_data(self, dims, n, K, shared_cov, dist_bw_means):
         X = np.vstack([m_normal(np.ones(dims) * dist_bw_means * x,
-                                    shared_cov, n) for x in range(K)])
+                                shared_cov, n) for x in range(K)])
         Y = np.hstack(['gaussian_{}'.format(k)] * 100 for k in range(5))
-        fnames = np.asarray(['gaussian_{}_x_{}.jpg'.format(k, x) \
+        fnames = np.asarray(['gaussian_{}_x_{}.jpg'.format(k, x)
                             for k in range(K) for x in range(n)])
 
         # Do not delete these assertions.
@@ -100,21 +100,24 @@ class TestPLDA(unittest.TestCase):
             self.assertEqual(n_1, self.n)
 
             X_subset = X[Y == key, :]
-            self.assert_same(mean_1, X_subset.mean(axis=0), tolerance=tolerance)
+            self.assert_same(mean_1, X_subset.mean(axis=0),
+                             tolerance=tolerance)
             self.assert_same(cov_1, np.cov(X_subset.T), tolerance=tolerance)
 
             truth = [None] * int(self.n)
             self.assert_same(np.asarray(fnames_2), np.asarray(truth))
 
             fnames_1.sort()
-            self.assert_same(np.asarray(fnames_1), np.asarray(fnames[Y == key]))
+            self.assert_same(np.asarray(fnames_1),
+                             np.asarray(fnames[Y == key]))
 
     def test_get_ns(self):
         ns_1, labels = self.model.get_ns(return_labels=True)
         ns_2 = self.model.get_ns()
 
         # Function should return the same ordering for all returns.
-        ns_1, ns_2, labels = np.asarray(ns_1), np.asarray(ns_2), np.asarray(labels)
+        ns_1, ns_2 = np.asarray(ns_1), np.asarray(ns_2)
+        labels = np.asarray(labels)
         idxs = np.argsort(labels)
         ns_1, ns_2, labels = ns_1[idxs], ns_2[idxs], labels[idxs]
         self.assert_same(ns_1, ns_2)
@@ -149,11 +152,13 @@ class TestPLDA(unittest.TestCase):
         cov_diags_2 = self.model.get_covs()
 
         # Function should return the same ordering for all returns.
-        cov_diags_1, cov_diags_2 = np.asarray(cov_diags_1), np.asarray(cov_diags_2)
+        cov_diags_1, \
+        cov_diags_2 = np.asarray(cov_diags_1), np.asarray(cov_diags_2)
         labels = np.asarray(labels)
         idxs = np.argsort(labels)
-        cov_diags_1, cov_diags_2, labels = cov_diags_1[idxs],\
-                                           cov_diags_2[idxs], labels[idxs]
+        cov_diags_1, \
+        cov_diags_2,
+        labels = cov_diags_1[idxs], cov_diags_2[idxs], labels[idxs]
         self.assert_same(cov_diags_1, cov_diags_2)
 
         # All appropriate labels should be returned.
@@ -194,12 +199,12 @@ class TestPLDA(unittest.TestCase):
 
     def test_calc_W(self):
         tolerance = 1e-100
-        S_b = [[ 17.70840444, 17.96889098, 18.19513973],
-               [ 17.96889098, 18.24564939, 18.46561872],
-               [ 18.19513973, 18.46561872, 18.69940039]]
-        S_w = [[ 0.94088804, -0.05751511,  0.01467744],
+        S_b = [[17.70840444, 17.96889098, 18.19513973],
+               [17.96889098, 18.24564939, 18.46561872],
+               [18.19513973, 18.46561872, 18.69940039]]
+        S_w = [[0.94088804,  -0.05751511,  0.01467744],
                [-0.05751511,  1.01617648, -0.03831551],
-               [ 0.01467744, -0.03831551,  0.88440609]]
+               [0.01467744,  -0.03831551,  0.88440609]]
 
         W_model = self.model.calc_W(S_b, S_w)
         _, W_truth = eigh(S_b, S_w)
@@ -306,7 +311,7 @@ class TestPLDA(unittest.TestCase):
         self.assert_diagonal(self.model.Ψ)
         self.assertEqual(np.isnan(self.model.Ψ).sum(), 0)
         self.assertEqual(np.isinf(self.model.Ψ).sum(), 0)
-        
+
     def test_get_relevant_dims(self):
         tolerance = 1e-100
         Ψ = self.model.Ψ
@@ -314,11 +319,11 @@ class TestPLDA(unittest.TestCase):
         relevant_dims = np.argsort(diag)[::-1][:100]
         self.assert_same(relevant_dims, self.model.get_relevant_dims(Ψ, n=100),
                          tolerance=tolerance)
-        
+
         relevant_dims = np.squeeze(np.argwhere(diag != 0))
         self.assert_same(relevant_dims, self.model.get_relevant_dims(Ψ),
                          tolerance=tolerance)
-        
+
     def test_add_datum(self):
         tolerance = 1e-100
         old_model = self.model
@@ -497,7 +502,7 @@ class TestPLDA(unittest.TestCase):
         new_fnames_truth = [None]
         new_fnames_truth = np.asarray(new_fnames_truth)
         self.assert_same(new_fnames_model.sort(), new_fnames_truth.sort())
-        
+
     def test_calc_marginal_likelihoods(self):
         X = self.X
         with self.assertRaises(AssertionError):
@@ -511,8 +516,9 @@ class TestPLDA(unittest.TestCase):
 #        # Assert shapes with supplied ms and tau_diags
 #        # Assert shape with ms missing and tau_diags
 #
-#        probs = self.model.calc_marginal_likelihoods(data, standardize_data=False)
-        #self.assertEqual(probs.shape, ())
+#        probs = self.model.calc_marginal_likelihoods(data,
+#                                                     standardize_data=False)
+        # self.assertEqual(probs.shape, ())
 
     def test_calc_posteriors(self):
         # Assert numbers of returns.
@@ -537,13 +543,15 @@ class TestPLDA(unittest.TestCase):
         if self.dims > 2:
             n_dims = self.dims - 2
             dims = np.arange(self.dims)[:n_dims]
-            means, covs, labels = self.model.calc_posteriors(dims=dims, return_labels=True)
+            means, \
+            covs, \
+            labels = self.model.calc_posteriors(dims=dims, return_labels=True)
             self.assertEqual(means.shape, (self.K, n_dims))
             self.assertEqual(covs.shape, (self.K, n_dims))
             self.assertEqual(len(labels), self.K)
 
         # Testing the actual probabilities is done in test_integration.py.
-        # Testing whether standardizing the data actually works is also in integration testing.
+        # Testing standardization of data is also in integration testing.
 
     def test_calc_posterior_predictives(self):
         # Assert raise assertion error for unspecified standardize_data
@@ -590,7 +598,7 @@ class TestPLDA(unittest.TestCase):
         truth = self.X - m
         predicted = self.model.whiten(self.X)
         self.assert_same(predicted, truth, tolerance=tolerance)
-        
+
         # Test unwhitening: x = Au + m = Iu + m = u + m
         self.assert_same(predicted + m, self.X, tolerance=tolerance)
 
@@ -612,7 +620,7 @@ class TestPLDA(unittest.TestCase):
             self.assertTrue(np.array_equal(a, b))
         else:
             self.assertTrue(np.allclose(a, b, atol=tolerance))
-            
+
         self.assertTrue(type(a) == type(b))
 
     def assert_diagonal(self, A, tolerance=None):
@@ -635,5 +643,5 @@ class TestPLDA(unittest.TestCase):
             self.assertFalse(np.array_equal(a, b))
         else:
             self.assertFalse(np.allclose(a, b, atol=tolerance))
-            
+
         self.assertTrue(type(a) == type(b))
