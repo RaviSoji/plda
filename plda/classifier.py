@@ -113,13 +113,13 @@ class Classifier:
 
         if return_probs is True and return_log is False:
             probs = np.exp(log_probs)
-            col_titles += ['prob_{}'.format(key) \
+            col_titles += ['prob_{}'.format(key)
                            for key in list(self.model.data.keys())]
             results.append(probs)
-                       
+
         elif return_probs is True and return_log is True:
             probs = log_probs
-            col_titles += ['log_prob_{}'.format(key) \
+            col_titles += ['log_prob_{}'.format(key)
                            for key in list(self.model.data.keys())]
             results.append(probs)
 
@@ -145,9 +145,9 @@ class Classifier:
         idx_array = np.zeros(fname_ndarray.shape)
         for idx, fname in np.ndenumerate(fname_ndarray):
             idx_array[idx] = np.argwhere(self.fnames == fname)
-    
+
         return idx_array.astype(int)
-  
+
     def get_confusion_matrix(self, results, as_ndarray=False):
         labels = np.unique(results[..., :2])
         row_dict = {label: 0 for label in labels}
@@ -214,7 +214,7 @@ class Classifier:
          num_shuffles  (int)
            Number of times to re-run the cross-validation on newly shuffled
            data. This matters only when your dataset is small.
-           
+
          leave_out  (bool), optional
            Whether or not to leave the 'n' data out of the training set before
            testing on the 'n' data. Default value is True (recommended).
@@ -251,7 +251,7 @@ class Classifier:
 
          return_fnames  (bool)
            Whether or not to return the filenames of the test images.
-         
+
         RETURNS
          results  (ndarray), shape=(*test_idxs.shape, >2)
            The last dimension always returns the prediction in the first column
@@ -280,7 +280,7 @@ class Classifier:
          return_log  (bool)
           Whether or not to return log probabilities of the test image
           being assigned to each label.
-         
+
         RETURNS
          tidied_data  (ndarray), shape=(*predictions.shape, 9)
         """
@@ -334,16 +334,13 @@ class Classifier:
 
         ARGUMENTS
          results  (ndarray), shape=(..., >1)
-           Must have at least two columns with the first being model predictions
-           and the second being the truth.
+           Must have at least two columns with the first being model
+           predictions and the second being the truth.
 
          as_ndarray  (bool), optional
            Returns the matrix as an ndarray
 
         RETURNS
          confusion_matrix  (dictionary of dictionaries OR ndarray)
-           Variable type depends on what as_array is set to. 
+           Variable type depends on what as_array is set to.
         """
-
-def main():
-    raise NotImplementedError

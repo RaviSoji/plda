@@ -21,6 +21,7 @@ from numpy.linalg import matrix_rank
 from plda import Model as PLDA
 from scipy.linalg import eigh, inv
 
+
 class TestPLDA(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -32,17 +33,17 @@ class TestPLDA(unittest.TestCase):
 
         np.random.seed(0)
         X, Y, fnames = cls.gen_data(cls.dims, cls.n, cls.K,
-                                     cls.shared_cov, cls.dist_bw_means)
+                                    cls.shared_cov, cls.dist_bw_means)
         cls.model = PLDA(X, Y, fnames)
         cls.X, cls.Y, cls.fnames = X, Y, fnames
 
     @classmethod
     def gen_data(cls, dims, n, K, shared_cov, dist_bw_means):
         X = np.vstack([m_normal(np.ones(dims) * dist_bw_means * x,
-                                    shared_cov, n) for x in range(K)])
+                                shared_cov, n) for x in range(K)])
         Y = np.hstack(['gaussian_{}'.format(k)] * 100 for k in range(5))
-        fnames = np.asarray(['gaussian_{}_x_{}.jpg'.format(k, x) \
-                            for k in range(K) for x in range(n)])
+        fnames = np.asarray(['gaussian_{}_x_{}.jpg'.format(k, x)
+                             for k in range(K) for x in range(n)])
 
         # Do not delete these assertions.
         assert len(X.shape) == 2
@@ -58,7 +59,7 @@ class TestPLDA(unittest.TestCase):
             cls.assertTrue(np.array_equal(a, b))
         else:
             cls.assertTrue(np.allclose(a, b, atol=tolerance))
-            
+
         cls.assertTrue(type(a) == type(b))
 
     def assert_diagonal(cls, A, tolerance=None):
@@ -80,7 +81,7 @@ class TestPLDA(unittest.TestCase):
             cls.assertFalse(np.array_equal(a, b))
         else:
             cls.assertFalse(np.allclose(a, b, atol=tolerance))
-            
+
         cls.assertTrue(type(a) == type(b))
 
     def test_get_ns(cls):
@@ -114,7 +115,7 @@ class TestPLDA(unittest.TestCase):
     def test_optimized_m(cls):
         tolerance = 1e-100
         cls.assert_same(cls.model.m, cls.X.mean(axis=0),
-                         tolerance=tolerance)
+                        tolerance=tolerance)
 
     def test_fit(cls):
         cls.assertEqual(cls.model.K, cls.K)
@@ -149,14 +150,13 @@ class TestPLDA(unittest.TestCase):
         cls.assert_diagonal(Λ_w, tolerance=tolerance)
 
     def test_optimized_Ψ_is_diagonal(cls):
-        tolerance=None
+        tolerance = None
         cls.assert_diagonal(cls.model.Ψ, tolerance=tolerance)
 
     def test_optimized_Ψ_is_nonnegative(cls):
-        n_non_negative_elements= (cls.model.Ψ < 0).sum()
+        n_non_negative_elements = (cls.model.Ψ < 0).sum()
         expected = 0
         cls.assertEqual(n_non_negative_elements, expected)
-
 
     def test_optimized_A_is_invertible(cls):
         cls.assert_invertible(cls.model.A)
@@ -174,7 +174,7 @@ class TestPLDA(unittest.TestCase):
         result = inv(result)
 
         cls.assert_same(result, cls.model.W, tolerance=tolerance)
-        
+
     def test_optimized_A_inv_diagonalizes_S_b(cls):
         """ (inv(A))(S_b)(inv(A^T) should yield a diagonal matrix. """
         tolerance = 1e-13
@@ -212,7 +212,7 @@ class TestPLDA(unittest.TestCase):
         cls.assert_same(Φ_b_1, Φ_b_2, tolerance=tolerance)
 
         # Hacky alternative since the assertion above has precision issues:
-        #  compared to Φ_b_2, S_b should be less similar to Φ_b_1 because 
+        #  compared to Φ_b_2, S_b should be less similar to Φ_b_1 because
         #  the point of the term on the right of S_b is to bring it closer to
         #  the "true Φ_b".
         passes = np.abs(Φ_b_1 - S_b).sum() > np.abs(Φ_b_1 - Φ_b_2).sum()
@@ -235,7 +235,7 @@ class TestPLDA(unittest.TestCase):
         NOTES:
         (1) There are two ways to compute Φ_w:
             Φ_w = (A)(A^T)
-            Φ_w = n / (n-1) * S_w 
+            Φ_w = n / (n-1) * S_w
         (2) *** COMPUTE PHI WITH S_w: Φ_w = n/(n-1) * S_w. ***
         (3) Do NOT use Φ_w = (A)(A^T) because that is trivially true:
              (V^T)(Φ_w)(V), where V = inv(A^T), which gives
@@ -287,7 +287,8 @@ class TestPLDA(unittest.TestCase):
         U = U[:, None, relevant_dims]
 
         probs_1 = model.calc_marginal_likelihoods(U, standardize_data=False,
-                                                 ms=means, tau_diags=cov_diags)
+                                                  ms=means,
+                                                  tau_diags=cov_diags)
 
         # Compute posterior predictive probabilities.
         X = cls.X[:, None, :]
