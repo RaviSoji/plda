@@ -18,7 +18,7 @@ import numpy as np
 import unittest
 from numpy.random import multivariate_normal as m_normal
 from numpy.linalg import matrix_rank
-from plda import PLDA
+from plda import Model as PLDA
 from scipy.linalg import eigh, inv
 
 class TestPLDA(unittest.TestCase):

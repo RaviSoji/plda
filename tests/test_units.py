@@ -14,8 +14,8 @@
 # ==============================================================================
 
 import unittest
-from plda import PLDA
 import numpy as np
+from plda import Model as PLDA
 from numpy.random import multivariate_normal as m_normal
 from scipy.linalg import det, eigh, inv
 from numpy.linalg import matrix_rank
