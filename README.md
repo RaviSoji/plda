@@ -1,4 +1,4 @@
-# probabilistic_LDA 
+# Probabilistic Linear Discriminant Analysis
 
 ### Disclaimer
 UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 15, 2017.
@@ -37,7 +37,7 @@ To run ALL tests:
 python3.5 -m unittest discover
 ```
 
-To run only one of the three test files in the tests folder, run the corresponding line/command, below:
+To run only one of the test files in the tests folder, run the corresponding line/command, below:
 ```
 python3.5 -m unittest tests.test_units_plda # Runs quickly.
 python3.5 -m unittest tests.test_integration_plda  # Runs quickly.
