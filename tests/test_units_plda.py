@@ -157,11 +157,12 @@ class TestPLDA(unittest.TestCase):
         labels = np.asarray(labels)
         idxs = np.argsort(labels)
         cov_diags_1, \
-        cov_diags_2,
+        cov_diags_2, \
         labels = cov_diags_1[idxs], cov_diags_2[idxs], labels[idxs]
         self.assert_same(cov_diags_1, cov_diags_2)
 
         # All appropriate labels should be returned.
+        print(labels)
         truth = np.unique(self.Y)
         np.sort(truth)
         self.assert_same(labels, truth)
