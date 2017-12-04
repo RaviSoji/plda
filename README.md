@@ -1,7 +1,7 @@
 # probabilistic_LDA 
 
 ### Disclaimer
-UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 01, 2017.
+UPDATE: I've merged all the updates in the revamp branch, but I still haven't had time to rewrite test_inference.py. Check back Dec. 15, 2017.
 
 If all that you want to do is apply this model to a dataset and measure its
  performance, you will find the code to be bulky in that it stores parameters,
@@ -39,9 +39,17 @@ python3.5 -m unittest discover
 
 To run only one of the three test files in the tests folder, run the corresponding line/command, below:
 ```
-python3.5 -m unittest tests.test_units # Runs quickly.
-python3.5 -m unittest tests.test_integration  # Runs quickly.
-python3.5 -m unittest tests.test_inference  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
+python3.5 -m unittest tests.test_units_plda # Runs quickly.
+python3.5 -m unittest tests.test_integration_plda  # Runs quickly.
+python3.5 -m unittest tests.test_inference_plda  # Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
+
+python3.5 -m unittest tests.test_units_discriminator.py
+python3.5 -m unittest tests.test_integration_discriminator.py
+python3.5 -m unittest tests.test_inference_discriminator.py
+
+python3.5 -m unittest tests.test_units_classifier.py
+python3.5 -m unittest tests.test_integration_classifier.py
+python3.5 -m unittest tests.test_inference_classifier.py
 ```
 
 ### Demo with Artificial 2D Gaussian Data
