@@ -34,8 +34,19 @@ class Discriminator:
         self.fnames = fnames
         self.model = None
 
-    def fit_model(self, X=self.X, Y=self.Y, fnames=self.fnames):
-        self.model = PLDA(self.X, self.Y, self.fnames)
+    def fit_model(self, X=None, Y=None, fnames=None):
+        if X is None:
+            assert Y is None and fnames is None
+            self.model(self.X, self.Y, self.fnames)
+        elif fnames is None:
+            assert X.shape[0] == Y.shape[0]
+            self.model = PLDA(X, Y, Y.shape[0] * [None])
+        elif fnames is not None:
+            assert len(Y) == len(fnames)
+            assert X.shape[0] == Y.shape[0]
+            self.model(X, Y, fnames)
+        else:
+            raise ValueError
 
     def fnames_to_idxs(self, fname_ndarray):
         idx_array = np.zeros(fname_ndarray.shape)
