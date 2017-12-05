@@ -37,7 +37,7 @@ class Discriminator:
     def fit_model(self, X=None, Y=None, fnames=None):
         if X is None:
             assert Y is None and fnames is None
-            self.model(self.X, self.Y, self.fnames)
+            self.model = PLDA(self.X, self.Y, self.fnames)
         elif fnames is None:
             assert X.shape[0] == Y.shape[0]
             self.model = PLDA(X, Y, Y.shape[0] * [None])
