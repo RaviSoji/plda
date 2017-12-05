@@ -31,7 +31,7 @@ class Classifier:
         self.fnames = fnames
         self.model = None
 
-    def fit_model(self, X, Y, fnames=None):
+    def fit_model(self, X=self.X, Y=self.Y, fnames=self.fnames):
         self.model = PLDA(X, Y, fnames)
 
     def cross_validate(self, n=1, num_shuffles=1, leave_out=True):
@@ -125,7 +125,7 @@ class Classifier:
 
         return np.hstack(results), np.asarray(col_titles)
 
-    def predict(self, X, model, standardize_data):
+    def predict(self, X, model=self.model, standardize_data):
         assert isinstance(model, PLDA)
         assert isinstance(standardize_data, bool)
 

@@ -34,8 +34,8 @@ class Discriminator:
         self.fnames = fnames
         self.model = None
 
-    def fit_model(self, X, Y, fnames):
-        self.model = PLDA(X, Y, fnames)
+    def fit_model(self, X=self.X, Y=self.Y, fnames=self.fnames):
+        self.model = PLDA(self.X, self.Y, self.fnames)
 
     def fnames_to_idxs(self, fname_ndarray):
         idx_array = np.zeros(fname_ndarray.shape)
