@@ -31,8 +31,19 @@ class Classifier:
         self.fnames = fnames
         self.model = None
 
-    def fit_model(self, X=self.X, Y=self.Y, fnames=self.fnames):
-        self.model = PLDA(X, Y, fnames)
+    def fit_model(self, X=None, Y=None, fnames=None):
+        if X is None:
+            assert Y is None and fnames is None
+            self.model(self.X, self.Y, self.fnames)
+        elif fnames is None:
+            assert X.shape[0] == Y.shape[0]
+            self.model = PLDA(X, Y, Y.shape[0] * [None])
+        elif fnames is not None:
+            assert len(Y) == len(fnames)
+            assert X.shape[0] == Y.shape[0]
+            self.model(X, Y, fnames)
+        else:
+            raise ValueError
 
     def cross_validate(self, n=1, num_shuffles=1, leave_out=True):
         assert n > 0 and isinstance(n, int)
@@ -125,9 +136,13 @@ class Classifier:
 
         return np.hstack(results), np.asarray(col_titles)
 
-    def predict(self, X, model=self.model, standardize_data):
-        assert isinstance(model, PLDA)
+    def predict(self, X, standardize_data, model=None):
         assert isinstance(standardize_data, bool)
+
+        if model is None:
+            model = self.model
+        else:
+            assert isinstance(model, PLDA)
 
         log_pps, \
         labels = model.calc_posterior_predictives(X[..., None, :],
