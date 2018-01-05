@@ -16,176 +16,155 @@
 import os
 import sys
 import numpy as np
+import pandas as pd
 from skimage.io import imread
 from scipy.misc import imresize
 from sklearn.decomposition import PCA
 sys.path.insert(0, '../')
 
 
-def load_jpgs_and_lbls(directory, dataset, as_grey=True, return_fnames=False):
-    """ Reads '.jpg' files from a directory as grayscaled images.
+def get_verbose_print_function(v):
+    assert isinstance(v, bool)
+
+    func = print if v is True else lambda *a, **k: None
+
+    return func
+
+
+def get_resize_function(shape):
+    if isinstance(shape, tuple):
+        assert isinstance(shape[0], int)
+        assert isinstance(shape[1], int)
+        assert len(shape) == 2
+        
+        func = lambda img: imresize(img, shape)
+        
+    elif shape is None:
+        func = lambda img: img
+        
+    else:
+        raise ValueError
+
+    return func
+
+
+def read_cafe(directory, resize_shape=None, verbose=False):
+    """ Reads the Child Affective Facial Expressions dataset as gray images.
 
     DESCRIPTION
      Grayscaling weights: 0.2125 RED + 0.7154 GREEN + 0.0721 BLUE.
-     cafe and google data file names should begin with the emotion name.
+     This function assumes the filenames begin with the emtion name
+      when obtaining the image label (first 3 characters of the filename).
 
-    ARGUMENT
-     directory    (str): Directory containing the files to be read.
-     dataset      (str): Must be set to either 'cafe' or 'google'.
+     RGB > Grayscale > Resize (optional)
+
+    ARGUMENTS
+     directory      (str): Directory containing the files to be read.
+     resize_shape   (int): Optional parameter for reshaping as images are read.
+                            This is useful when images are large and/or
+                            when the dataset is large.
+     verbose       (bool): Whether or not to print file names as they are read.
 
     RETURNS
      images      (list): List of 2D ndarrays (grayscaled images).
      labels      (list): List of strings in the same order as images.
+     fnames      (list): List of string file names in the same order as images.
     """
     assert isinstance(directory, str)
-    assert dataset == 'cafe' or dataset == 'google'
-    assert as_grey is True
+    assert directory.endswith('/')
+
+    verbose_print = get_verbose_print_function(verbose)
+    resize = get_resize_function(resize_shape)
 
     images = []
     labels = []
     fnames = []
+    verbose_message = 'Loading: {}'
     for fname in os.listdir(directory):
         if fname.endswith('.jpg'):
-            print('Loading: {}'.format(fname))
-            img = imread(directory + '/' + fname, as_grey=as_grey)
-            images.append(img)
-            label = get_label(fname, dataset=dataset)
+            verbose_print(verbose_message.format(fname))
+
+            img = imread(directory + fname, as_grey=True)
+            images.append(resize(img))
+
+            label = fname[:3]
             labels.append(label)
+
             fnames.append(fname)
 
-    if return_fnames is True:
-        return np.asarray(images), np.asarray(labels), np.asarray(fnames)
-    elif return_fnames is False:
-        return np.asarray(images), np.asarray(labels)
-    else:
-        raise ValueError
+    return images, labels, fnames
 
 
-def get_label(filename, dataset):
-    if dataset == 'cafe':
-        return filename[:3]
-
-    elif dataset == 'google':
-        label = ''.join([i for i in filename if not i.isdigit()])
-        label = label[:-4]
-
-        return label
-
-    else:
-        raise ValueError('Dataset must be set to either ' +
-                         '\"cafe\" or \"google\".')
-
-
-def get_smallest_shape(images):
-    smallest_size = -1
+def preprocess_faces(images, resize_shape=None,
+                     n_components_pca=None, pct_variance_explained_pca=None,
+                     verbose=False):
+    """ Grayscale > resize (optional) > flatten > PCA (optional). """
     for img in images:
-        assert isinstance(img, np.ndarray)
-        if img.shape[0] < smallest_size or smallest_size == -1:
-            smallest_size = img.shape[0]
+        assert img.shape[0] == img.shape[1]
 
-    return (smallest_size, smallest_size)
+    verbose_print = get_verbose_print_function(v=verbose)
+    resize = get_resize_function(resize_shape)
 
+    preprocessed_images = []
+    verbose_message = 'Preparing the {}th image for PCA.'
+    for i, img in enumerate(images):
+        prepped_img = resize(img).astype(float)
+        prepped_img = prepped_img.flatten()
+        preprocessed_images.append(prepped_img)
 
-def get_principal_components(flattened_images, n_components='default',
-                             default_pct_variance_explained=.96):
-    """ Standardizes the data and gets the principal components.
+        verbose_print(verbose_message.format(i))
+
+    if n_components_pca is None and pct_variance_explained_pca is None:
+        return np.asarray(preprocessed_images)
+    else:
+        return get_principal_components(preprocessed_images,
+                                        n_components_pca,
+                                        pct_variance_explained_pca)
+        
+
+def get_principal_components(flattened_images, n_components=None,
+                             pct_variance_explained=None):
+    """ Gets the principal components of flattened_images.
+
+    DESCRIPTION: Choose either the number of components to use or the
+                  lower bound on the percent variance to be captured.
+    
+    ARGUMENTS
+     preprocessed_imgs        (list): Must be a list of 1D ndarrays.
+     n_components_pca          (int): Number of pca components to use.
+     pct_variance_explained  (float): Must be in the half-open interval (0, 1].
+
+    RETURNS
+     principal_components  (ndarray): shape=(len(flattened_imgs), n_components)
     """
     for img in flattened_images:
         assert isinstance(img, np.ndarray)
         assert img.shape == flattened_images[-1].shape
         assert len(img.shape) == 1
+    assert pct_variance_explained is not None or n_components is not None
+
     X = np.asarray(flattened_images)
     X -= X.mean(axis=0)  # Center all of the data around the origin.
-    X /= np.std(X, axis=0)
+    X /= np.std(X, axis=0)  # Standardize all the variables/features/columns.
 
     pca = PCA()
     pca.fit(X)
+    sorted_eig_vals = pca.explained_variance_
+    cum_pct_variance = (sorted_eig_vals / sorted_eig_vals.sum()).cumsum()
 
-    if n_components == 'default':
-        sorted_eig_vals = pca.explained_variance_
-        cum_pct_variance = (sorted_eig_vals / sorted_eig_vals.sum()).cumsum()
-        idxs = np.argwhere(cum_pct_variance >= default_pct_variance_explained)
-        n_components = np.squeeze(idxs)[0]
+    if pct_variance_explained is not None:
+        idxs = np.argwhere(cum_pct_variance >= pct_variance_explained)
+        n_components = np.squeeze(idxs)[0] + 1  # Add 1 to ensure >=.
 
-    V = pca.components_[:n_components + 1, :].T
+    V = pca.components_[:n_components, :].T
     principal_components = np.matmul(X, V)
 
-    return principal_components
+    return principal_components, cum_pct_variance[:n_components]
 
-
-def preprocess_faces(images, n_components='default', resize_shape='default'):
-    """ Notes: Images are all square, but not the same size. We resize all the
-                images to be the same sized square, thereby preserving the
-                aspect ratios.
-    """
-    for img in images:
-        assert img.shape[0] == img.shape[1]
-
-    if resize_shape == 'default':
-        resize_shape = get_smallest_shape(images)
-
-    preprocessed_images = []
-    for img in images:
-        prepped_img = imresize(img, resize_shape).astype(float)
-        prepped_img = prepped_img.flatten()
-        preprocessed_images.append(prepped_img)
-    preprocessed = get_principal_components(preprocessed_images, n_components)
-
-    return preprocessed
-
-
-def fnames_to_idxs(fname_ndarray, unique_fnames=None):
-    """
-    ARGUMENTS
-     fname_ndarray  (ndarray): Contains filenames that may or may not be
-                                repeated.
-     unique_fnames  (ndarray): Must contain every filename in fname_ndarray
-                                and possibly others. Each filename should
-                                only occur once.
-                      Example: np.unique(fname_ndarray)
-    RETURNS
-     idx_array      (ndarray): Has same shape as fname_ndarray, but with
-                                integer entries. These integers index the
-                                filenames in unique_fnames.
-     unique_frames  (ndarray): The unique filenames that were passed in as
-                                an argument. If set to None, then this is set
-                                to np.unique(fname_ndarray).
-    """
-    if unique_fnames is not None:
-        if not isinstance(unique_fnames, np.ndarray):
-            unique_fnames = np.asarray(unique_fnames)
-    else:
-        unique_fnames = np.unique(fname_ndarray)
-
-    idx_array = np.zeros(np.asarray(fname_ndarray).shape)
-    for idx, fname in np.ndenumerate(fname_ndarray):
-        idx_array[idx] = np.argwhere(unique_fnames == fname)
-
-    return idx_array.astype(int), unique_fnames
-
-
-def preprocess_cafe(dir_raw_cafe_faces, test_fnames_path=None):
-    imgs, lbls, fnames = load_jpgs_and_lbls(dir_raw_cafe_faces, dataset='cafe',
-                                            return_fnames=True)
-    if test_fnames_path is not None:
-        test_fnames = np.load(test_fnames_path)
-    else:
-        test_fnames = []
-
-    preprocessed = preprocess_faces(imgs, n_components='default',
-                                    resize_shape=(400, 400))
-
-    idxs = np.arange(len(imgs))
-    test_idxs, _ = fnames_to_idxs(test_fnames, fnames)
-    test_idxs = np.unique(test_idxs)
-    train_idxs = np.asarray(list(set(idxs) - set(test_idxs)))
-
-    test_X = preprocessed[test_idxs, :]
-    test_Y = lbls[test_idxs]
-    test_fnames = fnames[test_idxs]
-
-    train_X = preprocessed[train_idxs, :]
-    train_Y = lbls[train_idxs]
-    train_fnames = fnames[train_idxs]
-
-    return (train_X, train_Y, train_fnames), (test_X, test_Y, test_fnames)
+def main():
+    # Preprocess only the mouth open images for the experiment.
+    imgs, lbls, fnames = read_cafe('cafe_faces/mouth_open/',
+                                   resize_shape=(400, 400), verbose=True)
+    imgs, lbls, fnames = np.asarray(imgs), np.asarray(lbls), np.asarray(fnames)
+    # 50 principal components explain >79.2% of the variance.
+    pc, cum_pct_var = preprocess_faces(imgs, n_components_pca=50, verbose=True)

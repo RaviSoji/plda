@@ -44,7 +44,7 @@ class Discriminator:
         elif fnames is not None:
             assert len(Y) == len(fnames)
             assert X.shape[0] == Y.shape[0]
-            self.model(X, Y, fnames)
+            self.model = PLDA(X, Y, fnames)
         else:
             raise ValueError
 
