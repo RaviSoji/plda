@@ -1,5 +1,3 @@
-json_imgs/
-cafe_faces/
-sessions/
 __pycache__/
 *.swp
+cross_validation/cafe_faces/

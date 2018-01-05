@@ -41,7 +41,7 @@ class Classifier:
         elif fnames is not None:
             assert len(Y) == len(fnames)
             assert X.shape[0] == Y.shape[0]
-            self.model(X, Y, fnames)
+            self.model = PLDA(X, Y, fnames)
         else:
             raise ValueError
 
@@ -91,8 +91,8 @@ class Classifier:
 
         self.fit_model(train_X, train_Y, train_fnames)
 
-        predictions, log_pps = self.predict(test_X, self.model,
-                                            standardize_data=True)
+        predictions, log_pps = self.predict(test_X, standardize_data=True,
+                                            model=self.model)
 
         results, col_titles = self.tidy_data(predictions, log_pps, test_idxs,
                                              return_probs, return_log,
