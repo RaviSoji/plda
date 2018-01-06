@@ -114,9 +114,7 @@ if __name__ == '__main__':
 
     # Use plda to classify test data.
     classifier = plda.Classifier(train_X, train_Y)
-    model = plda.Model(train_X, train_Y)
-    predictions, log_probs = classifier.predict(test, model=model,
-                                                standardize_data=True)
+    predictions, log_probs = classifier.predict(test, standardize_data=True)
 
     # Plot classified data.
     colors = cm.rainbow(np.linspace(0, 1, n_gaussians))
