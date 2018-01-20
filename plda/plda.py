@@ -43,7 +43,7 @@ class Model:
         self.Ψ = None
 
         self.data = self.mk_data_dict(X, Y, fnames)
-        self.fit()
+#        self.fit()
 
     @staticmethod
     def mk_data_dict(X, Y, fnames=None):
@@ -374,13 +374,15 @@ class Model:
         else:
             return probs
 
-    def whiten(self, X):
-        assert X.shape[-1] == self.m.shape[0] == self.A.shape[0]
+    def whiten(self, X, A=None, m=None):
+        if A is None: A = self.A
+        if m is None: m = self.m
+        assert X.shape[-1] == m.shape[0] == A.shape[0]
 
         shape = X.shape
         X = X.reshape(np.prod(shape[:-1]).astype(int), shape[-1])
-        inv_A = np.linalg.inv(self.A)
-        U = X - self.m
+        inv_A = np.linalg.inv(A)
+        U = X - m
         U = np.matmul(U, inv_A.T)
 
         return U.reshape(shape)
