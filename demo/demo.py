@@ -58,5 +58,5 @@ if __name__ == '__main__':
 
     print('Prediction\t{}'.format(['log_p ' + str(key)
                                    for key in classifier.model.data.keys()]))
-    for pred, log_p in zip(predictions[:5], log_probs[:5]):
-        print('{}\t{}'.format(pred, [np.around(p, 5) for p in log_p]))
+    for pred, log_p in zip(predictions[:5], np.around(log_probs[:5], 1)):
+        print('{}\t{}\t{}\t{}\t{}\t{}'.format(pred, *[str(p) for p in log_p]))
