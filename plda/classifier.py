@@ -45,6 +45,8 @@ class Classifier:
         else:
             raise ValueError
 
+        self.model.fit()
+
     def cross_validate(self, n=1, num_shuffles=1, leave_out=True):
         assert n > 0 and isinstance(n, int)
         assert num_shuffles > 0 and isinstance(num_shuffles, int)
@@ -138,11 +140,13 @@ class Classifier:
 
     def predict(self, X, standardize_data, model=None):
         assert isinstance(standardize_data, bool)
-
-        if model is None:
+        if model is None and self.model is None:
+            raise ValueError('No PLDA model found. Use either fit_model() ' +
+                             'or pass one in as a keyword argument.')
+        elif model is None:
             model = self.model
-        else:
-            assert isinstance(model, PLDA)
+
+        assert isinstance(model, PLDA)
 
         log_pps, \
         labels = model.calc_posterior_predictives(X[..., None, :],

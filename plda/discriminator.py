@@ -48,6 +48,8 @@ class Discriminator:
         else:
             raise ValueError
 
+        self.model.fit()
+
     def fnames_to_idxs(self, fname_ndarray):
         idx_array = np.zeros(fname_ndarray.shape)
         for idx, fname in np.ndenumerate(fname_ndarray):
