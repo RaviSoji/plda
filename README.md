@@ -19,11 +19,15 @@ This model was written for
 ### Demo Dependency
 * matplotlib 2.0.2  (for Demo) 
 
-### Preprocessing Dependencies (not necessary)
+### Preprocessing Dependency
 * sklearn 0.18.2  (for preprocess.py)
-* It is important that data fed into the model has full rank covariance.
+* Data fed into the model must have full rank covariance because of the
+   implemented optimization.
   You can check the data for this with `np.linalg.matrix_rank()` and
    `np.cov()`.
+* If your data does not have a full rank covariance matrix, 
+   you should preprocess your data with Principal Components Analysis to 
+   obtain the linearly independent principal components.
 
 ### Testing
 First, cd to the 'plda.py' file.
