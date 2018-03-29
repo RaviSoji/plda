@@ -60,12 +60,12 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 
 ## Classification Demos
 
-### MNIST Handwritten Digits Data
+__MNIST Handwritten Digits Data__
 See `plda/demos/mnist_data/mnist_demo.ipynb`.
 - This demo will show you how to preprocess your data so the model's
    optimization algorithm can run.
 
-### Artificial 2D Gaussian Data
+__Artificial 2D Gaussian Data__
 See `plda/demos/gaussian_data/gaussian_demo.ipynb`.
 
 Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that the demo training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
