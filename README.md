@@ -16,7 +16,7 @@ This model was written for
 - scipy 0.19.1
 
 ### Demo Dependency
-- matplotlib 2.0.2  (for Demo) 
+- matplotlib 2.0.2  (for demos) 
 
 ### Preprocessing Dependency
 - sklearn 0.18.2  (for preprocess.py)
