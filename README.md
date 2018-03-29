@@ -22,6 +22,8 @@ This model was written for
 ### Preprocessing Dependencies (not necessary)
 * sklearn 0.18.2  (for preprocess.py)
 * It is important that data fed into the model has full rank covariance.
+  You can check the data for this with `np.lingalg.matrix_rank()` and
+   `np.cov()`..
 
 ### Testing
 First, cd to the 'plda.py' file.
@@ -61,4 +63,4 @@ python3.5 demo.py
 ```
 Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that the demo training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
 
-![Figure 1-1](/demo/classification_demo.jpg?raw=True)
+![Figure 1-1](/demos/classification_demo.jpg?raw=True)
