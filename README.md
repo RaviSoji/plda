@@ -4,30 +4,31 @@
 This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
- so it keeps a bunch of parameters and
- data in memory that you will not need for simple classification and
- discrimination problems.
+ so it stores a bunch of parameters and data in memory that are not necessary
+ for simple classification and discrimination problems.
 
 ### Paper Citation
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.](https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Model Dependencies
-* Python3.5
-* numpy 1.13.1
-* scipy 0.19.1
+- Python3.5
+- numpy 1.13.1
+- scipy 0.19.1
 
 ### Demo Dependency
-* matplotlib 2.0.2  (for Demo) 
+- matplotlib 2.0.2  (for Demo) 
 
 ### Preprocessing Dependency
-* sklearn 0.18.2  (for preprocess.py)
-* Data fed into the model must have full rank covariance because of the
+- sklearn 0.18.2  (for preprocess.py)
+  - See the MNIST tutorial for an example: 
+     `plda/demos/mnist_data/mnist_demo.ipynb`.
+- Data fed into the model must have full rank covariance because of the
    implemented optimization.
   You can check the data for this with `np.linalg.matrix_rank()` and
    `np.cov()`.
-* If your data does not have a full rank covariance matrix, 
+- If your data does not have a full rank covariance matrix, 
    you should preprocess your data with Principal Components Analysis to 
-   obtain the linearly independent principal components.
+   obtain the linearly independent principal components. 
 
 ### Testing
 First, cd to the 'plda.py' file.
@@ -60,6 +61,9 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 ## Classification Demos
 
 ### MNIST Handwritten Digits Data
+See `plda/demos/mnist_data/mnist_demo.ipynb`.
+- This demo will show you how to preprocess your data so the model's
+   optimization algorithm can run.
 
 ### Artificial 2D Gaussian Data
 See `plda/demos/gaussian_data/gaussian_demo.ipynb`.
