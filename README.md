@@ -58,10 +58,7 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 ### MNIST Handwritten Digits Data
 
 ### Artificial 2D Gaussian Data
-The `demos/gaussian_data/` folder contains 
-1. a demo.py file,
-2. a jupyter notebook generating the illustration below
-3. a .jpg file of the output figure
+See: `plda/demos/gaussian_data/gaussian_demo.ipynb`
 
 If you want to quickly visualize the model at work, cd to demo.py, and run the file:
 ``` shell
