@@ -58,13 +58,8 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 ### MNIST Handwritten Digits Data
 
 ### Artificial 2D Gaussian Data
-See: `plda/demos/gaussian_data/gaussian_demo.ipynb`
+See `plda/demos/gaussian_data/gaussian_demo.ipynb`.
 
-If you want to quickly visualize the model at work, cd to demo.py, and run the file:
-``` shell
-cd Documents/folder/path/to/probabilistic_LDA/demo/ # demo.py should be in this folder.
-python3.5 demo.py
-```
 Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that the demo training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
 
 ![Figure 1-1](/demos/gaussian_data/classification_demo.jpg?raw=True)
