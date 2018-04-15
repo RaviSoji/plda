@@ -4,11 +4,14 @@
 This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
- so it stores a bunch of parameters and data in memory that are not necessary
- for simple classification and discrimination problems.
+ so it stores a bunch of parameters and data in memory that 
+ are not necessary for simple classification and discrimination problems.
 
 ### Paper Citation
-[Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. ECCV 2006.](https://link.springer.com/chapter/10.1007/11744085_41)
+[Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
+ In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. 
+ ECCV 2006.](
+ https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Model Dependencies
 - Python3.5
@@ -68,6 +71,13 @@ See `plda/demos/mnist_data/mnist_demo.ipynb`.
 ### Artificial 2D Gaussian Data
 See `plda/demos/gaussian_data/gaussian_demo.ipynb`.
 
-Training data are randomly generated from 5 2D Gaussians with the same covariance matrix. Test data are generated from a uniform distribution, and the colors of those points represent model classifications. The contours depict 95% confidence intervals of the labeled training data. Note that the demo training data were generated with the same covariance because this a fundamental assumption of linear discriminant analysis models.
+Training data are randomly generated from 5 2D Gaussians with 
+ the same covariance matrix. 
+Test data are generated from a uniform distribution, 
+ and the colors of those points represent model classifications. 
+The contours depict 95% confidence intervals of the labeled training data. 
+Note that the demo training data were generated with the same covariance 
+ because this a fundamental assumption of 
+ linear discriminant analysis models.
 
 ![Figure 1-1](/demos/gaussian_data/classification_demo.jpg?raw=True)
