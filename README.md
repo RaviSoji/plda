@@ -16,6 +16,7 @@ This model was written for
 ### Dependencies
 You may automatically download all dependencies to a conda environment 
  called `plda` with the following. 
+
 ```conda env create -f environment.yml -n plda```
 
 __Model dependencies__
