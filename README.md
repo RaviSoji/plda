@@ -24,7 +24,7 @@ This model was written for
 ### Preprocessing Dependency
 - sklearn 0.18.2
   - See the MNIST tutorial for an example: 
-     `plda/demos/mnist_data/mnist_demo.ipynb`.
+     `demos/mnist_data/mnist_demo.ipynb`.
 - Data fed into the model must have full rank covariance because of the
    implemented optimization algorithm.
   You can check the data for this with `np.linalg.matrix_rank()` and
@@ -33,7 +33,7 @@ This model was written for
    you will need to preprocess your data with Principal Components Analysis
    to obtain the linearly independent principal components. 
   If you are not sure how to do this, check out my MNIST demo: 
-   `plda/demos/mnist_data/mnist_demo.ipynb`.
+   `demos/mnist_data/mnist_demo.ipynb`.
 
 ### Testing
 
@@ -67,13 +67,13 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 ## Classification Demos
 
 ### MNIST Handwritten Digits Data
-See [plda/demos/mnist_data/mnist_demo.ipynb](
+See [demos/mnist_data/mnist_demo.ipynb](
      ./demos/mnist_data/mnist_demo.ipynb).
 - This demo will show you how to preprocess your data so the model's
    optimization algorithm can run.
 
 ### Visualization of classification in 2D space.
-See [plda/demos/gaussian_data/gaussian_demo.ipynb](
+See [demos/gaussian_data/gaussian_demo.ipynb](
      ./demos/gaussian_data/gaussian_demo.ipynb).
 
 Training data are randomly generated from 5 2D Gaussians with 
