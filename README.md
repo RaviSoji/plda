@@ -22,21 +22,24 @@ This model was written for
 - matplotlib 2.0.2  (for demos) 
 
 ### Preprocessing Dependency
-- sklearn 0.18.2  (for preprocess.py)
+- sklearn 0.18.2
   - See the MNIST tutorial for an example: 
      `plda/demos/mnist_data/mnist_demo.ipynb`.
 - Data fed into the model must have full rank covariance because of the
-   implemented optimization.
+   implemented optimization algorithm.
   You can check the data for this with `np.linalg.matrix_rank()` and
    `np.cov()`.
-- If your data does not have a full rank covariance matrix, 
-   you should preprocess your data with Principal Components Analysis to 
-   obtain the linearly independent principal components. 
+- If your data does not have full rank covariance, 
+   you will need to preprocess your data with Principal Components Analysis
+   to obtain the linearly independent principal components. 
+  If you are not sure how to do this, check out my MNIST demo: 
+   `plda/demos/mnist_data/mnist_demo.ipynb`.
 
 ### Testing
-First, cd to the 'plda.py' file.
+
+After cloning this repository, cd into it.
 ``` shell
-cd /Documents/folder/path/into/plda/ # README.md should be in this folder.
+cd plda/ # README.md and LICENSE should be in this folder.
 ```
 
 To run ALL tests:
@@ -64,20 +67,20 @@ python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
 ## Classification Demos
 
 ### MNIST Handwritten Digits Data
-See `plda/demos/mnist_data/mnist_demo.ipynb`.
+See [plda/demos/mnist_data/mnist_demo.ipynb](
+     ./demos/mnist_data/mnist_demo.ipynb).
 - This demo will show you how to preprocess your data so the model's
    optimization algorithm can run.
 
-### Artificial 2D Gaussian Data
-See `plda/demos/gaussian_data/gaussian_demo.ipynb`.
+### Visualization of classification in 2D space.
+See [plda/demos/gaussian_data/gaussian_demo.ipynb](
+     ./demos/gaussian_data/gaussian_demo.ipynb).
 
 Training data are randomly generated from 5 2D Gaussians with 
- the same covariance matrix. 
+ the same covariance (a fundamental assumption of
+ probabilistic linear discriminant analysis).
 Test data are generated from a uniform distribution, 
- and the colors of those points represent model classifications. 
-The contours depict 95% confidence intervals of the labeled training data. 
-Note that the demo training data were generated with the same covariance 
- because this a fundamental assumption of 
- linear discriminant analysis models.
+ and the colors of those points represent model classifications; 
+ the contours depict 95% confidence intervals. 
 
 ![Figure 1-1](/demos/gaussian_data/classification_demo.jpg?raw=True)
