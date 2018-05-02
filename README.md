@@ -14,18 +14,18 @@ This model was written for
  https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Dependencies
-To automatically download all dependencies to a conda environment called `plda`:
- `conda env create -f environment.yml -n plda`.
+To automatically download all dependencies to a conda environment called 
+ `plda`: `conda env create -f environment.yml -n plda`.
 
-- __Model dependencies__
-  - Python3.5
-  - numpy 1.13.1
-  - scipy 0.19.1
+__Model dependencies__
+- Python3.5
+- numpy 1.13.1
+- scipy 0.19.1
 
-- __Demo Dependency__
+__Demo Dependency__
 - matplotlib 2.0.2  (for demos) 
 
-- __Preprocessing Dependency__
+__Preprocessing Dependency__
 - sklearn 0.18.2
   - See the MNIST tutorial for an example: 
      `demos/mnist_data/mnist_demo.ipynb`.
