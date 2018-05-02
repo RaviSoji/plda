@@ -14,8 +14,9 @@ This model was written for
  https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Dependencies
-To automatically download all dependencies to a conda environment called 
- `plda`: `conda env create -f environment.yml -n plda`.
+You may automatically download all dependencies to a conda environment 
+ called `plda` with the following. 
+```conda env create -f environment.yml -n plda```
 
 __Model dependencies__
 - Python3.5
