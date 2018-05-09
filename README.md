@@ -14,7 +14,8 @@ This model was written for
  https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Dependencies
-You may automatically download all dependencies to a conda environment 
+If you already have Anaconda or Miniconda installed,
+ you can automatically download all dependencies to a conda environment 
  called `plda` with the following. 
 
 ```conda env create -f environment.yml -n plda```
@@ -42,6 +43,8 @@ __Preprocessing Dependency__
    `demos/mnist_data/mnist_demo.ipynb`.
 
 ### Testing
+Note that I changed the model interface, 
+ so the tests below will probably fail until I get a chance to update them.
 
 After cloning this repository, cd into it.
 ``` shell
@@ -87,6 +90,7 @@ Training data are randomly generated from 5 2D Gaussians with
  probabilistic linear discriminant analysis).
 Test data are generated from a uniform distribution, 
  and the colors of those points represent model classifications; 
- the contours depict 95% confidence intervals. 
+ the contours depict 95% confidence intervals based on the original
+ training data (not model certainty).
 
 ![Figure 1-1](/demos/gaussian_data/classification_demo.jpg?raw=True)
