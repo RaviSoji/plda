@@ -19,7 +19,7 @@ If you already have
   https://conda.io/docs/user-guide/install/index.html),
  you can automatically download all dependencies to a conda environment 
  called `plda` with the following. 
-Otherwise, see [environment.yml](./envrionment.yml).
+Otherwise, see [environment.yml](envrionment.yml).
 
 ```conda env create -f environment.yml -n plda```
 
