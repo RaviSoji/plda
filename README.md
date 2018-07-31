@@ -51,7 +51,7 @@ pytest plda/tests/test_model/test_model_units.py  # ~.66s for me.
 pytest plda/tests/test_model/test_model_integration.py  # ~1.0s for me.
 pytest plda/tests/test_model/test_model_inference.py  #  ~80.6s for me.
 
-pytest plda/tests/test_optimizer/test_optimizer_units.pa  # ~.59s for me.
+pytest plda/tests/test_optimizer/test_optimizer_units.py  # ~.59s for me.
 pytest plda/tests/test_optimizer/test_optimizer_integration.py  # ~.78s.
 pytest plda/tests/test_optimizer/test_optimizer_inference.py  # ~25.3s for me.
 
