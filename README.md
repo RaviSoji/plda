@@ -23,27 +23,18 @@ If you already have
 ```conda env create -f environment.yml -n plda```
 
 ### Testing
-__Running all tests__ (~120 seconds with ~60 CPU cores)
+If you created the Conda environment with the name `plda`, 
+ activate it with the following.
+``` shell
+source activate plda
+```
 
-1. If you created the Conda environment with the name `plda`, 
-    activate it with the following.
-   ``` shell
-   source activate plda
-   ```
+To run all tests (~120 seconds with ~60 CPU cores), use the following.
+``` shell
+python3.6 pytest plda/tests/
+```
 
-2. Run all the tests with the following.
-   ``` shell
-   python3.6 pytest plda/tests/
-   ```
-
-3. Clean up the `__pycache__/` folders with the following.
-   ``` shell
-   py3clean plda/
-   ```
-
-__Running a particular test file__
-Follow steps 1-3 from above, replacing step 2 with one of the following.
-
+To run Run a particular test file, run one of the following
 ``` shell
 pytest plda/tests/test_model/test_model_units.py  # ~.66s for me.
 pytest plda/tests/test_model/test_model_integration.py  # ~1.0s for me.
@@ -56,24 +47,18 @@ pytest plda/tests/test_optimizer/test_optimizer_inference.py  # 25.3s for me.
 python3.6 plda/tests/test_classifier/test_classifier_integration.py  #.69s.
 ```
 
-## Classification Demos
+Finally, 
+ clean up the `__pycache__/` folders with the following.
+``` shell
+py3clean plda/
+```
 
-### MNIST Handwritten Digits Data
+### Demo with MNIST Handwritten Digits Data
 See [demos/mnist_data/mnist_demo.ipynb](
      ./demos/mnist_data/mnist_demo.ipynb).
-- This demo will show you how to preprocess your data so the model's
-   optimization algorithm can run.
-
-### Visualization of classification in 2D space.
-See [demos/gaussian_data/gaussian_demo.ipynb](
-     ./demos/gaussian_data/gaussian_demo.ipynb).
-
-Training data are randomly generated from 5 2D Gaussians with 
- the same covariance (a fundamental assumption of
- probabilistic linear discriminant analysis).
-Test data are generated from a uniform distribution, 
- and the colors of those points represent model classifications; 
- the contours depict 95% confidence intervals based on the original
- training data (not model certainty).
-
-![Figure 1-1](/demos/gaussian_data/classification_demo.jpg?raw=True)
+- Although the model can automatically preprocess your data, 
+   you should worry about overfitting when training on small datasets.
+- One way to address this is to reduce the number of principal components 
+   present in the preprocessed data.
+- The MNIST demo shows that preprocessing is as simple as changing 
+   an optional parameter.
