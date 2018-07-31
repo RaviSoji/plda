@@ -24,7 +24,7 @@ Otherwise, see [environment.yml](./environment.yml).
 ```conda env create -f environment.yml -n plda```
 
 ### Demo with MNIST Handwritten Digits Data
-See [demos/mnist_data/mnist_demo.ipynb](
+See [demos/mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
 - Although the model can automatically preprocess your data, 
    you should worry about overfitting when training on small datasets.
