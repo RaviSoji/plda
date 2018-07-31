@@ -42,7 +42,7 @@ source activate plda
 
 To run all tests (~120 seconds with ~60 CPU cores), use the following.
 ``` shell
-python3.6 pytest plda/tests/
+python3.5 pytest plda/tests/
 ```
 
 To run a particular test file, run one of the following
@@ -55,7 +55,7 @@ pytest plda/tests/test_optimizer/test_optimizer_units.pa  # ~.59s for me.
 pytest plda/tests/test_optimizer/test_optimizer_integration.py  # ~.78s.
 pytest plda/tests/test_optimizer/test_optimizer_inference.py  # ~25.3s for me.
 
-python3.6 plda/tests/test_classifier/test_classifier_integration.py  # ~.69s.
+pytest plda/tests/test_classifier/test_classifier_integration.py  # ~.69s.
 ```
 
 Finally, 
