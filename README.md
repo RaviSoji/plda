@@ -4,8 +4,8 @@
 This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
- so it stores a bunch of parameters and data in memory that 
- are not necessary for simple classification and discrimination problems.
+ so it stores a bunch of parameters in memory that 
+ are not necessary for simple classification problems.
 
 ### Paper Citation
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
@@ -14,63 +14,46 @@ This model was written for
  https://link.springer.com/chapter/10.1007/11744085_41)
 
 ### Dependencies
-If you already have Anaconda or Miniconda installed,
+If you already have 
+ [Anaconda or Miniconda](
+  https://conda.io/docs/user-guide/install/index.html),
  you can automatically download all dependencies to a conda environment 
  called `plda` with the following. 
 
 ```conda env create -f environment.yml -n plda```
 
-__Model dependencies__
-- Python3.5
-- numpy 1.13.1
-- scipy 0.19.1
-
-__Demo Dependency__
-- matplotlib 2.0.2  (for demos) 
-
-__Preprocessing Dependency__
-- sklearn 0.18.2
-  - See the MNIST tutorial for an example: 
-     `demos/mnist_data/mnist_demo.ipynb`.
-- Data fed into the model must have full rank covariance because of the
-   implemented optimization algorithm.
-  You can check the data for this with `np.linalg.matrix_rank()` and
-   `np.cov()`.
-- If your data does not have full rank covariance, 
-   you will need to preprocess your data with Principal Components Analysis
-   to obtain the linearly independent principal components. 
-  If you are not sure how to do this, check out my MNIST demo: 
-   `demos/mnist_data/mnist_demo.ipynb`.
-
 ### Testing
-Note that I changed the model interface, 
- so the tests below will probably fail until I get a chance to update them.
+__Running all tests__ (~120 seconds with ~60 CPU cores)
 
-After cloning this repository, cd into it.
+1. If you created the Conda environment with the name `plda`, 
+    activate it with the following.
+   ``` shell
+   source activate plda
+   ```
+
+2. Run all the tests with the following.
+   ``` shell
+   python3.6 pytest plda/tests/
+   ```
+
+3. Clean up the `__pycache__/` folders with the following.
+   ``` shell
+   py3clean plda/
+   ```
+
+__Running a particular test file__
+Follow steps 1-3 from above, replacing step 2 with one of the following.
+
 ``` shell
-cd plda/ # README.md and LICENSE should be in this folder.
-```
+pytest plda/tests/test_model/test_model_units.py  # ~.66s for me.
+pytest plda/tests/test_model/test_model_integration.py  # ~1.0s for me.
+pytest plda/tests/test_model/test_model_inference.py  #  ~80.6s for me.
 
-To run ALL tests:
-``` shell
-python3.5 -m unittest discover
-```
+pytest plda/tests/test_optimizer/test_optimizer_units.pa  # ~.59s for me..
+pytest plda/tests/test_optimizer/test_optimizer_integration.py  # ~.78s.
+pytest plda/tests/test_optimizer/test_optimizer_inference.py  # 25.3s for me.
 
-To run only one of the test files in the tests folder, 
- run the corresponding line/command, below:
-``` shell
-python3.5 -m unittest tests.test_units_plda # Runs quickly.
-python3.5 -m unittest tests.test_integration_plda  # Runs quickly.
-python3.5 -m unittest tests.test_inference_plda 
-# Takes a little under 3 minutes to run for me, even with ~60 CPU cores.
-
-python3.5 -m unittest tests.test_units_discriminator.py  # Not implemented
-python3.5 -m unittest tests.test_integration_discriminator.py  # Not implemented
-python3.5 -m unittest tests.test_inference_discriminator.py  # Not implemented
-
-python3.5 -m unittest tests.test_units_classifier.py  # Not implemented
-python3.5 -m unittest tests.test_integration_classifier.py  # Not implemented
-python3.5 -m unittest tests.test_inference_classifier.py  # Not implemented
+python3.6 plda/tests/test_classifier/test_classifier_integration.py  #.69s.
 ```
 
 ## Classification Demos

@@ -12,354 +12,163 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-import os
-import warnings
 import numpy as np
-from .plda import Model as PLDA
+from scipy.special import logsumexp
+from .model import Model
 
 
 class Classifier:
-    def __init__(self, X, Y, fnames=None):
-        assert len(X.shape) == 2
-        assert X.shape[0] == Y.shape[0]
-        if fnames is not None:
-            assert X.shape[0] == fnames.shape[0]
-
-        self.X = X
-        self.Y = Y
-        self.fnames = fnames
+    def __init__(self):
         self.model = None
 
-    def fit_model(self, X=None, Y=None, fnames=None):
-        if X is None:
-            assert Y is None and fnames is None
-            self.model = PLDA(self.X, self.Y, self.fnames)
-        elif fnames is None:
-            assert X.shape[0] == Y.shape[0]
-            self.model = PLDA(X, Y, Y.shape[0] * [None])
-        elif fnames is not None:
-            assert len(Y) == len(fnames)
-            assert X.shape[0] == Y.shape[0]
-            self.model = PLDA(X, Y, fnames)
-        else:
-            raise ValueError
-
-        self.model.fit()
-
-    def cross_validate(self, n=1, num_shuffles=1, leave_out=True):
-        assert n > 0 and isinstance(n, int)
-        assert num_shuffles > 0 and isinstance(num_shuffles, int)
-        assert isinstance(leave_out, bool)
-        warnings.warn('Deleting the existing model to run cross validation.')
-
-        all_results = []
-        for curr_shuffle in range(num_shuffles):
-            all_idxs = np.arange(self.Y.shape[-1])
-            np.random.shuffle(all_idxs)
-            n_iters_per_shuffle = self.Y.shape[0] - n + 1
-            shuffle_results = []
-            for iteration in range(n_iters_per_shuffle):
-                print('Shuffle {} of {}, iteration {} of {}'.format(
-                      curr_shuffle, num_shuffles - 1, iteration,
-                      n_iters_per_shuffle - 1))
-                start = iteration
-                end = start + n
-                test_idxs = list(all_idxs[start:end])
-                results, col_titles = self.run(test_idxs, leave_out=leave_out)
-                shuffle_results.append(results)
-            all_results.append(np.asarray(shuffle_results))
-
-        all_results = np.asarray(all_results)
-
-        return all_results, col_titles
-
-    def run(self, test_idxs, leave_out, return_probs=True, return_log=True,
-            return_fnames=True):
-        assert isinstance(leave_out, bool)
-
-        if leave_out is True:
-            all_idxs = np.arange(self.Y.shape[0])
-            train_idxs = np.asarray(list(set(all_idxs) - set(test_idxs)))
-            train_X, train_Y = self.X[train_idxs, :], self.Y[train_idxs]
-            if self.fnames is not None:
-                train_fnames = self.fnames[train_idxs]
-            else:
-                train_fnames = None
-        else:
-            train_X, train_Y, train_fnames = self.X, self.Y, self.fnames
-
-        test_X, test_Y = self.X[test_idxs, :], self.Y[test_idxs]
-
-        self.fit_model(train_X, train_Y, train_fnames)
-
-        predictions, log_pps = self.predict(test_X, standardize_data=True,
-                                            model=self.model)
-
-        results, col_titles = self.tidy_data(predictions, log_pps, test_idxs,
-                                             return_probs, return_log,
-                                             return_fnames, leave_out)
-
-        return results, col_titles
-
-    def tidy_data(self, predictions, log_probs, test_idxs,
-                  return_probs, return_log, return_fnames, leave_out):
-        assert isinstance(return_log, bool)
-
-        col_titles = ['prediction', 'truth']
-        results = [predictions[:, None], self.Y[test_idxs][:, None]]
-
-        col_titles.append('leave_out')
-        if leave_out is True:
-            results.append(np.asarray([True] * len(predictions))[:, None])
-        elif leave_out is False:
-            results.append(np.asarray([False] * len(predictions))[:, None])
-
-        if return_fnames is True and self.fnames is None:
-            fnames = np.asarray([None] * len(test_idxs))
-            col_titles.append('filename')
-            results.append(fnames[:, None])
-
-        elif return_fnames is True and self.fnames is not None:
-            col_titles.append('filename')
-            results.append(self.fnames[test_idxs][:, None])
-
-        if return_probs is True and return_log is False:
-            probs = np.exp(log_probs)
-            col_titles += ['prob_{}'.format(key)
-                           for key in list(self.model.data.keys())]
-            results.append(probs)
-
-        elif return_probs is True and return_log is True:
-            probs = log_probs
-            col_titles += ['log_prob_{}'.format(key)
-                           for key in list(self.model.data.keys())]
-            results.append(probs)
-
-        return np.hstack(results), np.asarray(col_titles)
-
-    def predict(self, X, standardize_data, model=None):
-        assert isinstance(standardize_data, bool)
-        if model is None and self.model is None:
-            raise ValueError('No PLDA model found. Use either fit_model() ' +
-                             'or pass one in as a keyword argument.')
-        elif model is None:
-            model = self.model
-
-        assert isinstance(model, PLDA)
-
-        log_pps, \
-        labels = model.calc_posterior_predictives(X[..., None, :],
-                                                  standardize_data,
-                                                  return_labels=True)
-        axis = len(np.squeeze(X).shape) - 1
-        idxs = np.argmax(log_pps, axis=axis)
-        predictions = np.asarray(labels)[[idxs]]
-        if len(log_pps.shape) == 1:
-            log_pps = log_pps[None, :]
-
-        return predictions, log_pps
-
-    def fnames_to_idxs(self, fname_ndarray):
-        idx_array = np.zeros(fname_ndarray.shape)
-        for idx, fname in np.ndenumerate(fname_ndarray):
-            idx_array[idx] = np.argwhere(self.fnames == fname)
-
-        return idx_array.astype(int)
-
-    def get_confusion_matrix(self, results, as_ndarray=False):
-        labels = np.unique(results[..., :2])
-        row_dict = {label: 0 for label in labels}
-        matrix_dict = {label: row_dict.copy() for label in labels}
-        actual_Y = results[..., 1].flatten()
-        predicted_Y = results[..., 0].flatten()
-
-        for actual, predicted in zip(actual_Y, predicted_Y):
-            matrix_dict[actual][predicted] += 1
-
-        if as_ndarray is True:
-            shape = (len(matrix_dict.keys()), len(matrix_dict.keys()))
-            arr = np.zeros(shape)
-
-            row = 0
-            for row_key in matrix_dict.keys():
-                col = 0
-                for col_key in matrix_dict[row_key].keys():
-                    arr[row, col] = matrix_dict[row_key][col_key]
-                    col += 1
-                row += 1
-
-            matrix = arr
-        else:
-            matrix = matrix_dict
-
-        return matrix
-
-    fit_model.__doc__ = """
-        Fits the model to the data, labels, and filenames (if given).
-
-        ARGUMENTS
-         X  (ndarray or list), shape=(n_data, n_data_dims)
-           Each row is a datum and each column is a dimension of the datum.
-
-         Y  (ndarray or list), shape=(n_data,)
-           Labels that are sorted in the same order as X.
-
-         fnames  (ndarray or list), shape=(n_data,), optional
-           Filenames of the data, sorted in the same order as X.
-
-        RETURN
-         None
-        """
-
-    cross_validate.__doc__ = """
-        Performs cross validation on plda via a classification task.
-
-        DESCRIPTION: During any particular "shuffle", the order of the data
-                      is essentially randomized.
-                     Then, the first n data in this shuffled list are selected
-                      to be the test set. If leave_out is set to True, these
-                      are ommitted during model training. After this, the
-                      function increments by 1 and does the same thing, but
-                      this time with the 1st to (n + 1)'th data. This continues
-                      until there are no more data left, i.e. (n_data - n + 1)
-                      runs.
-                     If num_shuffles is greater than zero, the data are
-                      re-shuffled, and the process is run that number of times.
-        ARGUMENTS
-         n  (int)
-           Number of data to test on.
-
-         num_shuffles  (int)
-           Number of times to re-run the cross-validation on newly shuffled
-           data. This matters only when your dataset is small.
-
-         leave_out  (bool), optional
-           Whether or not to leave the 'n' data out of the training set before
-           testing on the 'n' data. Default value is True (recommended).
-
-        RETURNS
-         results  (ndarray), shape=(num_shuffles, n_data - n, n, 3 + n_classes)
-           First dimension corresponds to a particular shuffle.
-           Second dimension corresponds to runs with training data left
-           Third dimension corresponds to test trials.
-           The fourth dimension represents the actual data, whose column labels
-            are returned as col_titles
-
-         col_titles (ndarray), shape=results.shape[-1]
-           Titles of the columns (last dimension) in the results.
-        """
-
-    run.__doc__ = """
-        Runs the fitted plda model on data specified by the input indices.
-
-        ARGUMENTS
-         test_idxs  (list of ints)
-           Indices that index the data in self.fnames. These data will comprise
-           the test set.
-
-         leave_out  (bool)
-           Whether or not to leave the test data out of the training set.
-
-         return_probs  (bool)
-           Whether to return the probabilities of the test image being
-           classified to each of the labels.
-
-         return_log  (bool)
-           Whether or not to return log probabiltiies.
-
-         return_fnames  (bool)
-           Whether or not to return the filenames of the test images.
-
-        RETURNS
-         results  (ndarray), shape=(*test_idxs.shape, >2)
-           The last dimension always returns the prediction in the first column
-           and the truth in the second column. If return_fnames is set to
-           True, this goes in the second column, etc. See col_titles.
-
-         col_titles  (ndarray), shape=results.shape[-1]
-           Titles of the columns (last dimension) in the results.
-        """
-
-    tidy_data.__doc__ = """
-        Formats the inputs into "tidy data" format. See data science blogs.
-
-        ARGUMENTS
-         predictions  (ndarray)
-          Shape depends on the input to the .predict() function. These are the
-          model's predicted classifications of the test data.
-
-         log_probs  (ndarray), shape=(*predictions.shape, n_unique_lables)
-          Log probabilities of the image being assigned to each class in
-          the training data.
-
-         test_idxs  (list), length=len(predictions)
-          The indices used to generate predictions and log_probs.
-
-         return_log  (bool)
-          Whether or not to return log probabilities of the test image
-          being assigned to each label.
-
-        RETURNS
-         tidied_data  (ndarray), shape=(*predictions.shape, 9)
-        """
-
-    predict.__doc__ = """
-        Generates predictions and their log probabilities via the plda model.
-
-        ARGUMENTS
-         X  (ndarray), shape=(..., n_data, n_data_dims)
-          The data that is to be classified.
-
-         model  (PLDA)
-          A trained probabilistic linear discriminant analysis model. That is,
-          its "fit" method should have been run to fit the parameters to data.
-
-         standardize_data  (bool)
-          Whether or not to transform the data, X, to latent space.
-
-        RETURNS
-         predictions  (ndarray), shape=X.shape[:-1]
-           Model predictions about the labels of the rows in X. These are
-           generated by indexing the labels used to initialze the object.
-
-         log_pps  (ndarray), shape=(*X.shape[:-1], num_unique_labels)
-           The log probabilities the model used to generate the predictions.
-           These are sorted in the same order as 'predictions'.
-        """
-
-    fnames_to_idxs.__doc__ = """
-        Converts an ndarray of filenames to indices indexing the model's data.
+    def fit_model(self, X, Y, n_principal_components=None):
+        self.model = Model(X, Y, n_principal_components)
+
+    def predict(self, data, space='D', normalize_logps=False):
+        """ Classifies data into categories present in the training data.
+
+        DESCRIPTION
+         Predictions are the MAP estimates,
+          i.e. categories with the highest probabilities,
+          following the procedure described in the first sentence
+          on p.535 of Ioffe 2006.
+
+         See the `calc_logp_pp_categories()` method for documentation on the
+          actual equations.
 
         ARGUMENT
-         fname_ndarray  (ndarray)
-           Contains filenames that may or may not be repeated.
+         data  (numpy.ndarray), shape=(..., data_dimensionality)
+           - Data must follow statistics convention (row-wise).
+           - The last dimension of the array corresponds to data dimension.
+           - The dimensionality of the data depends on the space (see below).
 
-        RETURN
-         idx_array  (ndarray):
-           Has same shape as fname_ndarray, but with integer entries. These
-           integers replace the string filenames with indices that
-           index the filenames in self.fnames.
+        PARAMETERS
+         space  (str)
+           - Must be either 'D', 'X', 'U', or 'U_model',
+              where 'D' is the data space,
+                    'X' is the preprocessed space,
+                    'U' is the latent space, and
+                    'U_model' is the subspace of 'U' the model works in:
 
-        EXAMPLE:
-         fname_ndarray[0] == self.fnames[idx_array[0]]
-         fname_ndarray[0]  # 'img_name.jpg'
-         idx_array[0]   # 54
-         self.fnames[54]  # 'img_name.jpg'
-        """
+                    'D' <---> 'X' <---> 'U' <---> 'U_model'.
 
-    get_confusion_matrix.__doc__ = """
-        Generates a confusion matrix from model predictions and true labels.
+           - See `transform()` method in model.py
+              for details on the relationship between spaces.
 
-        ARGUMENTS
-         results  (ndarray), shape=(..., >1)
-           Must have at least two columns with the first being model
-           predictions and the second being the truth.
-
-         as_ndarray  (bool), optional
-           Returns the matrix as an ndarray
+         normalize_logps  (bool)
+           - Whether or not to normalize
+              the posterior predictive probabilities before returning them.
 
         RETURNS
-         confusion_matrix  (dictionary of dictionaries OR ndarray)
-           Variable type depends on what as_array is set to.
+         predictions  (numpy.ndarray), shape=data.shape[:-1]
+
+         logps  (numpy.ndarray), shape=(*data.shape[:-1], n_categories)
+           - Log posterior predictive probabilities for each category,
+              if normalize_logps = False.
+           - Log classification probabilities for each category,
+              if normalize_logps = True.
+             These are just the normalized posterior predictive
+              probabilities, aka model certainties.
         """
+        if space != 'U_model':
+            data = self.model.transform(data,
+                                        from_space=space, to_space='U_model')
+
+        logpps_k, K = self.calc_logp_pp_categories(data, normalize_logps)
+        predictions = K[np.argmax(logpps_k, axis=-1)]
+
+        return predictions, logpps_k
+
+    def calc_logp_pp_categories(self, data, normalize_logps):
+        """ Computes log posterior predictive probabilities for each category.
+
+        DESCRIPTION
+         The posterior predictive comes from p.535 of Ioffe 2006.
+         The classification procedure is described in the first sentence
+          of p.535,
+          which clearly implies the prior on categories to be uniform.
+
+        LATEX EQUATIONS
+         Normalized posterior predictive (classification certainty):
+           ```
+           \begin{align}
+           p(y_* = T \mid \mathbf{u}_*)
+           &= \frac{
+                p(\mathbf{u}_*
+                \vert
+                \mathbf{u}_1^T,
+                \mathbf{u}_2^T,
+                \dots,
+                \mathbf{u}_n^T)
+              }{\sum\limits_{k \in K}
+                p(\mathbf{u}_*
+                \vert
+                \mathbf{u}_1^k,
+                \mathbf{u}_2^k,
+                \dots,
+                \mathbf{u}_n^k)
+              },
+           \end{align}
+           ```
+
+         Posterior predictive
+           ```
+           \begin{align}
+           p(\mathbf{u}_*
+             \vert
+             \mathbf{u}_1^k,
+             \mathbf{u}_2^k,
+             \dots,
+             \mathbf{u}_n^k)
+           &= \int \dots \int
+              p(\mathbf{u}_* \vert \mathbf{v})
+              p(\mathbf{v} \vert
+                \mathbf{u}_1^k,
+                \mathbf{u}_2^k,
+                \dots,
+                \mathbf{u}_n^k)
+                d\mathbf{v} \\
+           &= \mathcal{N}
+              \left(
+              \mathbf{u}_*
+              \mid
+              \frac{
+                n \mathbf{\Psi}
+              }{n \mathbf{\Psi} + \mathbf{I}
+              }
+              \mathbf{\bar{u}}^k,
+              \mathbf{I}
+              + \frac{\mathbf{\Psi}
+                }{n \mathbf{\Psi} + \mathbf{I}
+                }
+              \right)
+           \end{align}
+           ```
+
+        ARGUMENT
+         See documentation for the `predict()` method.
+
+        PARAMTER
+         See documentation for the `predict()` method.
+        """
+        assert type(normalize_logps) == bool
+
+        logpps_by_category = []
+        K = self.get_categories()
+
+        for k in K:
+            logpps_k = self.model.calc_logp_posterior_predictive(data, k)
+            logpps_by_category.append(logpps_k)
+
+        logpps_by_category = np.stack(logpps_by_category, axis=-1)
+
+        if normalize_logps:
+            norms = logsumexp(logpps_by_category, axis=-1)
+            logps = logpps_by_category - norms[..., None]
+        else:
+            logps = logpps_by_category
+
+        return logps, np.asarray(K)
+
+    def get_categories(self):
+        return [k for k in self.model.posterior_params.keys()]
