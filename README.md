@@ -23,8 +23,8 @@ Otherwise, see [environment.yml](./environment.yml).
 
 ```conda env create -f environment.yml -n plda```
 
-### Demo with MNIST Handwritten Digits Data
-See [demos/mnist_demo/mnist_demo.ipynb](
+## Demo with MNIST Handwritten Digits Data
+See [mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
 - Although the model can automatically preprocess your data, 
    you should worry about overfitting when training on small datasets.
@@ -33,7 +33,7 @@ See [demos/mnist_demo/mnist_demo.ipynb](
 - The MNIST demo shows that preprocessing is as simple as supplying 
    an optional parameter.
 
-### Testing
+## Testing
 If you created the Conda environment with the name `plda`, 
  activate it with the following.
 ``` shell
