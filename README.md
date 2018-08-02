@@ -26,8 +26,8 @@ Otherwise, see [environment.yml](./environment.yml).
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
-- Although the model can automatically preprocess your data, 
-   you should worry about overfitting when training on small datasets.
+- The model automatically preprocess your data, 
+   but you should worry about overfitting when training on small datasets.
 - One way to address this is to reduce the number of principal components 
    present in the preprocessed data.
 - The MNIST demo shows that preprocessing is as simple as supplying 
@@ -42,7 +42,7 @@ source activate plda
 
 To run all tests (~120 seconds with ~60 CPU cores), use the following.
 ``` shell
-python3.5 pytest plda/tests/
+python3.5 pytest plda/  # This README.md should be inside here.
 ```
 
 To run a particular test file, run one of the following.
