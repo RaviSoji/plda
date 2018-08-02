@@ -1,19 +1,19 @@
 # Probabilistic Linear Discriminant Analysis
 
-### Disclaimer
+__Disclaimer__
 This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
  so it stores a bunch of parameters in memory that 
  are not necessary for simple classification problems.
 
-### Paper Citation
+__Paper Citation__
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
  In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. 
  ECCV 2006.](
  https://link.springer.com/chapter/10.1007/11744085_41)
 
-### Dependencies
+__Dependencies__
 If you already have 
  [Anaconda or Miniconda](
   https://conda.io/docs/user-guide/install/index.html),
@@ -21,7 +21,9 @@ If you already have
  called `plda` with the following. 
 Otherwise, see [environment.yml](./environment.yml).
 
-```conda env create -f environment.yml -n plda```
+``` shell
+conda env create -f environment.yml -n plda
+```
 
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
