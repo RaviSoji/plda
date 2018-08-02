@@ -1,6 +1,7 @@
 # Probabilistic Linear Discriminant Analysis
 
 __Disclaimer__
+
 This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
@@ -8,12 +9,14 @@ This model was written for
  are not necessary for simple classification problems.
 
 __Paper Citation__
+
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
  In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. 
  ECCV 2006.](
  https://link.springer.com/chapter/10.1007/11744085_41)
 
 __Dependencies__
+
 If you already have 
  [Anaconda or Miniconda](
   https://conda.io/docs/user-guide/install/index.html),
