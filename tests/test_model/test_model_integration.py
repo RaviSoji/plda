@@ -64,7 +64,7 @@ def test_maximum_likelihood_optimized_parameters(model, expected_parameters):
     def test_Psi():
         assert_allclose(model.Psi, expected_parameters['Psi'])
 
-    def test_():
+    def test_A():
         assert_allclose(model.A, expected_parameters['A'])
 
     def test_inv_A():
