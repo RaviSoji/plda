@@ -31,7 +31,7 @@ conda env create -f environment.yml -n plda  # "plda" is the environment name.
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
-- This demo shows you have to extract LDA features from your data.
+- This demo shows you how to extract LDA features from your data.
 - For classification, 
    the model automatically preprocesses your data, 
    but with the default preprocessing setting, 
@@ -75,6 +75,6 @@ py3clean plda/*  # This README.md should be in here.
 
 Finally, if you are done working with the model and test code, 
  deactivate the Conda environment.
-```
+``` shell
 source deactivate  # You can run this from any directory.
 ```
