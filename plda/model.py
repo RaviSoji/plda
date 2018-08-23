@@ -76,7 +76,7 @@ def transform_X_to_D(data, pca):
 
 
 class Model:
-    def __init__(self, row_wise_data, labels, n_principal_components):
+    def __init__(self, row_wise_data, labels, n_principal_components=None):
         assert len(row_wise_data.shape) == 2
         assert len(labels) == row_wise_data.shape[0]
 
