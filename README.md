@@ -28,6 +28,16 @@ Otherwise, see [environment.yml](./environment.yml).
 conda env create -f environment.yml -n plda  # "plda" is the environment name.
 ```
 
+__Usage__
+1. Activate your conda envrionment with `source activate plda`.
+2. Move this repository to the appropriate directory.
+   This might be a modules directory in your project or 
+    the same directory as the file importing this code.
+3. Add `import plda` to your code.
+4. See the demo below on how to use the actual model code.
+5. When you are all done,
+    you can deactivate the conda environment with `source deactivate`.
+
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
