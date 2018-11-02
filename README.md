@@ -29,7 +29,8 @@ conda env create -f environment.yml -n plda  # "plda" is the environment name.
 ```
 
 __Usage__
-1. Activate your conda envrionment with `source activate plda`.
+1. If you have one, 
+    activate your conda envrionment with `source activate plda`.
 2. Move this repository to the appropriate directory.
    This might be a modules directory in your project or 
     the same directory as the file importing this code.
