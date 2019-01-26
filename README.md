@@ -30,7 +30,7 @@ conda env create -f environment.yml -n plda  # "plda" is the environment name.
 
 __Usage__
 1. If you have one, 
-    activate your conda envrionment with `source activate plda`.
+    activate your conda envrionment with `conda activate plda`.
 2. Move this repository to the appropriate directory.
    This might be a modules directory in your project or 
     the same directory as the file importing this code.
@@ -57,7 +57,7 @@ See [mnist_demo/mnist_demo.ipynb](
 If you created the Conda environment with the name `plda`, 
  activate it with the following.
 ``` shell
-source activate plda  # If `plda` is the name you gave the Conda environment.
+conda activate plda  # If `plda` is the name you gave the Conda environment.
 ```
 
 To run all tests (~120 seconds with ~60 CPU cores), use the following.
