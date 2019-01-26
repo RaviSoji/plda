@@ -19,7 +19,7 @@ __Dependencies__
 
 If you already have 
  [Anaconda or Miniconda](
-  https://conda.io/docs/user-guide/install/index.html),
+  https://docs.conda.io/projects/conda/en/latest/),
  you can automatically download all dependencies to a conda environment 
  called `plda` with the following. 
 Otherwise, see [environment.yml](./environment.yml).
@@ -37,7 +37,7 @@ __Usage__
 3. Add `import plda` to your code.
 4. See the demo below on how to use the actual model code.
 5. When you are all done,
-    you can deactivate the conda environment with `source deactivate`.
+    you can deactivate the conda environment with `conda deactivate`.
 
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
@@ -87,5 +87,5 @@ py3clean plda/*  # This README.md should be in here.
 Finally, if you are done working with the model and test code, 
  deactivate the Conda environment.
 ``` shell
-source deactivate  # You can run this from any directory.
+conda deactivate  # You can run this from any directory.
 ```
