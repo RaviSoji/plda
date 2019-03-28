@@ -16,6 +16,7 @@ import numpy as np
 
 from numpy.testing import assert_array_equal
 from numpy.testing import assert_allclose
+from numpy.testing import assert_almost_equal
 from scipy.stats import multivariate_normal as gaussian
 from scipy.special import logsumexp
 from plda import plda
@@ -266,3 +267,30 @@ def test_m_recovers_true_prior_mean():
     np.random.seed(1234)
     assert_error_falls_as_K_increases(calc_error, n_k=50, D=2, k_list=ks)
     assert_error_falls_as_K_increases(calc_error, n_k=50, D=50, k_list=ks)
+
+
+def test_similarity():
+    np.random.seed(1234)
+
+    n_k = 100
+    K = 7
+    dim = 10
+
+    data_dictionary = generate_data(n_k, K, dim)
+    X_train = data_dictionary['data'][:500]
+
+    Y = data_dictionary['labels'][:500]
+    model = plda.Model(X_train, Y)
+
+    X_infer_speaker_1 = data_dictionary['data'][500:600]
+    X_infer_speaker_1 = model.transform(X_infer_speaker_1, 'D', 'U_model')
+    X_infer_speaker_2 = data_dictionary['data'][600:]
+    X_infer_speaker_2 = model.transform(X_infer_speaker_2, 'D', 'U_model')
+
+    similarity_1v2 = model.similarity(X_infer_speaker_1, X_infer_speaker_2)
+    similarity_2v2 = model.similarity(
+        X_infer_speaker_2[:50],
+        X_infer_speaker_2[50:]
+    )
+    assert_almost_equal(similarity_1v2, -46868.44557534719)
+    assert_almost_equal(similarity_2v2, 29.917954937414834)
