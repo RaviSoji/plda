@@ -143,6 +143,21 @@ class Model:
 
         return gaussian(mean, np.diag(cov_diag)).logpdf(v_model)
 
+    def calc_same_diff_likelihood_ratio(self, U_model_p, U_model_g):
+        assert U_model_p.shape[-1] == self.get_dimensionality('U_model')
+        assert U_model_g.shape[-1] == self.get_dimensionality('U_model')
+
+        U_model_same = np.concatenate([
+            U_model_p,
+            U_model_g,
+        ])
+        ll_same = self.calc_logp_marginal_likelihood(U_model_same)
+        ll_p = self.calc_logp_marginal_likelihood(U_model_p)
+        ll_g = self.calc_logp_marginal_likelihood(U_model_g)
+        ll_same = ll_same - (ll_p + ll_g)
+
+        return ll_same
+
     def fit(self, data, labels, n_principal_components=None):
         if n_principal_components is None:
             S_b, S_w = calc_scatter_matrices(data, labels)
@@ -251,18 +266,3 @@ class Model:
                 transformed = self.transform(transformed, space_1, space_2)
 
             return transformed
-
-    def similarity(self, U_model_p, U_model_g):
-        assert U_model_p.shape[-1] == self.get_dimensionality('U_model')
-        assert U_model_g.shape[-1] == self.get_dimensionality('U_model')
-
-        U_model_same = np.concatenate([
-            U_model_p,
-            U_model_g,
-        ])
-        ll_same = self.calc_logp_marginal_likelihood(U_model_same)
-        ll_p = self.calc_logp_marginal_likelihood(U_model_p)
-        ll_g = self.calc_logp_marginal_likelihood(U_model_g)
-        ll_same = ll_same - (ll_p + ll_g)
-
-        return ll_same
