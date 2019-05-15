@@ -287,8 +287,8 @@ def test_calc_same_diff_likelihood_ratio():
     X_infer_category_2 = data_dictionary['data'][600:]
     X_infer_category_2 = model.transform(X_infer_category_2, 'D', 'U_model')
 
-    similarity_1v2 = model.similarity(X_infer_category_1, X_infer_category_2)
-    similarity_2v2 = model.similarity(
+    similarity_1v2 = model.calc_same_diff_likelihood_ratio(X_infer_category_1, X_infer_category_2)
+    similarity_2v2 = model.calc_same_diff_likelihood_ratio(
         X_infer_category_2[:50],
         X_infer_category_2[50:]
     )
