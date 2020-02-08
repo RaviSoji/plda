@@ -18,7 +18,7 @@ from scipy.stats import multivariate_normal as gaussian
 from .optimizer import get_prior_params
 from .optimizer import get_posterior_params
 from .optimizer import get_posterior_predictive_params
-from .optimizer import optimize_maximum_likelihood
+from .optimizer import optimize_maximum_likelihood  # I.e. empirical Bayes.
 from .optimizer import calc_scatter_matrices
 
 

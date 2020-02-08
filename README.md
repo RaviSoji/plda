@@ -8,6 +8,8 @@ This model was written for
  so it stores a bunch of parameters in memory that 
  are not necessary for simple classification problems.
 
+The model parameters are estimated via empirical Bayes.
+
 __Paper Citation__
 
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
