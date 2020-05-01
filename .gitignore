@@ -3,3 +3,4 @@ __pycache__/
 cross_validation/cafe_faces/
 .ipynb_checkpoints/
 .pytest_cache/
+*.egg-info
