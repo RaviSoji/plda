@@ -24,6 +24,7 @@ There are three ways you can install dependencies.
     `pip install PATH/TO/PARENT/DIRECTORY/plda`.
 2. To install within a virtual environment you already created, 
      first activate that environment,
+     install `pip` within that environment, if you have not already, 
      and then run `pip install PATH/TO/PARENT/DIRECTORY/plda`.
 3. To create a Conda environment _and_ 
     install this package into that environment, 
