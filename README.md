@@ -18,27 +18,26 @@ __Paper Citation__
 
 __Dependencies__
 
-You can install dependencies for this package in 3 ways.
+There are three ways You can install dependencies.
 
 1. If you don't use virtual environments:
     `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-   In most cases you should be using virtual environments so your work is 
-    reproducible with minimal effort.
-2. If you already have a virtual environment, 
-     activate your environment and _then_ run 
-    `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-3. If you already have Conda installed via [Anaconda or Miniconda](
-    https://docs.conda.io/projects/conda/en/latest/), 
-    then you can automatically create a virtual environment called `plda` 
-    that will have this package installed.
-   First navigate your way into the directory containing this 
+2. To install within a virtual environment you already created, 
+     first activate that environment,
+     and then run `pip install PATH/TO/PARENT/DIRECTORY/plda`.
+3. If you want to create a Conda environment _and_ 
+    install this package into that environment, 
+    first navigate your way into the directory containing this 
     `README.md` file.
+   Then run the following to create a Conda environment named "plda".
 
     ``` shell
     conda env create -f environment.yml -n plda  # plda is the environment name.
     ```
 
-Otherwise, see [environment.yml](./environment.yml).
+You get Conda by downloading either [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/).
+
+For full specification of dependencies, see [environment.yml](./environment.yml).
 
 __Usage__
 1. If you installed this package in a virtual environment, 
@@ -47,21 +46,18 @@ __Usage__
 3. See MNIST demo below for examples of things you can do with this package.
 
 ## Demo with MNIST Handwritten Digits Data
-See [mnist_demo/mnist_demo.ipynb](
-     ./mnist_demo/mnist_demo.ipynb).
-It shows you have to 
-1. estimate the model parameters, 
-2. classify data points,
-3. determine whether two points are from the same category or not, and
-4. how to extract LDA features from your data.
+Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
-- For classification, 
-   the model automatically preprocesses your data, 
-   but with the default preprocessing setting, 
-   it will overfit small training datasets.
-- If you run into this issue, 
-   one way to address it is to reduce the number of principal components 
-   present in the preprocessed data (example is in the demo).
+1. Import plda and other convenient packages.
+2. Load data.
+3. Preprocess data.
+4. Fit model.
+5. __How to classify datapoints: Overfit classifier__.
+6. __How to classify datapoints: Better-fit classifier__.
+7. Extracting LDA-features.
+8. __How to classify datapoints: "same-or-different category" discrimination__.
+9. Extracting preprocessing information.
+10. Extracting model parameters.
 
 ## Testing
 

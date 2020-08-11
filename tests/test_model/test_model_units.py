@@ -18,7 +18,7 @@ import pytest
 from numpy.testing import assert_allclose
 from plda import plda
 from plda.plda.model import (
-    get_space_walk
+    get_space_walk,
     transform_D_to_X,
     transform_X_to_U,
     transform_U_to_U_model,
