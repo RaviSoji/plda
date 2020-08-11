@@ -17,19 +17,21 @@ import pytest
 
 from numpy.testing import assert_allclose
 from numpy.testing import assert_array_equal
-from plda.plda.optimizer import calc_A
-from plda.plda.optimizer import calc_W
-from plda.plda.optimizer import calc_Lambda_b
-from plda.plda.optimizer import calc_Lambda_w
-from plda.plda.optimizer import calc_m
-from plda.plda.optimizer import calc_n_avg
-from plda.plda.optimizer import calc_Psi
-from plda.plda.optimizer import calc_scatter_matrices
-from plda.plda.optimizer import as_dictionary_of_dictionaries
-from plda.plda.optimizer import get_prior_params
-from plda.plda.optimizer import get_posterior_params
-from plda.plda.optimizer import get_posterior_predictive_params
-from plda.plda.optimizer import get_relevant_U_dims
+from plda.plda.optimizer import (
+    calc_A,
+    calc_W,
+    calc_Lambda_b,
+    calc_Lambda_w,
+    calc_m,
+    calc_n_avg,
+    calc_Psi,
+    calc_scatter_matrices,
+    as_dictionary_of_dictionaries,
+    get_prior_params,
+    get_posterior_params,
+    get_posterior_predictive_params,
+    get_relevant_U_dims
+)
 from plda.tests.utils import assert_diagonal
 from scipy.linalg import eigh
 

@@ -17,12 +17,14 @@ import pytest
 
 from numpy.testing import assert_allclose
 from plda import plda
-from plda.plda.model import transform_D_to_X
-from plda.plda.model import transform_X_to_U
-from plda.plda.model import transform_U_to_U_model
-from plda.plda.model import transform_U_model_to_U
-from plda.plda.model import transform_U_to_X
-from plda.plda.model import transform_X_to_D
+from plda.plda.model import (
+    transform_D_to_X,
+    transform_X_to_U,
+    transform_U_to_U_model,
+    transform_U_model_to_U,
+    transform_U_to_X,
+    transform_X_to_D
+)
 from plda.plda.optimizer import optimize_maximum_likelihood
 from sklearn.decomposition import PCA
 from plda.tests.utils import generate_data

@@ -17,13 +17,15 @@ import pytest
 
 from numpy.testing import assert_allclose
 from plda import plda
-from plda.plda.model import get_space_walk
-from plda.plda.model import transform_D_to_X
-from plda.plda.model import transform_X_to_U
-from plda.plda.model import transform_U_to_U_model
-from plda.plda.model import transform_U_model_to_U
-from plda.plda.model import transform_U_to_X
-from plda.plda.model import transform_X_to_D
+from plda.plda.model import (
+    get_space_walk
+    transform_D_to_X,
+    transform_X_to_U,
+    transform_U_to_U_model,
+    transform_U_model_to_U,
+    transform_U_to_X,
+    transform_X_to_D
+)
 from sklearn.decomposition import PCA
 
 

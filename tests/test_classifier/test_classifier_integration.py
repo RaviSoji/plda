@@ -15,8 +15,10 @@
 import numpy as np
 import pytest
 
-from numpy.testing import assert_array_equal
-from numpy.testing import assert_allclose
+from numpy.testing import (
+    assert_array_equal,
+    assert_allclose
+)
 from plda import plda
 from plda.tests.utils import generate_data
 

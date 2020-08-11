@@ -1,14 +1,13 @@
 # Probabilistic Linear Discriminant Analysis
 
-__Disclaimer__
+__Disclaimers__
 
-This model was written for
+1. This model was written for
  an [Explainable Artificial Intelligence (XAI) project](
      http://shaftolab.com/people.html), 
  so it stores a bunch of parameters in memory that 
  are not necessary for simple classification problems.
-
-The model parameters are estimated via empirical Bayes.
+2. The model parameters are estimated via empirical Bayes.
 
 __Paper Citation__
 
@@ -19,20 +18,21 @@ __Paper Citation__
 
 __Dependencies__
 
-You can use this package in 3 ways.
-
+You can install dependencies for this package in 3 ways.
 
 1. If you don't use virtual environments:
     `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-   However, in most cases you really should use virtual environments, 
-     especially if you want your work to be reproducible with minimal effort.
+   In most cases you should be using virtual environments so your work is 
+    reproducible with minimal effort.
 2. If you already have a virtual environment, 
      activate your environment and _then_ run 
     `pip install PATH/TO/PARENT/DIRECTORY/plda`.
 3. If you already have Conda installed via [Anaconda or Miniconda](
     https://docs.conda.io/projects/conda/en/latest/), 
-    then you can run the following to automatically create a virtual 
-    environment called `plda` that will have this package installed.
+    then you can automatically create a virtual environment called `plda` 
+    that will have this package installed.
+   First navigate your way into the directory containing this 
+    `README.md` file.
 
     ``` shell
     conda env create -f environment.yml -n plda  # plda is the environment name.
@@ -44,6 +44,7 @@ __Usage__
 1. If you installed this package in a virtual environment, 
     activate that environment first.
 2. Add `import plda` to your code.
+3. See MNIST demo below for examples of things you can do with this package.
 
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
@@ -63,7 +64,9 @@ It shows you have to
    present in the preprocessed data (example is in the demo).
 
 ## Testing
-If you created the Conda environment with the name `plda`, 
+
+If you installed this package in an environment, activate it.
+For example, if you created the Conda environment with the name `plda`, 
  activate it with the following.
 ``` shell
 conda activate plda  # If `plda` is the name you gave the Conda environment.

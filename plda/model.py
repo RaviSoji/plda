@@ -15,11 +15,13 @@
 import numpy as np
 from sklearn.decomposition import PCA
 from scipy.stats import multivariate_normal as gaussian
-from .optimizer import get_prior_params
-from .optimizer import get_posterior_params
-from .optimizer import get_posterior_predictive_params
-from .optimizer import optimize_maximum_likelihood  # I.e. empirical Bayes.
-from .optimizer import calc_scatter_matrices
+from .optimizer import (
+    get_prior_params,
+    get_posterior_params,
+    get_posterior_predictive_params,
+    optimize_maximum_likelihood,  # I.e. empirical Bayes.
+    calc_scatter_matrices
+)
 
 
 def get_space_walk(from_space, to_space):
@@ -143,7 +145,7 @@ class Model:
 
         return gaussian(mean, np.diag(cov_diag)).logpdf(v_model)
 
-    def calc_same_diff_likelihood_ratio(self, U_model_p, U_model_g):
+    def calc_same_diff_log_likelihood_ratio(self, U_model_p, U_model_g):
         assert U_model_p.shape[-1] == self.get_dimensionality('U_model')
         assert U_model_g.shape[-1] == self.get_dimensionality('U_model')
 

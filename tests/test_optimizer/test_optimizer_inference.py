@@ -16,12 +16,16 @@ import numpy as np
 import pytest
 
 from numpy.testing import assert_allclose
-from plda.plda.optimizer import calc_scatter_matrices
-from plda.plda.optimizer import optimize_maximum_likelihood
-from plda.tests.utils import assert_error_falls_as_K_increases
-from plda.tests.utils import assert_error_falls_as_n_increases
-from plda.tests.utils import calc_mean_squared_error
-from plda.tests.utils import generate_data
+from plda.plda.optimizer import (
+    calc_scatter_matrices,
+    optimize_maximum_likelihood
+)
+from plda.tests.utils import (
+    assert_error_falls_as_K_increases,
+    assert_error_falls_as_n_increases,
+    calc_mean_squared_error,
+    generate_data
+)
 
 
 def test_S_w_and_n_recover_Phi_w():

@@ -14,16 +14,20 @@
 # ==============================================================================
 import numpy as np
 
-from numpy.testing import assert_array_equal
-from numpy.testing import assert_allclose
-from numpy.testing import assert_almost_equal
+from numpy.testing import (
+    assert_array_equal,
+    assert_allclose,
+    assert_almost_equal
+)
 from scipy.stats import multivariate_normal as gaussian
 from scipy.special import logsumexp
 from plda import plda
-from plda.tests.utils import assert_error_falls_as_K_increases
-from plda.tests.utils import assert_error_falls_as_n_increases
-from plda.tests.utils import calc_mean_squared_error
-from plda.tests.utils import generate_data
+from plda.tests.utils import (
+    assert_error_falls_as_K_increases,
+    assert_error_falls_as_n_increases,
+    calc_mean_squared_error,
+    generate_data
+)
 
 
 def test_A_recovers_Phi_w():
@@ -269,7 +273,7 @@ def test_m_recovers_true_prior_mean():
     assert_error_falls_as_K_increases(calc_error, n_k=50, D=50, k_list=ks)
 
 
-def test_calc_same_diff_likelihood_ratio():
+def test_calc_same_diff_log_likelihood_ratio():
     np.random.seed(1234)
 
     n_k = 100
@@ -287,8 +291,8 @@ def test_calc_same_diff_likelihood_ratio():
     X_infer_category_2 = data_dictionary['data'][600:]
     X_infer_category_2 = model.transform(X_infer_category_2, 'D', 'U_model')
 
-    similarity_1v2 = model.calc_same_diff_likelihood_ratio(X_infer_category_1, X_infer_category_2)
-    similarity_2v2 = model.calc_same_diff_likelihood_ratio(
+    similarity_1v2 = model.calc_same_diff_log_likelihood_ratio(X_infer_category_1, X_infer_category_2)
+    similarity_2v2 = model.calc_same_diff_log_likelihood_ratio(
         X_infer_category_2[:50],
         X_infer_category_2[50:]
     )
