@@ -33,9 +33,7 @@ conda env create -f environment.yml -n plda  # "plda" is the environment name.
 __Usage__
 1. If you have one, 
     activate your conda envrionment with `conda activate plda`.
-2. Move this repository to the appropriate directory.
-   This might be a modules directory in your project or 
-    the same directory as the file importing this code.
+2. Install `plda` as a package into the environment with `pip install .` (path . should point to this repository on your filesystem)
 3. Add `import plda` to your code.
 4. See the demo below on how to use the actual model code.
 5. When you are all done,
