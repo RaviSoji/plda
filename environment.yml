@@ -8,5 +8,5 @@ dependencies:
 - matplotlib~=2.2.2  # Optional.
 - nb_conda~=2.2.1  # Optional.
 - jupyter~=1.0.0  # Optional.
-- pip:
+- pip=20.2.1:
   - git+git://github.com/RaviSoji/plda@master

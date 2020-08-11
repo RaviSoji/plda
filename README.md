@@ -19,39 +19,48 @@ __Paper Citation__
 
 __Dependencies__
 
-If you already have 
- [Anaconda or Miniconda](
-  https://docs.conda.io/projects/conda/en/latest/),
- you can automatically download all dependencies to a conda environment 
- called `plda` with the following. 
+You can use this package in 3 ways.
+
+
+1. If you don't use virtual environments:
+    `pip install PATH/TO/PARENT/DIRECTORY/plda`.
+   However, in most cases you really should use virtual environments, 
+     especially if you want your work to be reproducible with minimal effort.
+2. If you already have a virtual environment, 
+     activate your environment and _then_ run 
+    `pip install PATH/TO/PARENT/DIRECTORY/plda`.
+3. If you already have Conda installed via [Anaconda or Miniconda](
+    https://docs.conda.io/projects/conda/en/latest/), 
+    then you can run the following to automatically create a virtual 
+    environment called `plda` that will have this package installed.
+
+    ``` shell
+    conda env create -f environment.yml -n plda  # plda is the environment name.
+    ```
+
 Otherwise, see [environment.yml](./environment.yml).
 
-``` shell
-conda env create -f environment.yml -n plda  # "plda" is the environment name.
-```
-
 __Usage__
-1. If you have one, 
-    activate your conda envrionment with `conda activate plda`.
-2. Install `plda` as a package into the environment with `pip install .` (path . should point to this repository on your filesystem)
-3. Add `import plda` to your code.
-4. See the demo below on how to use the actual model code.
-5. When you are all done,
-    you can deactivate the conda environment with `conda deactivate`.
+1. If you installed this package in a virtual environment, 
+    activate that environment first.
+2. Add `import plda` to your code.
 
 ## Demo with MNIST Handwritten Digits Data
 See [mnist_demo/mnist_demo.ipynb](
      ./mnist_demo/mnist_demo.ipynb).
-- This demo shows you how to extract LDA features from your data.
+It shows you have to 
+1. estimate the model parameters, 
+2. classify data points,
+3. determine whether two points are from the same category or not, and
+4. how to extract LDA features from your data.
+
 - For classification, 
    the model automatically preprocesses your data, 
    but with the default preprocessing setting, 
-   it could overfit small training datasets.
+   it will overfit small training datasets.
 - If you run into this issue, 
    one way to address it is to reduce the number of principal components 
-   present in the preprocessed data.
-- The MNIST demo shows you how simple this is: 
-   just supply an optional parameter.
+   present in the preprocessed data (example is in the demo).
 
 ## Testing
 If you created the Conda environment with the name `plda`, 
