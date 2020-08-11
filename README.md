@@ -18,26 +18,28 @@ __Paper Citation__
 
 __Dependencies__
 
-There are three ways You can install dependencies.
+There are three ways you can install dependencies.
 
 1. If you don't use virtual environments:
     `pip install PATH/TO/PARENT/DIRECTORY/plda`.
 2. To install within a virtual environment you already created, 
      first activate that environment,
      and then run `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-3. If you want to create a Conda environment _and_ 
+3. To create a Conda environment _and_ 
     install this package into that environment, 
     first navigate your way into the directory containing this 
     `README.md` file.
-   Then run the following to create a Conda environment named "plda".
+   Then run the following to create a Conda environment named "plda" with 
+    this package installed.
 
     ``` shell
     conda env create -f environment.yml -n plda  # plda is the environment name.
     ```
 
-You get Conda by downloading either [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/).
+You can get Conda by downloading either [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/).
+I prefer the latter because it wastes less disk space.
 
-For full specification of dependencies, see [environment.yml](./environment.yml).
+The full specification of dependencies is in [environment.yml](./environment.yml).
 
 __Usage__
 1. If you installed this package in a virtual environment, 
@@ -97,3 +99,9 @@ Finally, if you are done working with the model and test code,
 ``` shell
 conda deactivate  # You can run this from any directory.
 ```
+
+## Thanks!
+
+Special thanks to @seandickert and @matiaslindgren for pushing for and 
+ implementing the same-different discrimination and the pip install, 
+ respectively!
