@@ -1,5 +1,5 @@
 dependencies:
-- python~=3.5  # Necessary for plda.
+- python>=3.5  # Necessary for plda.
 - numpy~=1.14.2  # Necessary for plda.
 - scipy~=1.0.1  # Necessary for plda.
 - scikit-learn~=0.19.1  # Necessary for plda.
@@ -8,3 +8,5 @@ dependencies:
 - matplotlib~=2.2.2  # Optional.
 - nb_conda~=2.2.1  # Optional.
 - jupyter~=1.0.0  # Optional.
+- pip:
+  - git+git://github.com/RaviSoji/plda@master

@@ -62,7 +62,7 @@ conda activate plda  # If `plda` is the name you gave the Conda environment.
 
 To run all tests (~120 seconds with ~60 CPU cores), use the following.
 ``` shell
-python3.5 pytest plda/  # This README.md should be inside here.
+pytest plda/  # README.md should be in this directory.
 ```
 
 To run a particular test file, run one of the following.
