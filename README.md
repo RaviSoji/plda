@@ -1,20 +1,25 @@
 # Probabilistic Linear Discriminant Analysis
 
-__Disclaimers__
-
-1. This model was written for
- an [Explainable Artificial Intelligence (XAI) project](
-     http://shaftolab.com/people.html), 
- so it stores a bunch of parameters in memory that 
- are not necessary for simple classification problems.
-2. The model parameters are estimated via empirical Bayes.
-
 __Paper Citation__
 
 [Ioffe S. (2006) Probabilistic Linear Discriminant Analysis. 
  In: Leonardis A., Bischof H., Pinz A. (eds) Computer Vision – ECCV 2006. 
  ECCV 2006.](
  https://link.springer.com/chapter/10.1007/11744085_41)
+
+## Demo with MNIST Handwritten Digits Data
+Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
+
+1. Import plda and other convenient packages.
+2. Load data.
+3. Preprocess data.
+4. Fit model.
+5. __How to classify datapoints: Overfit classifier__.
+6. __How to classify datapoints: Better-fit classifier__.
+7. Extracting LDA-features.
+8. __How to classify datapoints: "same-or-different category" discrimination__.
+9. Extracting preprocessing information.
+10. Extracting model parameters.
 
 __Dependencies__
 
@@ -39,28 +44,13 @@ There are three ways you can install dependencies.
 
 You can get Conda by downloading either [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/).
 I prefer the latter because it wastes less disk space.
-
 The full specification of dependencies is in [environment.yml](./environment.yml).
 
 __Usage__
 1. If you installed this package in a virtual environment, 
     activate that environment first.
 2. Add `import plda` to your code.
-3. See MNIST demo below for examples of things you can do with this package.
-
-## Demo with MNIST Handwritten Digits Data
-Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
-1. Import plda and other convenient packages.
-2. Load data.
-3. Preprocess data.
-4. Fit model.
-5. __How to classify datapoints: Overfit classifier__.
-6. __How to classify datapoints: Better-fit classifier__.
-7. Extracting LDA-features.
-8. __How to classify datapoints: "same-or-different category" discrimination__.
-9. Extracting preprocessing information.
-10. Extracting model parameters.
+3. See MNIST demo for the rest.
 
 ## Testing
 
@@ -100,6 +90,16 @@ Finally, if you are done working with the model and test code,
 ``` shell
 conda deactivate  # You can run this from any directory.
 ```
+
+__Disclaimers__
+
+1. This model was written for
+ an [Explainable Artificial Intelligence (XAI) project](
+     http://shaftolab.com/people.html), 
+ so it stores a bunch of parameters in memory that 
+ are not necessary for simple classification problems.
+2. The model parameters are estimated via empirical Bayes.
+
 
 ## Thanks!
 
