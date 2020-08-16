@@ -12,14 +12,13 @@ Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 1. Import plda and other convenient packages.
 2. Load data.
-3. Preprocess data.
-4. Fit model.
-5. __How to classify datapoints: Overfit classifier__.
-6. __How to classify datapoints: Better-fit classifier__.
-7. Extracting LDA-features.
-8. __How to classify datapoints: "same-or-different category" discrimination__.
-9. Extracting preprocessing information.
-10. Extracting model parameters.
+3. Preprocess data and fit model.
+4. __How to classify datapoints: Overfit classifier__.
+5. __How to classify datapoints: Better-fit classifier__.
+6. Extracting LDA-features.
+7. __How to classify datapoints: "same-or-different category" discrimination__.
+8. Extracting preprocessing information.
+9. Extracting model parameters.
 
 __Dependencies__
 
