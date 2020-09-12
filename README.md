@@ -47,7 +47,7 @@ If you are new to code or research in general,
 __To add this repository as a dependency in your own conda environment 
  `yml` file__, 
  add the following to the end of your `yml` file
- (e.g. this repository's [environment.yml](./environment.yml) file): 
+ (e.g. this repository's [environment.yml](./environment.yml) file).
   ```
   - pip=20.2.1
   - pip:
