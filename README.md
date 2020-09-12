@@ -47,9 +47,9 @@ Follow the directions below with Terminal.
 Now, you have 4 options.
 - To install globally on your machine (bad practice): 
    `pip install plda`.
-- To install within an existing virtual environment,
+- To install within an existing virtual environment named `myenv` ,
    activate that virtual environment first 
-   (e.g. `conda activate myprojectenv`), 
+   (e.g. `conda activate myenv`), 
    and then run `pip install plda`.
 - To automatically create a conda environment named `plda`, 
    with this package and its dependencies,
@@ -72,10 +72,10 @@ If you are new to code in general,
 ## Testing
 
 If you installed this package in an environment, activate it.
-For example, if you created the Conda environment with the name `plda`, 
+For example, if you created the Conda environment with the name `myenv`, 
  activate it with the following.
 ``` shell
-conda activate plda  # If `plda` is the name you gave the Conda environment.
+conda activate myenv
 ```
 
 To run all tests (~120 seconds with ~60 CPU cores), use the following.
