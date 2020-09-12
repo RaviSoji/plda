@@ -44,8 +44,8 @@ If you are new to code or research in general,
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
 
-To add this repository as a dependency in your own conda environment 
- `yml` file, 
+__To add this repository as a dependency in your own conda environment 
+ `yml` file__, 
  add the following to the end of your `yml` file
  (e.g. this repository's [environment.yml](./environment.yml) file): 
   ```
@@ -54,7 +54,7 @@ To add this repository as a dependency in your own conda environment
     - git+git://github.com/RaviSoji/plda@master
   ```
 
-Alternatively, you can install dependencies in 3 steps using Terminal.
+__Alternatively, you can install dependencies in 3 steps using Terminal__.
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
