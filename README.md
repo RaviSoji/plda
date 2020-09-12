@@ -39,7 +39,22 @@ Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 ## Dependencies
 
-Follow the directions below with Terminal.
+If you are new to code or research in general,
+ check out the following download and installation instructions: 
+ [`git`](https://git-scm.com/downloads) and 
+ [`conda`](https://github.com/conda/conda).
+
+To add this repository as a dependency in your own conda environment 
+ `yml` file, 
+ add the following to the end of your `yml` file
+ (e.g. this repository's [environment.yml](./environment.yml) file): 
+  ```
+  - pip=20.2.1
+  - pip:
+    - git+git://github.com/RaviSoji/plda@master
+  ```
+
+Alternatively, you can install dependencies in 3 steps using Terminal.
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
@@ -54,20 +69,6 @@ Now, you have 4 options.
 - To automatically create a conda environment named `myenv`, 
    with this package and its dependencies,
    run `conda env create -f plda/environment.yml -n myenv`.
-- To add this repository as a dependency in your own conda environment 
-   `yml` file, 
-   add the following to the end of your `yml` file
-   (e.g. this repository's [environment.yml](./environment.yml)): 
-    ```
-    - pip=20.2.1
-    - pip:
-      - git+git://github.com/RaviSoji/plda@master
-    ```
-
-If you are new to code in general,
- check out the following download and installation instructions: 
- [`git`](https://git-scm.com/downloads) and 
- [`conda`](https://github.com/conda/conda).
 
 ## Testing
 
