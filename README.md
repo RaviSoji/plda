@@ -59,7 +59,7 @@ Alternatively, you can install dependencies in 3 steps using Terminal.
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
 
-Now, you have 4 options.
+Now, you have 3 options.
 - To install globally on your machine (bad practice): 
    `pip install plda`.
 - To install within an existing virtual environment named `myenv` ,
