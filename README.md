@@ -51,13 +51,13 @@ Now, you have 4 options.
    activate that virtual environment first 
    (e.g. `conda activate myenv`), 
    and then run `pip install plda`.
-- To automatically create a conda environment named `plda`, 
+- To automatically create a conda environment named `myenv`, 
    with this package and its dependencies,
-   run `conda env create -f plda/environment.yml -n plda`.
+   run `conda env create -f plda/environment.yml -n myenv`.
 - To add this repository as a dependency in your own conda environment 
    `yml` file, 
    add the following to the end of your `yml` file
-   (e.g. this repository's [environment.yml](./mnist_demo/mnist_demo.ipynb)): 
+   (e.g. this repository's [environment.yml](./environment.yml)): 
     ```
     - pip=20.2.1
     - pip:
