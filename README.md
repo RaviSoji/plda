@@ -43,6 +43,7 @@ Follow the directions below with Terminal.
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
+
 Now, you have 4 options.
 - To install globally on your machine (bad practice): 
    `pip install plda`.
