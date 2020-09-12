@@ -7,9 +7,26 @@ __Paper Citation__
  ECCV 2006.](
  https://link.springer.com/chapter/10.1007/11744085_41)
 
-## Demo with MNIST Handwritten Digits Data
+__Disclaimers__
+
+1. Parameters are estimated via empirical Bayes.
+2. This code was originally written for an Explainable Artificial Intelligence 
+    (XAI) project at the [CoDaS Laboratory](http://shaftolab.com/people.html), 
+    so it keeps parameters in memory that are unnecessary for simple 
+    classification problems.
+
+__Thanks__!
+
+Special thanks to @seandickert and @matiaslindgren for pushing for and 
+ implementing the same-different discrimination and the pip install, 
+ respectively!
+
+## Usage Demo with MNIST Handwritten Digits Data
+
 Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
+0. If you installed this package in a virtual environment, 
+    activate that virtual environment first.
 1. Import plda and other convenient packages.
 2. Load data.
 3. Preprocess data and fit model.
@@ -20,36 +37,39 @@ Outline for [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 8. Extracting preprocessing information.
 9. Extracting model parameters.
 
-__Dependencies__
+## Dependencies
 
-There are three ways you can install dependencies.
+Follow the directions below with Terminal.
 
-1. If you don't use virtual environments:
-    `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-2. To install within a virtual environment you already created, 
-     first activate that environment,
-     install `pip` within that environment, if you have not already, 
-     and then run `pip install PATH/TO/PARENT/DIRECTORY/plda`.
-3. To create a Conda environment _and_ 
-    install this package into that environment, 
-    first navigate your way into the directory containing this 
-    `README.md` file.
-   Then run the following to create a Conda environment named "plda" with 
-    this package installed.
+1. `cd` into your favorite directory.
+2. `git clone https://github.com/RaviSoji/plda.git`
+3. Now, you have 4 options.
+    - To install globally on your machine (bad practice): 
+       `pip install plda`.
+    - To install within an existing virtual environment,
+       activate that virtual environment first 
+       (e.g. `conda activate myprojectenv`), 
+       and then run `pip install plda`.
+    - To automatically create a conda environment named `plda`, 
+       with this package and its dependencies,
+       run `conda env create -f plda/environment.yml -n plda`.
+    - To add this repository as a dependency in your own conda environment 
+       `yml` file, 
+       add the following to the end of your `yml` file: 
+        ```
+        - pip=20.2.1
+        - pip:
+          - git+git://github.com/RaviSoji/plda@master
+        ```
+      For an example, 
+       check out the last couple lines of this repository's 
+       [environment.yml](./mnist_demo/mnist_demo.ipynb)
+       file.
 
-    ``` shell
-    conda env create -f environment.yml -n plda  # plda is the environment name.
-    ```
-
-You can get Conda by downloading either [Anaconda or Miniconda](https://docs.conda.io/projects/conda/en/latest/).
-I prefer the latter because it wastes less disk space.
-The full specification of dependencies is in [environment.yml](./environment.yml).
-
-__Usage__
-1. If you installed this package in a virtual environment, 
-    activate that environment first.
-2. Add `import plda` to your code.
-3. See MNIST demo for the rest.
+If you are new to code in general,
+ check out the download and installation instructions for 
+ [`git`](https://git-scm.com/downloads] and 
+ [`conda`](https://github.com/conda/conda).
 
 ## Testing
 
@@ -89,19 +109,3 @@ Finally, if you are done working with the model and test code,
 ``` shell
 conda deactivate  # You can run this from any directory.
 ```
-
-__Disclaimers__
-
-1. This model was written for
- an [Explainable Artificial Intelligence (XAI) project](
-     http://shaftolab.com/people.html), 
- so it stores a bunch of parameters in memory that 
- are not necessary for simple classification problems.
-2. The model parameters are estimated via empirical Bayes.
-
-
-## Thanks!
-
-Special thanks to @seandickert and @matiaslindgren for pushing for and 
- implementing the same-different discrimination and the pip install, 
- respectively!
