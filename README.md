@@ -17,7 +17,9 @@ __Disclaimers__
 
 __Thanks__!
 
-Special thanks to @seandickert and @matiaslindgren for pushing for and 
+Special thanks to 
+ [@seandickert](https://github.com/seandickert) and 
+ [@matiaslindgren](https://github.com/matiaslindgren) for pushing for and 
  implementing the same-different discrimination and the pip install, 
  respectively!
 
