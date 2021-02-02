@@ -113,6 +113,22 @@ class Model:
 
     def calc_logp_marginal_likelihood(self, U_model):
         """ Computes the log marginal likelihood on axis=-2. """
+        """
+        To explicitly express the math of it, we understand that the joint
+        probability distribution of multiple samples is
+            \begin{align}
+                P(\boldsymbol{u}^{1\cdots n}) &= \prod_{t=1}^d \underbrace{\frac{1}{\sqrt{(2\pi)^n (\psi_t + \frac{1}{n})}} }_{C} \exp \left( \underbrace{- \frac{\bar{u}_t^2}{2(\psi_t + \frac{1}{n})}}_{E_1} \underbrace{- \frac{\sum_{i=1}^n (u_t^i - \bar{u}_t)^2}{2} }_{E_2} \right) \\
+                &= \prod_{t=1}^d C \exp (E_1 + E_2) \\ 
+            \end{align}
+        By taking the natural log, it prevents precision errors and allows for 
+        one to simply use sums. 
+            \begin{align}
+                \log (P(\boldsymbol{u}^{1\cdots n})) &= \sum_{t=1}^d \color{red}{\log (C)} +\color{cyan}{ \log(e^{E_1})} + \color{magenta}{\log(e^{E_2})} \\
+                &= \sum_{t=1}^d \color{red}{\log (C)} + \color{cyan}{E_1} + \color{magenta}{E_2} \\
+                &= \sum_{t=1}^d \color{red}{-\frac{n}{2} \log (2\pi) - \frac{1}{2} \log \left(\psi_t + \frac{1}{n} \right)} \color{cyan}{ - \frac{\bar{u}_t^2}{2(\psi_t + \frac{1}{n})} } \color{magenta}{- \frac{\sum_{i=1}^n (u_t^i - \bar{u}_t)^2}{2} }
+                &= \sum_{t=1}^d \color{red}{-\frac{n}{2} \log (2\pi) - \frac{1}{2} \log \left(n\psi_t + 1 \right) + \frac{1}{2} \log(n)} \color{cyan}{ - \frac{\bar{u}_t^2}{2(\psi_t + \frac{1}{n})} } \color{magenta}{- \frac{\sum_{i=1}^n (u_t^i - \bar{u}_t)^2}{2} }
+            \end{align}
+        """
         assert U_model.shape[-1] == self.get_dimensionality('U_model')
 
         if len(U_model.shape) == 1:
@@ -122,15 +138,16 @@ class Model:
         psi_diag = self.prior_params['cov_diag']
         n_psi_plus_eye = n * psi_diag + 1
 
-        log_constant = -.5 * n * np.log(2 * np.pi)
-        log_constant += -.5 * np.log(n_psi_plus_eye)
-
-        sum_of_squares = np.sum(U_model ** 2, axis=-2)
-        log_exponent_1 = -.5 * sum_of_squares
+        log_constant = -0.5 * n * np.log(2 * np.pi)
+        log_constant += -0.5 * np.log(n_psi_plus_eye)
+        log_constant += 0.5 np.log(n)
 
         mean = U_model.mean(axis=-2)
-        log_exponent_2 = .5 * (n ** 2 * psi_diag * mean ** 2)
-        log_exponent_2 /= n_psi_plus_eye
+        log_exponent_1 = -0.5 * (n * mean ** 2)
+        log_exponent_1 /= n_psi_plus_eye
+
+        sum_of_squares = np.sum(U_model ** 2, axis=-2)
+        log_exponent_2 = -0.5 * sum_of_squares
 
         logp_ml = log_constant + log_exponent_1 + log_exponent_2
         logp_ml = np.sum(logp_ml, axis=-1)
