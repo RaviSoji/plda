@@ -67,12 +67,12 @@ __Alternatively, you can install dependencies in 3 steps using Terminal__.
 
 Now, you have 3 options.
 - To globally install on your machine: 
-   `pip install plda`.
+   `pip install plda/` or `pip install ./plda`.
   This is easiest, but it is bad practice.
 - To install within an existing virtual environment named `myenv` that has 
    `pip` installed,
    activate that virtual environment first (e.g. `conda activate myenv`), 
-   and then run `pip install plda`.
+   and then run `pip install plda/` or `pip install ./plda`.
 - To automatically create a conda environment named `myenv`, 
    with this package and its dependencies,
    run `conda env create -f plda/environment.yml -n myenv`.
