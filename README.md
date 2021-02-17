@@ -48,9 +48,13 @@ If you are new to code or research in general,
 
 __To add this repository as a dependency in your own conda environment 
  `yml` file__, 
- add the following to the end of your `yml` file
+ add the following to the end of your dependencies
  (e.g. this repository's [environment.yml](./environment.yml) file).
   ```
+  - python>=3.5
+  - numpy~=1.14.2
+  - scipy~=1.0.1
+  - scikit-learn~=0.19.1
   - pip=20.2.1
   - pip:
     - git+git://github.com/RaviSoji/plda@master
