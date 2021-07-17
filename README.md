@@ -45,6 +45,7 @@ __Installing with `pip install`__
 __Installing using your own conda environment.yml file.__
 
 1. Add the following to the end of your dependencies.
+   Here is an example: [environment.yml](./environment.yml) file.
   ```
   - python>=3.5
   - numpy~=1.14.2
@@ -54,14 +55,13 @@ __Installing using your own conda environment.yml file.__
   - pip:
     - git+git://github.com/RaviSoji/plda@master
   ```
-Here is an example: [environment.yml](./environment.yml) file.
 
 ## Demo with MNIST Handwritten Digits Data
 
-Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 If you installed this package in a virtual environment, 
  remember to activate that virtual environment first.
+Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 ## Testing the software
 
-See [tests/README.md](./tests/README.md)
+See [tests/README.md](./tests/README.md).
