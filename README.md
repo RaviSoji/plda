@@ -23,26 +23,14 @@ __Thanks__!
  implemented the same-different discrimination and the pip install, 
  respectively!
 
-## Demo with MNIST Handwritten Digits Data: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
-0. If you installed this package in a virtual environment, 
-    activate that virtual environment first.
-1. Import plda and other convenient packages.
-2. Load data.
-3. Preprocess data and fit model.
-4. __How to classify datapoints: Overfit classifier__.
-5. __How to classify datapoints: Better-fit classifier__.
-6. Extracting LDA-features.
-7. __How to classify datapoints: "same-or-different category" discrimination__.
-8. Extracting preprocessing information.
-9. Extracting model parameters.
-
 ## Installation
 
 If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
+You may install the package by using `pip install` or by adding a few lines 
+ to your own environment.yml file.
 
 __Installing with `pip install`__
 
@@ -67,6 +55,14 @@ __Installing using your own conda environment.yml file.__
     - git+git://github.com/RaviSoji/plda@master
   ```
 Here is an example: [environment.yml](./environment.yml) file.
+
+## Demo with MNIST Handwritten Digits Data
+
+Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
+
+If you installed this package in a virtual environment, 
+ activate that virtual environment first.
+
 
 ## Testing the software
 
