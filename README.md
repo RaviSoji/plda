@@ -47,10 +47,10 @@ __Installing with `pip install`__
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
 3. If you have one, activate your virtual environment.
-   E.g. `conda activate myenv`.
-   If you installed `conda`, you can make one called `myenv` by running 
-    `conda env create -f plda/environment.yml -n myenv`. 
 4. Run either `pip install plda/` or `pip install ./plda`.
+5. If you want to make a new environment called `myenv` 
+    with this package and its python dependencies automatically installed, 
+    run the following: `conda env create -f plda/environment.yml -n myenv`. 
 
 __Installing using your own conda environment.yml file.__
 
