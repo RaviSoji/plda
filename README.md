@@ -59,10 +59,8 @@ Here is an example: [environment.yml](./environment.yml) file.
 ## Demo with MNIST Handwritten Digits Data
 
 Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
 If you installed this package in a virtual environment, 
- activate that virtual environment first.
-
+ remember to activate that virtual environment first.
 
 ## Testing the software
 
