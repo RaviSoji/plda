@@ -48,18 +48,15 @@ __Installing with `pip install`__
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
-3. Activate your virtual environmental if you have one.
+3. If you have one, activate your virtual environment.
    E.g. `conda activate myenv`.
-   If you want to make one called `myenv` with the python dependencies, 
-    run `conda env create -f plda/environment.yml -n myenv`, 
-    and then run `conda activate myenv`.
-4. Run either `pip install plda/` or `pip install ./plda`. Either will work.
+   If you installed `conda`, you can make one by running 
+    `conda env create -f plda/environment.yml -n myenv`. 
+4. Run either `pip install plda/` or `pip install ./plda`.
 
 __Installing using your own conda environment.yml file.__
 
-__To add this repository as a dependency in your own conda environment 
- `yml` file__, 
- add the following to the end of your dependencies.
+1. Add the following to the end of your dependencies.
   ```
   - python>=3.5
   - numpy~=1.14.2
@@ -69,8 +66,8 @@ __To add this repository as a dependency in your own conda environment
   - pip:
     - git+git://github.com/RaviSoji/plda@master
   ```
-Here is an example: [environment.yml](./environment.yml) file).
+Here is an example: [environment.yml](./environment.yml) file.
 
-## Tests
+## Testing the software
 
-See [./tests/README.md](./tests/README.md)
+See [tests/README.md](./tests/README.md)
