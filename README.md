@@ -23,13 +23,23 @@ __Thanks__!
  implemented the same-different discrimination and the pip install, 
  respectively!
 
+## Demo with MNIST Handwritten Digits Data
+
+If you installed this package in a virtual environment, 
+ remember to activate that virtual environment first.
+Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
+
+## Testing the software
+
+See [tests/README.md](./tests/README.md).
+
 ## Installation
 
 If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
-You may install the package by using `pip install` or by adding a few lines 
+You may install this package by using `pip install` or by adding a few lines 
  to your own environment.yml file.
 
 __Installing with `pip install`__
@@ -38,7 +48,7 @@ __Installing with `pip install`__
 2. `git clone https://github.com/RaviSoji/plda.git`
 3. If you have one, activate your virtual environment.
    E.g. `conda activate myenv`.
-   If you installed `conda`, you can make one by running 
+   If you installed `conda`, you can make one called `myenv` by running 
     `conda env create -f plda/environment.yml -n myenv`. 
 4. Run either `pip install plda/` or `pip install ./plda`.
 
@@ -55,13 +65,3 @@ __Installing using your own conda environment.yml file.__
   - pip:
     - git+git://github.com/RaviSoji/plda@master
   ```
-
-## Demo with MNIST Handwritten Digits Data
-
-If you installed this package in a virtual environment, 
- remember to activate that virtual environment first.
-Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
-## Testing the software
-
-See [tests/README.md](./tests/README.md).
