@@ -16,8 +16,11 @@ If you are new to programming, research, or sharing remote machines,
 __Easy install__.
 
 You can make a new conda environment called `myenv` with both this package and 
- its python dependencies automatically installed by running the following: 
-  `conda env create -f plda/environment.yml -n myenv`. 
+ its python dependencies automatically installed with the following steps. 
+
+1. `cd` into your favorite directory.
+2. `git clone https://github.com/RaviSoji/plda.git`
+3. `conda env create -f plda/environment.yml -n myenv`. 
 
 __Installing with `pip install`__.
 
