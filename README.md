@@ -55,7 +55,7 @@ __Installing with `pip install`__
 __Installing using your own conda environment.yml file.__
 
 1. Add the following to the end of your dependencies.
-   Here is an example: [environment.yml](./environment.yml) file.
+   Here is an example: [environment.yml](./environment.yml).
   ```
   - python>=3.5
   - numpy~=1.14.2
