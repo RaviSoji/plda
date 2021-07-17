@@ -37,12 +37,14 @@ __Thanks__!
 8. Extracting preprocessing information.
 9. Extracting model parameters.
 
-## Installation: `pip install`
+## Installation
 
-If you are new to programming, research, or sharing remote machines,  
+If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
+
+__Installing with `pip install`__
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
@@ -53,7 +55,7 @@ If you are new to programming, research, or sharing remote machines,
     and then run `conda activate myenv`.
 4. Run either `pip install plda/` or `pip install ./plda`. Either will work.
 
-## Installation: your own conda environment.yml file.
+__Installing using your own conda environment.yml file.__
 
 __To add this repository as a dependency in your own conda environment 
  `yml` file__, 
@@ -68,3 +70,7 @@ __To add this repository as a dependency in your own conda environment
     - git+git://github.com/RaviSoji/plda@master
   ```
 Here is an example: [environment.yml](./environment.yml) file).
+
+## Tests
+
+See [./tests/README.md](./tests/README.md)
