@@ -45,8 +45,7 @@ You may install this package by using `pip install` or by adding a few lines
 __Easy install__
 
 You can make a new conda environment called `myenv` with both this package and 
- its python dependencies automatically installed, 
- by running the following: 
+ its python dependencies automatically installed by running the following: 
   `conda env create -f plda/environment.yml -n myenv`. 
 
 __Installing with `pip install`__
