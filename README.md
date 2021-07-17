@@ -1,12 +1,12 @@
 # Probabilistic Linear Discriminant Analysis
 
-## Demo with MNIST Handwritten Digits Data
+__Demo with MNIST Handwritten Digits Data__
 
 If you installed this package in a virtual environment, 
  remember to activate that virtual environment first.
 Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
-## Testing the software
+__Testing the software__
 
 See [tests/README.md](./tests/README.md).
 
