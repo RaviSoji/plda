@@ -1,14 +1,10 @@
 # Probabilistic Linear Discriminant Analysis
 
-__Demo with MNIST Handwritten Digits Data__
+### Demo with MNIST Handwritten Digits Data
 
 If you installed this package in a virtual environment, 
  remember to activate that virtual environment first.
 Link: [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
-__Testing the software__
-
-See [tests/README.md](./tests/README.md).
 
 ## Installation
 
@@ -43,6 +39,10 @@ __Installing using your own conda environment.yml file__.
   - pip:
     - git+git://github.com/RaviSoji/plda@master
   ```
+
+## Testing the software
+
+See [tests/README.md](./tests/README.md).
 
 ## Credit and disclaimers
 
