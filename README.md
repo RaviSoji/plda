@@ -42,15 +42,19 @@ If you are new to programming, research, or sharing remote machines,
 You may install this package by using `pip install` or by adding a few lines 
  to your own environment.yml file.
 
+__Easy install__
+
+You can make a new conda environment called `myenv` with both this package and 
+ its python dependencies automatically installed, 
+ by running the following: 
+  `conda env create -f plda/environment.yml -n myenv`. 
+
 __Installing with `pip install`__
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
 3. If you have one, activate your virtual environment.
 4. Run either `pip install plda/` or `pip install ./plda`.
-5. If you want to make a new environment called `myenv` 
-    with this package and its python dependencies automatically installed, 
-    run the following: `conda env create -f plda/environment.yml -n myenv`. 
 
 __Installing using your own conda environment.yml file.__
 
