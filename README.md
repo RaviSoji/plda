@@ -2,21 +2,21 @@
 
 ## Install instructions
 
-__Option 1: `pip install` only this package__.
+__Option 1: `pip install` without [dependencies](./environment.yml)__.
 
-1. Make sure you have the dependencies in [environment.yml](./environment.yml).
-2. `pip install https://github.com/RaviSoji/plda/tarball/master`
+```bash
+pip install https://github.com/RaviSoji/plda/tarball/master
+```
 
-
-__Option 2: Easy install__.
+__Option 2: Easy install with all dependencies__.
 
 If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
 
-With the following steps, 
- you will install both this package and its dependencies in a conda 
+With the following, 
+ you will install this package and its dependencies in a conda 
  environment called `myenv`.
 
 1. `cd` into your favorite directory.
