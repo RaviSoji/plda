@@ -1,6 +1,6 @@
 # Probabilistic Linear Discriminant Analysis
 
-### Installation instructions.
+## Install instructions
 
 __Option 1: `pip install` only this package__.
 
@@ -23,7 +23,7 @@ With the following steps,
 2. `git clone https://github.com/RaviSoji/plda.git`
 3. `conda env create -f plda/environment.yml -n myenv`
 
-__Uninstall__
+## Uninstall instructions
 
 ```bash
 pip uninstall plda
