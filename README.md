@@ -7,7 +7,7 @@ See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 ## Install instructions
 
 __Option 1: `pip install` without dependencies__.
-Use this if you have the necessary [dependencies](./environment.yml).
+Use this after installing necessary [dependencies](./environment.yml).
 
 ```bash
 pip install https://github.com/RaviSoji/plda/tarball/master
