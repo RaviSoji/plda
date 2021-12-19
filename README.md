@@ -2,7 +2,10 @@
 
 ## Install instructions
 
-__Option 1: `pip install` without [dependencies](./environment.yml)__.
+__Option 1: `pip install` without dependencies__.
+
+Use the following if you already have the necessary 
+ [dependencies](./environment.yml).
 
 ```bash
 pip install https://github.com/RaviSoji/plda/tarball/master
