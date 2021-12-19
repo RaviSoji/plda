@@ -29,7 +29,7 @@ With the following,
 ## Uninstall instructions
 
 - To uninstall `plda` only: `pip uninstall plda`.
-- To remove the `myenv` conda environment:`conda env remove -n myenv`.
+- To remove the `myenv` conda environment: `conda env remove -n myenv`.
 
 ## Demo with MNIST Handwritten Digits Data
 
