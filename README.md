@@ -1,12 +1,14 @@
 # Probabilistic Linear Discriminant Analysis
 
-__`pip install` only the `plda` package__.
+### Installation instructions.
+
+__Option 1: `pip install` only this package__.
 
 1. Make sure you have the dependencies in [environment.yml](./environment.yml).
 2. `pip install https://github.com/RaviSoji/plda/tarball/master`
 
 
-__(Alternative) Easy install__.
+__Option 2: Easy install__.
 
 If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
