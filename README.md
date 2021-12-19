@@ -1,5 +1,9 @@
 # Probabilistic Linear Discriminant Analysis
 
+## Demo with MNIST Handwritten Digits Data
+
+See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
+
 ## Install instructions
 
 __Option 1: `pip install` without dependencies__.
@@ -30,10 +34,6 @@ With the following,
 
 - To uninstall `plda` only: `pip uninstall plda`.
 - To remove the `myenv` conda environment: `conda env remove -n myenv`.
-
-## Demo with MNIST Handwritten Digits Data
-
-See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 ## Testing the software
 
