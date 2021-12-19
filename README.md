@@ -31,7 +31,7 @@ If you have [`conda`](https://github.com/conda/conda),
 
     ```bash
     wget https://raw.githubusercontent.com/RaviSoji/plda/master/environment.yml
-    conda env create -f plda/environment.yml -n myenv
+    conda env create -f environment.yml -n myenv
     ```
 
 ## Uninstall instructions
