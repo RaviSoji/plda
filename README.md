@@ -7,18 +7,14 @@ See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 ## Install instructions
 
 __Option 1: `pip install` without dependencies__.
-
-Use the following if you already have the necessary 
- [dependencies](./environment.yml).
+Use this if you have the necessary [dependencies](./environment.yml).
 
 ```bash
 pip install https://github.com/RaviSoji/plda/tarball/master
 ```
 
 __Option 2: `conda install` with all dependencies__.
-
-If you have [`conda`](https://github.com/conda/conda), 
- either of below will work.
+This requires [`conda`](https://github.com/conda/conda).
 
 - Via [`git`](https://git-scm.com/downloads):
 
