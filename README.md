@@ -15,20 +15,24 @@ Use the following if you already have the necessary
 pip install https://github.com/RaviSoji/plda/tarball/master
 ```
 
-__Option 2: Easy install with all dependencies__.
+__Option 2: `conda install` with all dependencies__.
 
-If you are new to programming, research, or sharing remote machines, 
- you will save yourself a lot of headache by installing the following software:
- [`git`](https://git-scm.com/downloads) and 
- [`conda`](https://github.com/conda/conda).
+If you have [`conda`](https://github.com/conda/conda), 
+ either of below will work.
 
-With the following, 
- you will install this package and its dependencies in a conda 
- environment called `myenv`.
+- Via [`git`](https://git-scm.com/downloads):
 
-1. `cd` into your favorite directory.
-2. `git clone https://github.com/RaviSoji/plda.git`
-3. `conda env create -f plda/environment.yml -n myenv`
+    ```bash
+    git clone https://github.com/RaviSoji/plda.git
+    conda env create -f plda/environment.yml -n myenv
+    ```
+
+- Alternatively, via `wget`:
+
+    ```bash
+    wget https://raw.githubusercontent.com/RaviSoji/plda/master/environment.yml
+    conda env create -f plda/environment.yml -n myenv
+    ```
 
 ## Uninstall instructions
 
