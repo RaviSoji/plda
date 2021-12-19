@@ -1,25 +1,21 @@
 # Probabilistic Linear Discriminant Analysis
 
-__Demo with MNIST Handwritten Digits Data__
-
-See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
-
-## Installation
-
-__Installing with `pip`__.
+__`pip install` only the `plda` package__.
 
 1. Make sure you have the dependencies in [environment.yml](./environment.yml).
 2. `pip install https://github.com/RaviSoji/plda/tarball/master`
 
-__Easy install__.
+
+__(Alternative) Easy install__.
 
 If you are new to programming, research, or sharing remote machines, 
  you will save yourself a lot of headache by installing the following software:
  [`git`](https://git-scm.com/downloads) and 
  [`conda`](https://github.com/conda/conda).
 
-You can make a new conda environment called `myenv` with both this package and 
- its python dependencies automatically installed with the following steps. 
+With the following steps, 
+ you will install both this package and its dependencies in a conda 
+ environment called `myenv`.
 
 1. `cd` into your favorite directory.
 2. `git clone https://github.com/RaviSoji/plda.git`
@@ -30,6 +26,10 @@ __Uninstall__
 ```bash
 pip uninstall plda
 ```
+
+## Demo with MNIST Handwritten Digits Data
+
+See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 ## Testing the software
 
