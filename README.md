@@ -2,6 +2,12 @@
 
 ## Demo with MNIST Handwritten Digits Data
 
+<div align="center">
+<a href="https://colab.research.google.com/github/RaviSoji/plda/blob/master/mnist_demo/mnist_demo.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Demo"/>
+</a>
+</div>
+
 See [mnist_demo/mnist_demo.ipynb](./mnist_demo/mnist_demo.ipynb).
 
 ## Install instructions
